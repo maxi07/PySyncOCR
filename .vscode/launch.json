@@ -4,6 +4,7 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "Python-Modul-OCR",
             "type": "python",
@@ -16,6 +17,13 @@
             "type": "python",
             "request": "launch",
             "module": "src.installer",
+            "justMyCode": true
+        },
+        {
+            "name": "Python-Modul-RcloneSetup",
+            "type": "python",
+            "request": "launch",
+            "module": "src.helpers.rclone-setup",
             "justMyCode": true
         }
     ]
