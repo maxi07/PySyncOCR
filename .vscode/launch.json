@@ -4,7 +4,15 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+
+        {
+            "name": "Python: Aktuelle Datei",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
         {
             "name": "Python-Modul-OCR",
             "type": "python",
@@ -24,6 +32,13 @@
             "type": "python",
             "request": "launch",
             "module": "src.helpers.rclone-setup",
+            "justMyCode": true
+        },
+        {
+            "name": "Python-Modul-RcloneManagementOneDrive",
+            "type": "python",
+            "request": "launch",
+            "module": "src.helpers.rclone-management-onedrive",
             "justMyCode": true
         }
     ]

@@ -23,7 +23,7 @@ def configure_rclone_onedrive_personal(name):
         process.sendline('n')
         logger.debug(f"Selected [n] to create a new remote")
 
-        # Enter the remote name (e.g., 'working')
+        # Enter the remote name (e.g., 'myonedrive')
         process.expect('name>')
         process.sendline(name)
         logger.debug(f"Set name to {name}")
@@ -107,4 +107,4 @@ def configure_rclone_onedrive_personal(name):
         process.close()
 
 # Call the function to configure rclone
-# configure_rclone_onedrive_personal(name="test")
+configure_rclone_onedrive_personal(name="test2")
