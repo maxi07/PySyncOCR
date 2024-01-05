@@ -61,10 +61,10 @@ def list_filesandfolders(connection: str, folderid=None) -> List[FileItem] | Non
         file_objects = [FileItem(**item) for item in items]
         return file_objects
     except subprocess.CalledProcessError as e:
-        if e.returncode in (1, 3):
+        if e.returncode in (1):
             logger.error(f"The specified remote {connection} does not exist.")
         else:
             logger.error(f"Error getting filesandfolders rclone: {e}")
         return None
 
-print(list_filesandfolders("test"))
+print(list_filesandfolders("test2:"))
