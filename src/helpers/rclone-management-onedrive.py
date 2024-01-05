@@ -3,19 +3,6 @@ from src.logger import logger
 import subprocess
 import json
 
-class FileItem:
-    def __init__(self, Path, Name, Size, MimeType, ModTime, IsDir, ID):
-        self.path = Path
-        self.name = Name
-        self.size = Size
-        self.mime_type = MimeType
-        self.mod_time = ModTime
-        self.is_dir = IsDir
-        self.file_id = ID
-
-    def __repr__(self):
-        return f"FileItem(path={self.path}, name={self.name}, size={self.size}, mime_type={self.mime_type}, mod_time={self.mod_time}, is_dir={self.is_dir}, file_id={self.file_id})"
-
 
 def list_remotes() -> list[str]:
     """
@@ -30,6 +17,7 @@ def list_remotes() -> list[str]:
     command = ['rclone', 'listremotes']
 
     try:
+        logger.debug(f"Calling {' '.join(command)}")
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         logger.debug(f"Received {result}")
 
@@ -38,33 +26,95 @@ def list_remotes() -> list[str]:
 
         # Remove colons from each line
         result_list = [line.replace(':', '') for line in lines]
+        logger.debug(f"Found remotes: {str(result_list)}")
         return result_list
     except subprocess.CalledProcessError as e:
         logger.error(f"Error getting remotes rclone: {e}")
         return []
 
 
-def list_filesandfolders(connection: str, folderid=None) -> List[FileItem] | None:
-    command = ['rclone', 'lsjson', connection]
+def list_folders(connection: str, folder=None) -> list[str] | None:
+    """
+    List folders in a remote storage using rclone.
+
+    Args:
+        connection (str): The name or path of the remote storage connection.
+        folder (str, optional): The path to the parent folder. Defaults to None.
+
+    Returns:
+        list[str] | None: A list of folder names if successful, or None if an error occurs.
+
+    Raises:
+        subprocess.CalledProcessError: If the underlying rclone command encounters an error.
+
+    Notes:
+        The function uses rclone to list folders in the specified remote storage connection.
+        If `folder` is provided, it lists folders within that specific directory; otherwise,
+        it lists folders in the root directory of the remote storage.
+
+    Example:
+        >>> list_folders("my_remote:")
+        ['folder1', 'folder2']
+
+    """
+    if folder is None:
+        command = ['rclone', 'lsf', connection, f"--dirs-only"]
+        logger.debug(f"Calling {' '.join(command)}")
+    else:
+        command = ['rclone', 'lsf', connection + folder, f"--dirs-only"]
+        logger.debug(f"Calling {' '.join(command)}")
 
     try:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         # Parse the JSON string into a list of dictionaries
         try:
             logger.debug("Received command result")
-            items = json.loads(result.stdout.decode())
+            lines = [line.strip() for line in result.stdout.decode().split('\n') if line.strip()]
+            logger.debug("Folders: " + str(lines))
+            return lines
         except json.JSONDecodeError as json_err:
             logger.error(f"Error decoding JSON: {json_err}")
             return None
-
-        # Create FileItem objects
-        file_objects = [FileItem(**item) for item in items]
-        return file_objects
     except subprocess.CalledProcessError as e:
-        if e.returncode in (1):
+        if e.returncode == 3:
             logger.error(f"The specified remote {connection} does not exist.")
+            logger.error(e.stderr.decode())
         else:
-            logger.error(f"Error getting filesandfolders rclone: {e}")
+            logger.error(f"Error getting filesandfolders rclone (Code {e.returncode}): {e}")
         return None
 
-print(list_filesandfolders("test2:"))
+
+def create_folder(connection: str, path: str, foldername: str) -> bool:
+    if not path.endswith("/"):
+        path += "/"
+    command = ['rclone', 'mkdir', connection + path + foldername]
+    logger.debug(f"Calling {' '.join(command)}")
+
+    try:
+        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        logger.info(f"Created new folder at {path + foldername}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error creating folder rclone: {e}")
+        return False
+
+
+def remove_folder(connection: str, path: str, foldername: str) -> bool:
+    if not path.endswith("/"):
+        path += "/"
+    command = ['rclone', 'rmdir', connection + path + foldername]
+    logger.debug(f"Calling {' '.join(command)}")
+
+    try:
+        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        logger.info(f"Removed folder at {path + foldername}")
+        return True
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 3:
+            logger.error(f"Directory {foldername} does not exist at {path}.")
+        elif e.returncode == 1 and e.stderr.decode().endswith("directory not empty\n"):
+            logger.error(f"Directory {foldername} at {path} cannot be deleted, as its not empty.")
+        else:
+            logger.error(f"Error removing folder at {path + foldername} rclone: {e}")
+        return False
+    
