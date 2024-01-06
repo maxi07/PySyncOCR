@@ -118,4 +118,21 @@ def remove_folder(connection: str, path: str, foldername: str) -> bool:
             logger.error(f"Error removing folder at {path + foldername} rclone: {e}")
         return False
     
+
+def upload_file(connection: str, src_path: str, remote_path: str, filename: str) -> bool:
+    if not remote_path.endswith("/"):
+        remote_path += "/"
+    if not src_path.endswith("/"):
+        src_path += "/"
+    command = ['rclone', 'moveto', src_path + filename, connection + remote_path + filename]
+    logger.debug(f"Calling {' '.join(command)}")
+
+    try:
+        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        logger.info(f"Uploaded file from {src_path + filename} to {connection + remote_path + filename}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error uploading file from {src_path + filename} to {connection + remote_path + filename}: {e}\n{e.stderr.decode()}")
+        return False
+    
 logger.debug(f"Loaded {__name__} module")

@@ -18,13 +18,7 @@ def onedrive_conf_setup():
     # Setup
     config_file = str(config.get("sync_service.root_path"))
     rclone_config = ConfigManager(config_file)
-
-    id = "test1"
-    local = "test1"
-    remote = "test1:test1/"
-    type = "onedrive"
-
-    rclone_config.add(id, local, remote, type)
+    rclone_config.add("test1", "test1:", "onedrive")
 
     # Assert
     # assert os.path.exists(f"{config.get('sync_service.root_folder')}/{local}")
@@ -52,7 +46,7 @@ def test_duplicate(use_backup, onedrive_conf_setup):
     remote = "test1:test1/"
     type = "onedrive"
 
-    onedrive_conf_setup.add("test1", "test1", "test1:test1/", "onedrive")
+    onedrive_conf_setup.add("test1", "test1:", "onedrive")
 
     # assert os.path.exists("$home/PySyncOCR/test1")
     assert len(onedrive_conf_setup) == 1

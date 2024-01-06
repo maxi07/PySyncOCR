@@ -1,2 +1,8 @@
 [
+    {
+        "id": "test2",
+        "local": "test2",
+        "remote": "test2:/test2",
+        "type": "onedrive"
+    }
 ]

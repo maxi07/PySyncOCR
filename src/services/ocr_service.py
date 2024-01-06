@@ -37,13 +37,14 @@ def main():
             continue
 
 class OcrService:
-    def __init__(self, file_queue: Queue):
-        self.file_queue = file_queue
+    def __init__(self, ocr_queue: Queue, sync_queue: Queue):
+        self.ocr_queue = ocr_queue
+        self.sync_queue = sync_queue
 
     def start_processing(self):
         logger.info("Started OCR service")
         while True:
-            file_path = self.file_queue.get()  # Retrieve item from the queue
+            file_path = self.ocr_queue.get()  # Retrieve item from the queue
             if file_path is None:  # Exit command
                 break
             # Add your OCR processing logic here
@@ -51,6 +52,8 @@ class OcrService:
             # Simulate OCR processing by sleeping for a few seconds
             time.sleep(3)
             logger.info(f"OCR processing completed: {file_path}")
-            self.file_queue.task_done()
+            logger.debug(f"Adding {file_path} to sync queue")
+            self.sync_queue.put(file_path)
+            self.ocr_queue.task_done()
 
 logger.debug(f"Loaded {__name__} module")

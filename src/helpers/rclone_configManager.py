@@ -22,7 +22,7 @@ The config should look like so:
 """
 
 class ConfigEntry:
-    def __init__(self, id, local, remote, type):
+    def __init__(self, id: str, local: str, remote: str, type):
         self.id = id
         self.local = local
         self.remote = remote
@@ -45,6 +45,13 @@ class ConfigManager:
         except FileNotFoundError:
             logger.error("The rclone config file to manage sync destinations does not exist!")
             return []
+        except json.decoder.JSONDecodeError:
+            logger.error("The config file is broken.")
+            quit()
+        except Exception as ex:
+            logger.exception(f"Failed loading config from {self.config_file}: {ex}")
+            quit()
+        
 
     def save_config(self):
         try:
@@ -54,9 +61,11 @@ class ConfigManager:
         except Exception as ex:
             logger.exception("Failed saving config:", ex)
 
-    def add(self, id: str, local: str, remote: str, type):
+    def add(self, id: str, connection: str, type):
         try:
             if not any(entry.get("id") == id for entry in self.config_data):
+                local = id
+                remote = connection + id + "/"
                 if local.startswith("/"):
                     local = local[1:]
                 new_entry = {"id": id, "local": local, "remote": remote, "type": type}

@@ -1,5 +1,6 @@
 {
     "sync_service": {
-        "root_folder": "$home/PySyncOCR"
+        "root_folder": "PySyncOCR",
+        "failed_dir": "PySyncOCR/failed"
     }
 }

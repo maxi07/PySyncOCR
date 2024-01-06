@@ -8,7 +8,7 @@
             "name": "Python: Main",
             "type": "python",
             "request": "launch",
-            "module": "src.main",
+            "module": "main",
             "justMyCode": true
         }
     ]

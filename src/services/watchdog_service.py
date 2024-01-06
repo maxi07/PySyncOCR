@@ -3,6 +3,8 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from queue import Queue
 from src.helpers.logger import logger
+from src.helpers.config import config
+import os
 
 
 class FileHandler(FileSystemEventHandler):
@@ -26,8 +28,12 @@ class FileHandler(FileSystemEventHandler):
         if event.is_directory:
             logger.debug(f"Ignoring new folder at {event.src_path}")
             return
+        
+        if str(config.get("sync_service.failed_dir")) in str(event.src_path):
+            logger.debug(f"Ignoring new file in {event.src_path}")
+            return
         # Add the new file to the queue
-        logger.info(f"Added {event.src_path} to queue {self.file_queue}")
+        logger.info(f"Added {event.src_path} to OCR queue")
         self.file_queue.put(event.src_path)
 
 class FolderMonitor:
@@ -52,12 +58,12 @@ class FolderMonitor:
         Starts the watchdog observer.
         """
         try:
+            if not os.path.exists(self.root_folder):
+                logger.warning(f"The specified root folder for syncing does not exist: {self.root_folder}")
+                logger.info("Creating new sync folder.")
+                os.mkdir(self.root_folder)
             self.observer.schedule(self.event_handler, self.root_folder, recursive=True)
             self.observer.start()
-        except OSError as e:
-            if e.errno == 2:
-                logger.error(f"The specified root folder for syncing does not exist: {self.root_folder}")
-                return
         except Exception as e:
             logger.exception("Failed starting watchdog", e)
             return
