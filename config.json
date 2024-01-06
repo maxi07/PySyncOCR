@@ -1,11 +1,5 @@
 {
-    "setup": {
-        "windows": {
-            "tesseract_path": "C:\\Program Files\\Tesseract-OCR\\tesseract-uninstall.exe",
-            "ghostscript_path": "C:\\Program Files\\gs\\gs10.02.1\\bin\\gswin64.exe",
-            "pngquant_path": "pngquant\\pngquant.exe"
-        },
-        "linux": {
-        }
+    "sync_service": {
+        "root_folder": "/home/maxi"
     }
 }

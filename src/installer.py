@@ -15,6 +15,8 @@ def check_install():
 
     logger.debug("Running on Linux")
 
+    check_and_install("python3", "python3")
+    check_and_install("pip", "python3-pip")
     check_and_install("OCRmyPDF", "ocrmypdf")
     check_and_install("RClone", "rclone")
 

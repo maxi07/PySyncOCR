@@ -40,6 +40,13 @@
             "request": "launch",
             "module": "src.helpers.rclone-management-onedrive",
             "justMyCode": true
+        },
+        {
+            "name": "Python-Modul-SyncService",
+            "type": "python",
+            "request": "launch",
+            "module": "src.services.watchdog-service",
+            "justMyCode": true
         }
     ]
 }

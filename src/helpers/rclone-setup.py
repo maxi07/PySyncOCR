@@ -105,6 +105,3 @@ def configure_rclone_onedrive_personal(name):
     finally:
         # Close the process
         process.close()
-
-# Call the function to configure rclone
-configure_rclone_onedrive_personal(name="test2")
