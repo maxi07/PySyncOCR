@@ -38,6 +38,7 @@ console_handler.setFormatter(colored_formatter)
 
 # Create a file handler and set the formatter
 file_handler = logging.FileHandler("logfile.log")
+file_handler.setLevel(logging.WARNING)
 file_handler.setFormatter(formatter)
 
 # Add both handlers to the logger
