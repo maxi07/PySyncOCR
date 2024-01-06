@@ -1,10 +1,10 @@
-import pytesseract
-import platform
-from src.logger import logger
+from src.helpers.logger import logger
+from queue import Queue
 from langdetect import detect
 import ocrmypdf
 import os
 from multiprocessing import Process
+import time
 
 
 def detect_language(text):
@@ -20,12 +20,6 @@ def ocrmypdf_process(input, output):
 
 
 def main():
-    if platform.system() == 'Windows':
-        logger.debug("Detected Windows plattform, setting path to tesseract.")
-        pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-    logger.debug(f"Running tesseract version {pytesseract.get_tesseract_version()}")
-    logger.debug(f"Available languages: {pytesseract.get_languages()}")
-
     pdf_input_folder = r"C:\Users\MaximilianKrausePAGE\Downloads"
     file_list = [f for f in os.listdir(path=pdf_input_folder) if f.endswith('.pdf') or f.endswith('.PDF')]
     logger.debug(f"Detected {len(file_list)} PDFs.")
@@ -42,6 +36,21 @@ def main():
             logger.exception(f"Failed running OCR on {file}")
             continue
 
+class OcrService:
+    def __init__(self, file_queue: Queue):
+        self.file_queue = file_queue
 
-if __name__ == "__main__":
-    main()
+    def start_processing(self):
+        logger.info("Started OCR service")
+        while True:
+            file_path = self.file_queue.get()  # Retrieve item from the queue
+            if file_path is None:  # Exit command
+                break
+            # Add your OCR processing logic here
+            logger.info(f"Processing file with OCR: {file_path}")
+            # Simulate OCR processing by sleeping for a few seconds
+            time.sleep(3)
+            logger.info(f"OCR processing completed: {file_path}")
+            self.file_queue.task_done()
+
+logger.debug(f"Loaded {__name__} module")

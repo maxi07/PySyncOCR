@@ -1,5 +1,5 @@
 from typing import List
-from src.logger import logger
+from src.helpers.logger import logger
 import subprocess
 import json
 
@@ -118,3 +118,4 @@ def remove_folder(connection: str, path: str, foldername: str) -> bool:
             logger.error(f"Error removing folder at {path + foldername} rclone: {e}")
         return False
     
+logger.debug(f"Loaded {__name__} module")

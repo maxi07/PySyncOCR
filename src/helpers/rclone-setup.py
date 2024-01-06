@@ -1,7 +1,7 @@
 import pexpect
 import re
 import webbrowser
-from src.logger import logger
+from src.helpers.logger import logger
 
 def extract_url(prompt):
     # Use regular expression to extract the URL from the prompt
@@ -105,3 +105,5 @@ def configure_rclone_onedrive_personal(name):
     finally:
         # Close the process
         process.close()
+
+logger.debug(f"Loaded {__name__} module")

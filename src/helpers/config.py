@@ -1,6 +1,6 @@
 import json
 from typing import Any
-from src.logger import logger
+from src.helpers.logger import logger
 
 
 class Config:
@@ -9,9 +9,9 @@ class Config:
         try:
             with open(config_file) as f:
                 self._config = json.load(f)
-                logger.debug("Reading config.")
+                logger.debug("Reading config")
         except Exception:
-            logger.exception("Failed reading config.")
+            logger.exception("Failed reading config")
             quit(-2)
 
     def __iter__(self):
@@ -29,7 +29,7 @@ class Config:
             # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
             return value if value is not None else default
         except Exception as ex:
-            logger.exception("Failed reading config.", ex)
+            logger.exception("Failed reading config", ex)
             return default
 
     def set(self, key, value):
@@ -43,7 +43,7 @@ class Config:
                 json.dump(self._config, f)
             logger.debug(f"Set config key '{key}' with value '{value}'")
         except Exception as ex:
-            logger.exception(f"Failed saving {key} setting to config.", ex)
+            logger.exception(f"Failed saving {key} setting to config", ex)
 
     def __getattr__(self, name: str) -> Any:
         # Allow auto-completion for existing keys
@@ -52,4 +52,5 @@ class Config:
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
 
-config = Config('config.json')
+config = Config('src/configs/config.json')
+logger.debug(f"Loaded {__name__} module")

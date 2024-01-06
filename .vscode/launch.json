@@ -4,48 +4,11 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "Python: Aktuelle Datei",
+            "name": "Python: Main",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "Python-Modul-OCR",
-            "type": "python",
-            "request": "launch",
-            "module": "src.services.ocr-service",
-            "justMyCode": true
-        },
-        {
-            "name": "Python-Modul-installer",
-            "type": "python",
-            "request": "launch",
-            "module": "src.installer",
-            "justMyCode": true
-        },
-        {
-            "name": "Python-Modul-RcloneSetup",
-            "type": "python",
-            "request": "launch",
-            "module": "src.helpers.rclone-setup",
-            "justMyCode": true
-        },
-        {
-            "name": "Python-Modul-RcloneManagementOneDrive",
-            "type": "python",
-            "request": "launch",
-            "module": "src.helpers.rclone-management-onedrive",
-            "justMyCode": true
-        },
-        {
-            "name": "Python-Modul-SyncService",
-            "type": "python",
-            "request": "launch",
-            "module": "src.services.watchdog-service",
+            "module": "src.main",
             "justMyCode": true
         }
     ]
