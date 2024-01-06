@@ -1,5 +1,5 @@
 {
     "sync_service": {
-        "root_folder": "/home/maxi"
+        "root_folder": "$home/PySyncOCR"
     }
 }

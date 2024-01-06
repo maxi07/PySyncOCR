@@ -1,14 +1,2 @@
 [
-    {
-        "id": "test1",
-        "local": "/home/maxi/test1",
-        "remote": "test_remote:/test1",
-        "type": "onedrive"
-    },
-    {
-        "id": "test2",
-        "local": "/home/maxi/test2",
-        "remote": "test_remote:/test2",
-        "type": "onedrive"
-    }
 ]
