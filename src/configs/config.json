@@ -2,5 +2,14 @@
     "sync_service": {
         "root_folder": "PySyncOCR",
         "failed_dir": "PySyncOCR/failed"
+    },
+    "smb_service": {
+            "server_name": "PySyncOCR",
+            "server_ip": "0.0.0.0",
+            "share_name": "PySyncOCR",
+            "username": "ocr",
+            "password": "pysyncocr",
+            "share_path": "$home/PySyncOCR",
+            "max_connections": 0          
     }
 }

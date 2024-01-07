@@ -5,11 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Main",
+            "name": "Python: Main (SUDO)",
             "type": "python",
             "request": "launch",
             "module": "main",
-            "justMyCode": true
+            "justMyCode": true,
+            "sudo": true
         }
     ]
 }
