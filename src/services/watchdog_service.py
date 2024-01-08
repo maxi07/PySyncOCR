@@ -5,7 +5,7 @@ from queue import Queue
 from src.helpers.logger import logger
 from src.helpers.config import config
 import os
-
+from PIL import Image
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -32,9 +32,28 @@ class FileHandler(FileSystemEventHandler):
         if str(config.get("sync_service.failed_dir")) in str(event.src_path):
             logger.debug(f"Ignoring new file in {event.src_path}")
             return
+        
+        # Test if file is PDF or image
+        if not str(event.src_path).lower().endswith(".pdf"):
+            # Its not a PDF, test if its an image
+            logger.debug("Detected new file, but it doesnt have a PDF extension")
+            if not self.is_image(event.src_path):
+                logger.debug("File is also not an image - Skipping")
+                return
+            else:
+                logger.debug(f"Detected file as image: {str(event.src_path)}")
+        else:
+            logger.debug(f"Detected new PDF file: {str(event.src_path)}")
         # Add the new file to the queue
         logger.info(f"Added {event.src_path} to OCR queue")
         self.file_queue.put(event.src_path)
+
+    def is_image(self, file_path) -> bool:
+        try:
+            with Image.open(file_path):
+                return True
+        except (IOError, Image.DecompressionBombError):
+            return False
 
 class FolderMonitor:
     """
