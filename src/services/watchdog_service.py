@@ -6,6 +6,7 @@ from src.helpers.logger import logger
 from src.helpers.config import config
 import os
 from PIL import Image
+import PyPDF2
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -37,17 +38,22 @@ class FileHandler(FileSystemEventHandler):
             logger.debug(f"Ignoring new file in {event.src_path}")
             return
         
-        # Test if file is PDF or image
-        if not str(event.src_path).lower().endswith(".pdf"):
-            # Its not a PDF, test if its an image
-            logger.debug("Detected new file, but it doesnt have a PDF extension")
-            if not self.is_image(event.src_path):
-                logger.debug("File is also not an image - Skipping")
-                return
+        # Test if file is PDF or image. if neither can be opened, wait five seconds and try again.
+        # Repeat this process until a maximum timeout of three minutes is reached
+        timeout = 180
+        start_time = time.time()
+
+        for i in range(timeout):
+            if self.is_image(event.src_path) or self.is_pdf(event.src_path):
+                break
             else:
-                logger.debug(f"Detected file as image: {str(event.src_path)}")
-        else:
-            logger.debug(f"Detected new PDF file: {str(event.src_path)}")
+                logger.debug(f"Waiting for {event.src_path} for another {round(timeout - (time.time() - start_time), 0)} seconds")
+                logger.debug(f"Total waiting time left: {timeout - (time.time() - start_time)}")
+                time.sleep(5)
+                if time.time() - start_time > timeout:
+                    logger.warning(f"File {event.src_path} is neither a PDF or image file. Skipping.")
+                    return 
+
         # Add the new file to the queue
         logger.info(f"Added {event.src_path} to OCR queue")
         self.file_queue.put(event.src_path)
@@ -55,8 +61,18 @@ class FileHandler(FileSystemEventHandler):
     def is_image(self, file_path) -> bool:
         try:
             with Image.open(file_path):
+                logger.debug(f"File {file_path} is an image file.")
                 return True
         except (IOError, Image.DecompressionBombError):
+            return False
+        
+    def is_pdf(file_path):
+        try:
+            pdf = PyPDF2.PdfFileReader(open(file_path, "rb"))
+            pdf.getNumPages() # read a property to test if valid
+            logger.debug(f"File {file_path} is a PDF file.")
+            return True
+        except PyPDF2.PdfReadError:
             return False
 
 class FolderMonitor:
