@@ -1,6 +1,7 @@
 import json
 from typing import Any
 from src.helpers.logger import logger
+from os.path import expanduser, join
 
 
 class Config:
@@ -28,6 +29,21 @@ class Config:
                 value = value.get(k, {})
             # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
             return value if value is not None else default
+        except Exception as ex:
+            logger.exception("Failed reading config", ex)
+            return default
+
+    def get_filepath(self, key: str, default=None):
+        try:
+            keys = key.split('.')
+            value = self._config
+            for k in keys:
+                value = value.get(k, {})
+            # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
+            if value is not None:
+                return join(expanduser('~'), value)
+            else:
+                return default          
         except Exception as ex:
             logger.exception("Failed reading config", ex)
             return default

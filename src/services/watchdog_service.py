@@ -29,7 +29,11 @@ class FileHandler(FileSystemEventHandler):
             logger.debug(f"Ignoring new folder at {event.src_path}")
             return
         
-        if str(config.get("sync_service.failed_dir")) in str(event.src_path):
+        if "_OCR.pdf" in event.src_path:
+            logger.debug(f"Ignoring working _OCR file at {event.src_path}")
+            return
+
+        if any(substr in event.src_path for substr in [str(config.get("sync_service.failed_dir")), str(config.get("sync_service.original_dir"))]):
             logger.debug(f"Ignoring new file in {event.src_path}")
             return
         

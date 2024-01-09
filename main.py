@@ -9,7 +9,6 @@ from src.services.smb_service import MySMBServer
 from queue import Queue
 from src.helpers.config import config
 import time
-from os.path import expanduser, join
 
 
 if __name__ == "__main__":
@@ -17,7 +16,7 @@ if __name__ == "__main__":
     check_install()
 
 
-    root_folder = join(expanduser("~"),config.get("sync_service.root_folder"))
+    root_folder = config.get_filepath("sync_service.root_folder")
     logger.info(f"Root folder is {root_folder}")
     ocr_queue = Queue()
     sync_queue = Queue()

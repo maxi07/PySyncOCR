@@ -31,7 +31,7 @@ class MySMBServer():
 
     def start(self):
         if self.isInitialized:
-            logger.info("SMB service has started")
+            logger.info("Started SMB service")
             self.server.start()
         else:
             logger.error("Cannot start SMB server as initialization is missing.")
