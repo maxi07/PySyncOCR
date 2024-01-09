@@ -6,7 +6,7 @@ from src.helpers.logger import logger
 from src.helpers.config import config
 import os
 from PIL import Image
-import PyPDF2
+from PyPDF2 import PdfReader
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -33,6 +33,13 @@ class FileHandler(FileSystemEventHandler):
         if "_OCR.pdf" in event.src_path:
             logger.debug(f"Ignoring working _OCR file at {event.src_path}")
             return
+        
+        # Ignore files that are hidden and start with a dot based on filename
+        basename = os.path.basename(event.src_path)
+        if basename.startswith(".") or basename.startswith("_"):
+            logger.debug(f"Ignoring hidden file at {event.src_path}")
+            return
+
 
         if any(substr in event.src_path for substr in [str(config.get("sync_service.failed_dir")), str(config.get("sync_service.original_dir"))]):
             logger.debug(f"Ignoring new file in {event.src_path}")
@@ -43,12 +50,12 @@ class FileHandler(FileSystemEventHandler):
         timeout = 180
         start_time = time.time()
 
+        logger.info(f"Detected new file at {event.src_path}")
         for i in range(timeout):
             if self.is_image(event.src_path) or self.is_pdf(event.src_path):
                 break
             else:
-                logger.debug(f"Waiting for {event.src_path} for another {round(timeout - (time.time() - start_time), 0)} seconds")
-                logger.debug(f"Total waiting time left: {timeout - (time.time() - start_time)}")
+                logger.debug(f"Waiting for {event.src_path} for another {int(round(timeout - (time.time() - start_time), 0))} seconds")
                 time.sleep(5)
                 if time.time() - start_time > timeout:
                     logger.warning(f"File {event.src_path} is neither a PDF or image file. Skipping.")
@@ -66,14 +73,18 @@ class FileHandler(FileSystemEventHandler):
         except (IOError, Image.DecompressionBombError):
             return False
         
-    def is_pdf(file_path):
+    def is_pdf(self, file_path):
         try:
-            pdf = PyPDF2.PdfFileReader(open(file_path, "rb"))
-            pdf.getNumPages() # read a property to test if valid
-            logger.debug(f"File {file_path} is a PDF file.")
+            with open(file_path, "rb") as file:
+                r = PdfReader(file)
+                if len(r.pages) > 0:
+                    logger.debug(f"File {file_path} is a PDF file.")
+                else:
+                    return False
             return True
-        except PyPDF2.PdfReadError:
+        except Exception as ex:
             return False
+
 
 class FolderMonitor:
     """

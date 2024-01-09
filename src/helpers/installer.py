@@ -3,6 +3,7 @@ from src.helpers.logger import logger
 import sys
 import subprocess
 import os
+import ocrmypdf
 import stat
 
 def check_install():

@@ -23,9 +23,7 @@ class SyncService:
                 logger.info(f"Received new item for upload: {file_path}")
                 # Test for local filepath
                 subdirname = os.path.basename(os.path.dirname(file_path))
-                logger.debug(f"Extracted subdirname: {subdirname}")
                 filename = os.path.basename(file_path)
-                logger.debug(f"Extracted filename: {filename}")
                 confitem = RcloneConfig.get(subdirname)
                 if confitem is None:
                     logger.error(f"Cannot sync {file_path} as no matching onedrive config was found.")
@@ -36,8 +34,9 @@ class SyncService:
                     if res == False:
                         self.move_to_failed(file_path)
                     else:
-                        logger.debug("Removing original file")
-                        os.remove(file_path.replace("_OCR", ""))
+                        if os.path.exists(file_path.replace("_OCR", "")):
+                            logger.debug(f"Removing original file at {file_path.replace('_OCR', '')}")
+                            os.remove(file_path.replace("_OCR", ""))
             except Exception as ex:
                 logger.exception(f"Failed syncing {file_path}: {ex}")
                 self.move_to_failed(file_path)

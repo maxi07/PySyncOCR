@@ -1,17 +1,9 @@
 from src.helpers.logger import logger
 from queue import Queue
-from langdetect import detect
 import ocrmypdf
 import os
 from src.helpers.config import config
-from os.path import join
 from shutil import copy
-
-def detect_language(text):
-    try:
-        return detect(text)
-    except Exception:
-        return 'unknown'
 
 class OcrService:
     def __init__(self, ocr_queue: Queue, sync_queue: Queue):
@@ -36,7 +28,7 @@ class OcrService:
 
             ocr_file = dirname + "/" + basename_without_ext + "_OCR.pdf"
             try:
-                result = ocrmypdf.ocr(file_path, ocr_file, output_type='pdf', skip_text=True, deskew=True, rotate_pages=True, jpg_quality=80, png_quality=80, optimize=2)
+                result = ocrmypdf.ocr(file_path, ocr_file, output_type='pdf', skip_text=True, deskew=True, rotate_pages=True, jpg_quality=80, png_quality=80, optimize=2, language=["eng"])
                 logger.info(f"OCR processing completed: {file_path}")
                 logger.debug(f"OCR exited with code {result}")
                 logger.debug(f"Adding {ocr_file} to sync queue")
