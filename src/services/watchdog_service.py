@@ -7,6 +7,7 @@ from src.helpers.config import config
 import os
 from PIL import Image
 from PyPDF2 import PdfReader
+from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -34,6 +35,14 @@ class FileHandler(FileSystemEventHandler):
             logger.debug(f"Ignoring working _OCR file at {event.src_path}")
             return
         
+        if ":Zone.Identifier" in event.src_path:
+            logger.debug(f"Ignoring Windows Security File file at {event.src_path}")
+            try:
+                os.remove(event.src_path)
+            except OSError:
+                pass
+            return
+
         # Ignore files that are hidden and start with a dot based on filename
         basename = os.path.basename(event.src_path)
         if basename.startswith(".") or basename.startswith("_"):
@@ -52,7 +61,11 @@ class FileHandler(FileSystemEventHandler):
 
         logger.info(f"Detected new file at {event.src_path}")
         for i in range(timeout):
-            if self.is_image(event.src_path) or self.is_pdf(event.src_path):
+            if self.is_image(event.src_path):
+                item = ProcessItem(event.src_path, ItemType.IMAGE)
+                break
+            elif self.is_pdf(event.src_path):
+                item = ProcessItem(event.src_path, ItemType.PDF)
                 break
             else:
                 logger.debug(f"Waiting for {event.src_path} for another {int(round(timeout - (time.time() - start_time), 0))} seconds")
@@ -62,8 +75,9 @@ class FileHandler(FileSystemEventHandler):
                     return 
 
         # Add the new file to the queue
-        logger.info(f"Added {event.src_path} to OCR queue")
-        self.file_queue.put(event.src_path)
+        logger.info(f"Added {item.local_file_path} to OCR queue")
+        item.status = ProcessStatus.OCR_PENDING
+        self.file_queue.put(item)
 
     def is_image(self, file_path) -> bool:
         try:

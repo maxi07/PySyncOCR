@@ -5,7 +5,9 @@ from src.helpers.config import config
 from src.helpers.rclone_management_onedrive import upload_file
 import os
 from shutil import move
-from os.path import join, expanduser
+from os.path import join
+from src.helpers.ProcessItem import ProcessItem, ProcessStatus
+from datetime import datetime
 
 class SyncService:
     def __init__(self, file_queue: Queue):
@@ -14,33 +16,40 @@ class SyncService:
     def start_processing(self):
         logger.info("Started Sync service")
         while True:
-            file_path = self.file_queue.get()  # Retrieve item from the queue
-
+            item: ProcessItem = self.file_queue.get()  # Retrieve item from the queue
+            item.status = ProcessStatus.SYNC
+            item.time_upload_started = datetime.now()
             try:
-                if file_path is None:  # Exit command
+                if item is None:  # Exit command
                     break
                 
-                logger.info(f"Received new item for upload: {file_path}")
-                # Test for local filepath
-                subdirname = os.path.basename(os.path.dirname(file_path))
-                filename = os.path.basename(file_path)
-                confitem = RcloneConfig.get(subdirname)
+                logger.info(f"Received new item for upload: {item.ocr_file}")
+                confitem = RcloneConfig.get(item.local_directory_above)
                 if confitem is None:
-                    logger.error(f"Cannot sync {file_path} as no matching onedrive config was found.")
+                    logger.error(f"Cannot sync {item.ocr_file} as no matching onedrive config was found.")
+                    item.status = ProcessStatus.SYNC_FAILED
+                    self.move_to_failed(item.ocr_file)
+                    if os.path.exists(item.local_file_path.replace("_OCR", "")):
+                        logger.debug(f"Removing original file at {item.local_file_path.replace('_OCR', '')}")
+                        os.remove(item.local_file_path.replace("_OCR", ""))
                 else:
                     logger.debug(f"Found matching config item: {confitem.id}")
-                    logger.info(f"Uploading file...: {file_path}")
-                    res = upload_file(file_path, join(confitem.remote, filename.replace("_OCR", "")))  # Remove the "_OCR" from the filepath
+                    logger.info(f"Uploading file...: {item.ocr_file}")
+                    res = upload_file(item.ocr_file, join(confitem.remote, item.filename.replace("_OCR", "")))  # Remove the "_OCR" from the filepath
                     if res == False:
-                        self.move_to_failed(file_path)
+                        item.status = ProcessStatus.SYNC_FAILED
+                        self.move_to_failed(item.local_file_path)
                     else:
-                        if os.path.exists(file_path.replace("_OCR", "")):
-                            logger.debug(f"Removing original file at {file_path.replace('_OCR', '')}")
-                            os.remove(file_path.replace("_OCR", ""))
+                        item.status = ProcessStatus.COMPLETED
+                        if os.path.exists(item.local_file_path.replace("_OCR", "")):
+                            logger.debug(f"Removing original file at {item.local_file_path.replace('_OCR', '')}")
+                            os.remove(item.local_file_path.replace("_OCR", ""))
             except Exception as ex:
-                logger.exception(f"Failed syncing {file_path}: {ex}")
-                self.move_to_failed(file_path)
+                logger.exception(f"Failed syncing {item.local_file_path}: {ex}")
+                item.status = ProcessStatus.SYNC_FAILED
+                self.move_to_failed(item.local_file_path)
             finally:
+                item.time_finished = datetime.now()
                 self.file_queue.task_done()
 
     def move_to_failed(self, file_path: str):
