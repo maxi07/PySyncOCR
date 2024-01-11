@@ -131,4 +131,15 @@ def upload_file(src_path: str, remote_path: str) -> bool:
         logger.error(f"Error uploading file from {src_path} to {remote_path}: {e}\n{e.stderr.decode()}")
         return False
     
+
+def dump_config():
+    command = ['rclone', 'config', 'dump']
+    logger.debug(f"Calling {' '.join(command)}")
+    try:
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        logger.debug(f"Received {result}")
+        return json.loads(result.stdout.decode())
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error dumping rclone config: {e}")
+        return None
 logger.debug(f"Loaded {__name__} module")

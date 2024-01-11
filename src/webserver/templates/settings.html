@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Settings</h1>
+<p>
+    Set up or manage your OneDrive connections for syncing.
+</p>
+<div class="container mt-5">
+    <div>
+        <h2>Connections <button class="btn btn-success">Add</button></h2>
+    </div>
+    {% if onedrive_configs.items() %}
+    <table class="table table-striped" id="onedrive-configs-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Connection</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name, config in onedrive_configs.items() %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ config.type }}</td>
+                <td>{{ config.drive_type }}</td>
+                <td><button class="btn btn-danger btn-sm">Delete</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No connections found.</p>
+    {% endif %}
+</div>
+{% endblock %}
