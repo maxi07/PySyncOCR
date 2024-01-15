@@ -69,7 +69,7 @@ def configure_rclone_onedrive_personal(name):
         if auth_url:
             logger.info(f"If your browser doesn't open automatically, go to the following link:")
             logger.info(auth_url)
-            webbrowser.open(auth_url)  # Open the URL in the default browser
+            yield auth_url
 
             # Continue handling prompts
             process.expect('Your choice>', timeout=120)
@@ -92,15 +92,19 @@ def configure_rclone_onedrive_personal(name):
             process.sendline('y')
             logger.debug(f"Selected [y] for final confirmation")
             logger.info("Success setting up OneDrive!")
-
+            yield "0"
         else:
             logger.error("Failed to extract authorization URL.")
+            return -3
 
     except pexpect.EOF:
         logger.error("Error: Unexpected end of input.")
+        logger.error(process.before.decode())
+        return -4
 
     except Exception:
         logger.error(process.buffer.decode())
+        return -5
 
     finally:
         # Close the process

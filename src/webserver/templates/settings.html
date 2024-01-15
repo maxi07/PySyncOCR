@@ -6,7 +6,7 @@
 </p>
 <div class="container mt-5">
     <div>
-        <h2>Connections <button class="btn btn-success">Add</button></h2>
+        <h2>Connections <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addonedrivemodal">Add</button></h2>
     </div>
     {% if onedrive_configs.items() %}
     <table class="table table-striped" id="onedrive-configs-table">
@@ -20,11 +20,11 @@
         </thead>
         <tbody>
             {% for name, config in onedrive_configs.items() %}
-            <tr>
+            <tr id="{{ name }}_row">
                 <td>{{ name }}</td>
                 <td>{{ config.type }}</td>
                 <td>{{ config.drive_type }}</td>
-                <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                <td><button id="{{ name }}_delete_button" onclick="deleteOneDriveConf('{{ name }}')" class="btn btn-danger btn-sm">Delete</button></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -32,5 +32,47 @@
     {% else %}
     <p>No connections found.</p>
     {% endif %}
+
+    <!-- OneDrive Adding modal-->
+    <div class="modal fade" id="addonedrivemodal" tabindex="-1" aria-labelledby="addonedriveLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addonedriveLabel">Add OneDrive config</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group has-validation">
+                        <div class="mb-3" id="onedrive_name_container">
+                            <label for="onedrive_name" class="col-form-label">Name of new config</label>
+                            <input type="text" class="form-control" id="onedrive_name" name="onedrive_name" placeholder="Name">
+                            <div id="name_help" class="form-text">This name must be unique for the connection.</div>
+                        </div>
+                        <div class="text-danger" id="allowedCharsErrorMsg" style="display: none;">
+                            Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
+                        </div>
+                    </div>
+
+                    <!-- Waiting animation -->
+                    <div class="text-center" id="waitingAnimation" style="display: none;">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Waiting for connection...</p>
+                    </div>
+
+                    <!-- Status update -->
+                    <div class="text-center" id="statusUpdate" style="display: none;">
+                        <p class="mt-2" id="updateText">I am hidden</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="add_onedrive_button" class="btn btn-primary" onclick="addOneDrive()" disabled>Add</button>
+                </div>
+            </div>
+        </div>   
+    </div>
 </div>
+<script src="/static/js/settings.js"></script>
 {% endblock %}
