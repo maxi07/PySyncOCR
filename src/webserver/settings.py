@@ -11,10 +11,22 @@ def index():
     try:
         logger.info("Loading settings...")
         onedrive_configs = dump_config()
-        return render_template('settings.html', onedrive_configs=onedrive_configs)
+        try:
+            with open("src/configs/onedrive_sync_config.json", "r") as f:
+                path_mappings = json.load(f)
+                logger.debug(f"Loaded {len(path_mappings)} path mappings")
+                
+        except Exception as e:
+            logger.exception(e)
+            path_mappings = {}
+        return render_template('settings.html',
+                               onedrive_configs=onedrive_configs,
+                               path_mappings=path_mappings)
     except Exception as e:
         logger.exception(e)
-        return render_template('settings.html', onedrive_configs=[])
+        return render_template('settings.html',
+                               onedrive_configs={},
+                               path_mappings={})
     
 @bp.delete("/onedrive")
 def deleteOneDriveConf():
