@@ -16,10 +16,11 @@ class OcrService:
         logger.info("Started OCR service")
         while True:
             item: ProcessItem = self.ocr_queue.get()
-            item.status = ProcessStatus.OCR
-            item.time_ocr_started = datetime.now()
             if item is None:  # Exit command
                 break
+            item.status = ProcessStatus.OCR
+            item.time_ocr_started = datetime.now()
+
             logger.info(f"Processing file with OCR: {item.local_file_path}")
 
             # Read PDF file properties

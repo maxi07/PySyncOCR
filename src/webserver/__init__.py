@@ -31,4 +31,5 @@ def create_app(test_config=None):
     app.register_blueprint(main.bp)
     app.register_blueprint(settings.bp)
     logger.debug(f"Registered blueprints with routes {app.url_map}")
+    logger.info("Started FLASK server")
     return app

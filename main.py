@@ -6,7 +6,7 @@ from src.services.watchdog_service import FolderMonitor
 from src.services.ocr_service import OcrService
 from src.services.sync_service import SyncService
 from src.services.smb_service import MySMBServer
-from src.services.flask_service import run_flask
+from src.services.flask_service import start_server
 from queue import Queue
 from src.helpers.config import config
 import time
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     ocr_thread = threading.Thread(target=ocr_service.start_processing, name="OCR Service")
     sync_thread = threading.Thread(target=sync_service.start_processing, name="Sync Service")
     smb_thread = threading.Thread(target=smb_server.start, name="SMB Service")
-    flask_thread = threading.Thread(target=run_flask, name="Flask Service")
+    flask_thread = threading.Thread(target=start_server, name="Flask Service")
 
     watchdog_thread.start()
     ocr_thread.start()

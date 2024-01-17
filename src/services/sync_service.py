@@ -17,12 +17,11 @@ class SyncService:
         logger.info("Started Sync service")
         while True:
             item: ProcessItem = self.file_queue.get()  # Retrieve item from the queue
+            if item is None:  # Exit command
+                break
             item.status = ProcessStatus.SYNC
             item.time_upload_started = datetime.now()
-            try:
-                if item is None:  # Exit command
-                    break
-                
+            try:             
                 logger.info(f"Received new item for upload: {item.ocr_file}")
                 confitem = RcloneConfig.get(item.local_directory_above)
                 if confitem is None:
