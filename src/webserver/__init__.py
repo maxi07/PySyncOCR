@@ -1,6 +1,7 @@
 import os
 from flask_sock import Sock
 from flask import Flask
+from src.helpers.logger import logger
 
 sock = Sock()
 def create_app(test_config=None):
@@ -29,4 +30,5 @@ def create_app(test_config=None):
     from . import main, settings
     app.register_blueprint(main.bp)
     app.register_blueprint(settings.bp)
+    logger.debug(f"Registered blueprints with routes {app.url_map}")
     return app

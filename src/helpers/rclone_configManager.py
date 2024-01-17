@@ -1,6 +1,7 @@
 import json
 from src.helpers.logger import logger
 from src.helpers.config import config
+import os
 
 """
 The config should look like so:
@@ -61,31 +62,44 @@ class ConfigManager:
         except Exception as ex:
             logger.exception("Failed saving config:", ex)
 
-    def add(self, id: str, connection: str, type):
+    def add(self, local: str, remote: str, connection: str, type="onedrive") -> bool:
         try:
+            id = local
             if not any(entry.get("id") == id for entry in self.config_data):
-                local = id
-                remote = connection + id + "/"
+                remotepath = connection + remote
                 if local.startswith("/"):
                     local = local[1:]
-                new_entry = {"id": id, "local": local, "remote": remote, "type": type}
+                new_entry = {"id": id, "local": local, "remote": remotepath, "type": type}
+
+                # Add new smb folder
+                try:
+                    os.makedirs(os.path.join(config.get_filepath("smb_service.share_path"),local), exist_ok=True)
+                    logger.info(f"Created folder {os.path.join(config.get_filepath('smb_service.share_path'),local)}")
+                except Exception as ex:
+                    logger.exception(f"Failed creating folder {os.path.join(config.get_filepath('smb_service.share_path'),local)}:", ex)
+                    return False
                 self.config_data.append(new_entry)
                 self.save_config()
                 logger.info(f"Entry with id '{id}' added successfully.")
+                return True
             else:
                 logger.error(f"Entry with id '{id}' already exists. Cannot add duplicate entry.")
+                return False
         except Exception as ex:
             logger.exception("Failed adding rclone sync destination:", ex)
+            return False
 
-    def delete(self, id):
+    def delete(self, id) -> bool:
         try:
             entries_to_remove = [entry for entry in self.config_data if entry.get("id") == id]
             for entry in entries_to_remove:
                 self.config_data.remove(entry)
             self.save_config()
             logger.info(f"Entry with id '{id}' deleted successfully.")
+            return True
         except Exception as ex:
             logger.exception(f"Failed deleting {id}:", ex)
+            return False
 
     def get(self, id) -> ConfigEntry:
         try:

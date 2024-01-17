@@ -14,7 +14,7 @@ def list_remotes() -> list[str]:
     Note:
     - Uses the 'rclone listremotes' command to get remote names.
     """
-    command = ['rclone', 'listremotes']
+    command = ['rclone', 'listremotes', '--long']
 
     try:
         logger.debug(f"Calling {' '.join(command)}")
@@ -25,7 +25,8 @@ def list_remotes() -> list[str]:
         lines = [line.strip() for line in result.stdout.decode().split('\n') if line.strip()]
 
         # Remove colons from each line
-        result_list = [line.replace(':', '') for line in lines]
+        filtered_list = [item for item in lines if ": onedrive" in item]
+        result_list = [line.replace(': onedrive', '') for line in filtered_list]
         logger.debug(f"Found remotes: {str(result_list)}")
         return result_list
     except subprocess.CalledProcessError as e:
@@ -33,35 +34,12 @@ def list_remotes() -> list[str]:
         return []
 
 
-def list_folders(connection: str, folder=None) -> list[str] | None:
-    """
-    List folders in a remote storage using rclone.
-
-    Args:
-        connection (str): The name or path of the remote storage connection.
-        folder (str, optional): The path to the parent folder. Defaults to None.
-
-    Returns:
-        list[str] | None: A list of folder names if successful, or None if an error occurs.
-
-    Raises:
-        subprocess.CalledProcessError: If the underlying rclone command encounters an error.
-
-    Notes:
-        The function uses rclone to list folders in the specified remote storage connection.
-        If `folder` is provided, it lists folders within that specific directory; otherwise,
-        it lists folders in the root directory of the remote storage.
-
-    Example:
-        >>> list_folders("my_remote:")
-        ['folder1', 'folder2']
-
-    """
+def list_folders(connection: str, folder=None) -> dict | None:
     if folder is None:
-        command = ['rclone', 'lsf', connection, f"--dirs-only"]
+        command = ['rclone', 'lsf', connection, f"--dirs-only", "--recursive", "--max-depth", "2"]
         logger.debug(f"Calling {' '.join(command)}")
     else:
-        command = ['rclone', 'lsf', connection + folder, f"--dirs-only"]
+        command = ['rclone', 'lsf', connection + folder, f"--dirs-only", "--recursive", "--max-depth", "2"]
         logger.debug(f"Calling {' '.join(command)}")
 
     try:
@@ -70,8 +48,22 @@ def list_folders(connection: str, folder=None) -> list[str] | None:
         try:
             logger.debug("Received command result")
             lines = [line.strip() for line in result.stdout.decode().split('\n') if line.strip()]
-            logger.debug("Folders: " + str(lines))
-            return lines
+            logger.debug(f"Received: {len(lines)} results")
+
+            # Convert this list into a dict holding amount of subdirs
+            # eg {'Anlagen': 0, 'AppData': 1}
+            directory_dict = {}
+            if len(lines) > 0:
+                for item in lines:
+                    parts = item.split("/")
+                    top_level_directory = parts[0]
+                    
+                    if top_level_directory not in directory_dict:
+                        directory_dict[top_level_directory] = 0
+                    else:
+                        directory_dict[top_level_directory] += 1
+
+            return directory_dict
         except json.JSONDecodeError as json_err:
             logger.error(f"Error decoding JSON: {json_err}")
             return None

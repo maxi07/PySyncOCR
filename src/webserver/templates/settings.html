@@ -7,7 +7,7 @@
 <div class="container mt-5">
     <div>
         <h2>OneDrive Accounts <button class="btn btn-primary" data-bs-toggle="modal"
-                data-bs-target="#addonedrivemodal"><i class="bi bi-plus-circle" ></i> Add</button></h2>
+                data-bs-target="#addonedrivemodal"><i class="bi bi-plus-circle"></i> Add</button></h2>
     </div>
     <p>Manage credentials to different OneDrive accounts.</p>
     {% if onedrive_configs.items() %}
@@ -37,14 +37,14 @@
     {% endif %}
     <br>
     <hr>
-    <h2>Path mappings <button class="btn btn-primary" data-bs-toggle="modal"
-        data-bs-target="#pathmappingmodal"><i class="bi bi-plus-circle"></i> Add</button></h2>
+    <h2>Path mappings <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pathmappingmodal"
+            onclick="getConnections()"><i class="bi bi-plus-circle"></i> Add</button></h2>
     <p>Manage individual sync destinations for SMB folders to OneDrive.</p>
-    {% if path_mappings %}
-    <div class="row row-cols1 row-cols-md-2 g-4">
+    <div class="row row-cols1 row-cols-md-2 g-4" id="pathmappingscontainer">
+        {% if path_mappings %}
 
         {% for item in path_mappings %}
-        <div class="col">
+        <div class="col" id="{{ item.id }}_pathmappingcard">
             <div class="card">
                 <div class="card-header">
                     {{ item.id }}
@@ -54,13 +54,13 @@
                         <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Local</div>
-                                <i class="bi bi-folder" ></i> {{ item.local }}
+                                <i class="bi bi-folder"></i> {{ item.local }}
                             </div>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Remote</div>
-                                <i class="bi bi-folder" ></i> {{ item.remote }}
+                                <i class="bi bi-folder"></i> {{ item.remote }}
                             </div>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -72,17 +72,19 @@
                     </ol>
                 </div>
                 <div class="card-footer">
-                    <button id="{{ item.id }}_edit_button" onclick="editPathMapping('{{ item.id }}')" class="btn btn-primary"><i class="bi bi-pencil" ></i> Edit</button>
-                    <button id="{{ item.id }}_delete_button" onclick="deletePathMapping('{{ item.id }}')" class="btn btn-danger"><i class="bi bi-trash" ></i> Delete</button>         
+                    <button id="{{ item.id }}_edit_button" onclick="editPathMapping('{{ item.id }}')"
+                        class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</button>
+                    <button id="{{ item.id }}_delete_button" onclick="deletePathMapping('{{ item.id }}')"
+                        class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             </div>
         </div>
         {% endfor %}
+        {% else %}
+        <p>No path mappings found.</p>
+        {% endif %}
     </div>
 
-    {% else %}
-    <p>No path mappings found.</p>
-    {% endif %}
     <!-- OneDrive Adding modal-->
     <div class="modal fade" id="addonedrivemodal" tabindex="-1" aria-labelledby="addonedriveLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -92,20 +94,20 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="input-group has-validation">
+                    <div class=" has-validation">
                         <div class="mb-3" id="onedrive_name_container">
                             <label for="onedrive_name" class="col-form-label">Name of new config</label>
                             <input type="text" class="form-control" id="onedrive_name" name="onedrive_name"
                                 placeholder="Name">
                             <div id="name_help" class="form-text">This name must be unique for the connection.</div>
                         </div>
-                        <div class="text-danger" id="allowedCharsErrorMsg" style="display: none;">
+                        <div class="text-danger" id="allowedCharsErrorMsgOneDriveConn" style="display: none;">
                             Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
                         </div>
                     </div>
 
                     <!-- Waiting animation -->
-                    <div class="text-center" id="waitingAnimation" style="display: none;">
+                    <div class="text-center" id="waitingAnimationonedriveadd" style="display: none;">
                         <div class="spinner-border" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
@@ -136,35 +138,76 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="input-group has-validation">
-                        <div class="mb-3" id="onedrive_name_container">
-                            <label for="onedrive_name" class="col-form-label">Name of new config</label>
-                            <input type="text" class="form-control" id="onedrive_name" name="onedrive_name"
-                                placeholder="Name">
-                            <div id="name_help" class="form-text">This name must be unique for the connection.</div>
+                    <div class="mb-3" id="pathmappingmodal_body">
+                        <div class=" has-validation">
+                            <div class="mb-3" id="local_path_container">
+                                <label for="local_path" class="col-form-label fw-bold">Name of SMB share</label>
+                                <input type="text" class="form-control" id="local_path" name="local_path"
+                                    placeholder="Name">
+                                <div id="name_help" class="form-text">This folder will be accessible via SMB and later
+                                    synced to the selected OneDrive destination.</div>
+                            </div>
+                            <div class="text-danger" id="allowedCharsErrorMsgLocalPath" style="display: none;">
+                                Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
+                            </div>
                         </div>
-                        <div class="text-danger" id="allowedCharsErrorMsg" style="display: none;">
-                            Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
+                        <label for="connection_selector" class="col-form-label fw-bold">Choose a connection</label>
+                        <div id="connection_selector_container">
+                            <select class="form-select" id="connection_selector_modal" name="connection_selector_modal">
+                                <!-- Options will be dynamically added here -->
+                            </select>
+                        </div>
+                        <br>
+                        <label for="remote_path" class="col-form-label fw-bold">OneDrive path</label>
+                        <div id="remote_path_container" class="input-group">
+                            <a href="#remotepathselector" data-bs-toggle="collapse" role="button" aria-expanded="false"
+                                aria-controls="remotepathselector"><span class="input-group-text"><i
+                                        class="bi bi-folder"></i></span></a>
+                            <input type="text" class="form-control" id="remote_path" name="remote_path"
+                                placeholder="Please select a path." disabled>
+                        </div>
+                        <br>
+                        <div class="collapse" id="remotepathselector">
+                            <div class="card card-body">
+                                <!-- Waiting animation -->
+                                <div class="text-center" id="waitingAnimationPathMapping">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading directories...</p>
+                                </div>
+                                <!-- Back button wrapped in a div with a specific width -->
+                                <div style="width: 100px; display:none;" id="remoteonedrivebackbutton">
+                                    <button class="btn btn-secondary" onclick="loadOneDriveDir(true)">
+                                        <i class="bi bi-arrow-90deg-up"></i> Back
+                                    </button>
+                                </div>
+                                <br>
+                                <div class="list-group" id="onedrivelistgroup">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Waiting animation -->
-                    <div class="text-center" id="waitingAnimation" style="display: none;">
+                    <!-- Waiting animation when form is sent -->
+                    <div class="text-center" id="waitingAnimationPathMappingSent" style="display: none;">
                         <div class="spinner-border" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <p class="mt-2">Waiting for connection...</p>
+                        <p class="mt-2">Creating mapping...</p>
                     </div>
-
-                    <!-- Status update -->
-                    <div class="text-center" id="statusUpdate" style="display: none;">
-                        <p class="mt-2" id="updateText">I am hidden</p>
+                    <div class="text-center" id="finalPathMappingStatus" style="display: none;">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"
+                            id="finalPathMappingStatusSuccess"></i>
+                        <i class="bi bi-exclamation-circle-fill text-danger" style="font-size: 2rem;"
+                            id="finalPathMappingStatusError"></i>
+                        <p id="finalPathMappingStatusText"></p>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" id="pathmappingmodal_footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" id="add_onedrive_button" class="btn btn-primary" onclick="addOneDrive()"
-                        disabled>Add</button>
+                    <button type="submit" id="add_path_mapping_button" class="btn btn-primary"
+                        onclick="addPathMapping()" disabled>Add</button>
                 </div>
             </div>
         </div>

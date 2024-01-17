@@ -39,7 +39,7 @@ class Config:
             value = self._config
             for k in keys:
                 value = value.get(k, {})
-            # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
+            logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
             if value is not None:
                 return join(expanduser('~'), value)
             else:

@@ -11,7 +11,7 @@
             "share_name": "PySyncOCR",
             "username": "ocr",
             "password": "pysyncocr",
-            "share_path": "~/PySyncOCR",
+            "share_path": "PySyncOCR",
             "max_connections": 0          
     }
 }
