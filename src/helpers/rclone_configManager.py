@@ -95,6 +95,12 @@ class ConfigManager:
             for entry in entries_to_remove:
                 self.config_data.remove(entry)
             self.save_config()
+            try:
+                os.removedirs(os.path.join(config.get_filepath("smb_service.share_path"),entry.get("local")))
+                logger.info(f"Deleted folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}")
+            except Exception as ex:
+                logger.exception(f"Failed deleting folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}", ex)
+                return False
             logger.info(f"Entry with id '{id}' deleted successfully.")
             return True
         except Exception as ex:

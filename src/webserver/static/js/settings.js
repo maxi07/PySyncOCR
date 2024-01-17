@@ -383,7 +383,7 @@ function addPathMappingToUI(local, remote, connection) {
                         <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
                                 <div class="fw-bold">Remote</div>
-                                <i class="bi bi-folder"></i> ${connection + remote}
+                                <i class="bi bi-folder"></i><div id="${local}_remote_pathmapping">${connection + remote}</div>
                             </div>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -396,7 +396,7 @@ function addPathMappingToUI(local, remote, connection) {
                 </div>
                 <div class="card-footer">
                     <button id="${local}_edit_button" onclick="editPathMapping('${local}')"
-                        class="btn btn-primary"><i class="bi bi-pencil"></i> Edit</button>
+                        class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pathmappingmodal"><i class="bi bi-pencil"></i> Edit</button>
                     <button id="${local}_delete_button" onclick="deletePathMapping('${local}')"
                         class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
                 </div>
@@ -427,4 +427,17 @@ function deletePathMapping(id) {
         };
     }
     xhr.send(JSON.stringify({ "id": id }));
+}
+
+function editPathMapping(id) {
+    const local_path = document.getElementById("local_path");
+    const remote_path = document.getElementById("remote_path");
+    const connection = document.getElementById("connection_selector_modal");
+
+    local_path.value = id;
+    remote_path.value = document.getElementById(id + "_remote_pathmapping").innerText.split(":")[1];
+    var optionElement = document.createElement('option');
+    optionElement.value = document.getElementById(id + "_remote_pathmapping").innerText.split(":")[0] + ":"
+    optionElement.textContent = document.getElementById(id + "_remote_pathmapping").innerText.split(":")[0];
+    connection.appendChild(optionElement);
 }
