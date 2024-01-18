@@ -3,8 +3,4 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return redirect(url_for('main.dashboard'))
-
-@bp.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
+    return redirect(url_for('dashboard.index'))

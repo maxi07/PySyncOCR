@@ -7,10 +7,10 @@ sock = Sock()
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    # app.config.from_mapping(
-    #     SECRET_KEY='dev',
-    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    # )
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        DATABASE=os.path.join(app.instance_path, 'pysyncocr.sqlite'),
+    )
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -25,10 +25,16 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    # initialize websocket
     sock.init_app(app)
 
-    from . import main, settings
+    # initialize SQL db
+    from . import db
+    db.init_app(app)
+
+    from . import main, settings, dashboard
     app.register_blueprint(main.bp)
+    app.register_blueprint(dashboard.bp)
     app.register_blueprint(settings.bp)
     logger.debug(f"Registered blueprints with routes {app.url_map}")
     logger.info("Started FLASK server")
