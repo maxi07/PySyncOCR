@@ -6,14 +6,22 @@ from src.services.watchdog_service import FolderMonitor
 from src.services.ocr_service import OcrService
 from src.services.sync_service import SyncService
 from src.services.smb_service import MySMBServer
-from src.services.flask_service import start_server
+from src.services.flask_service import start_server, start_dev_server
 from queue import Queue
 from src.helpers.config import config
 import time
+import argparse
 
 
 if __name__ == "__main__":
     logger.info("Starting PySyncOCR...")
+    parser = argparse.ArgumentParser(
+                    prog='PySyncOCR',
+                    description='PySyncOCR is a simple tool to sync scanned PDFs from SMB to cloud and OCR them.')
+    parser.add_argument('--dev', action='store_true', help='Run in development mode')
+    args = parser.parse_args()
+    if args.dev:
+        logger.warning("Running in development mode!")
     check_install()
 
 
@@ -34,7 +42,13 @@ if __name__ == "__main__":
     ocr_thread = threading.Thread(target=ocr_service.start_processing, name="OCR Service")
     sync_thread = threading.Thread(target=sync_service.start_processing, name="Sync Service")
     smb_thread = threading.Thread(target=smb_server.start, name="SMB Service")
-    flask_thread = threading.Thread(target=start_server, name="Flask Service")
+
+    if args.dev:
+        logger.warning("Running FLASK dev server!")
+        flask_thread = threading.Thread(target=start_dev_server, name="Flask Service DEV")
+    else:
+        flask_thread = threading.Thread(target=start_server, name="Flask Service")
+
 
     watchdog_thread.start()
     ocr_thread.start()

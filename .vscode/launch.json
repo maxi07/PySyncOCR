@@ -4,6 +4,7 @@
     // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Aktuelle Datei",
             "type": "python",
@@ -19,6 +20,17 @@
             "module": "main",
             "justMyCode": true,
             "sudo": true
+        },
+        {
+            "name": "Python: Main (SUDO) DEV",
+            "type": "python",
+            "request": "launch",
+            "module": "main",
+            "justMyCode": true,
+            "sudo": true,
+            "args": [
+                "--dev"
+            ]
         }
     ]
 }

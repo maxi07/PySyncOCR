@@ -15,14 +15,14 @@ class ProcessStatus(Enum):
     SKIPPED: Item was skipped and not processed.
     SYNC_FAILED: Syncing the item to remote storage failed.
     """
-    OCR_PENDING = 1
-    OCR = 2
-    SYNC_PENDING = 3
-    SYNC = 4
-    COMPLETED = 5
-    FAILED = -1
-    SKIPPED = -2
-    SYNC_FAILED = -3
+    OCR_PENDING = "OCR Pending"
+    OCR = "OCR Processing"
+    SYNC_PENDING = "Sync Pending"
+    SYNC = "Syncing"
+    COMPLETED = "Completed"
+    FAILED = "Failed"
+    SKIPPED = "Skipped"
+    SYNC_FAILED = "Sync Failed"
 
 class OCRStatus(Enum):
     """Enumeration of possible OCR statuses.
@@ -71,6 +71,7 @@ class ProcessItem:
             logger.exception(f"Error creating ProcessItem: {e}")
             return
         self.remote_file_path: str = None
+        self.remote_directory: str = None
         self.status: ProcessStatus = status
         self.connection = None
         self.filename = os.path.basename(local_file_path)
@@ -85,6 +86,7 @@ class ProcessItem:
         self.time_finished = None
         self.item_type = item_type
         self.ocr_status = OCRStatus.UNKNOWN
+        self.db_id = None
 
         # PDF Status
         self.pdf_pages = 0

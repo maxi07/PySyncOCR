@@ -12,3 +12,7 @@ def start_server():
         subprocess.run(gunicorn_command, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error running Gunicorn: {e}")
+
+def start_dev_server():
+    app = create_app()
+    app.run(debug=True, use_reloader=False, threaded=True)

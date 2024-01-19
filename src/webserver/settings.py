@@ -17,6 +17,14 @@ def index():
                 path_mappings = json.load(f)
                 logger.debug(f"Loaded {len(path_mappings)} path mappings")
 
+            # Check if the connection in the path mapping actually exisits
+            for path_mapping in path_mappings:
+                if str(path_mapping["remote"]).split(":")[0] not in list_remotes():
+                    logger.warning(f"Remote {str(path_mapping['remote']).split(':')[0]} not found in rclone remotes.")
+                    path_mapping["remote_exists"] = False
+                else:
+                    path_mapping["remote_exists"] = True
+                    continue
         except Exception as e:
             logger.exception(e)
             path_mappings = {}

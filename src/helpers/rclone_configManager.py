@@ -10,13 +10,13 @@ The config should look like so:
     {
         "id": "test1",
         "local": "/home/maxi/test1",
-        "remote": "test_remote:/test1",
+        "remote": "test1:/test1",
         "type": "onedrive"
     },
     {
         "id": "test2",
         "local": "/home/maxi/test2",
-        "remote": "test_remote:/test2",
+        "remote": "test2:/test2",
         "type": "onedrive"
     }
 ]

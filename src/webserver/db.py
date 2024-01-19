@@ -2,6 +2,7 @@ import sqlite3
 import click
 from flask import current_app, g
 from src.helpers.logger import logger
+from functools import wraps
 
 def get_db():
     logger.info("Creating database connection")
@@ -39,3 +40,28 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+
+def with_database(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Connect to the database
+        connection = sqlite3.connect('instance/pysyncocr.sqlite')
+        cursor = connection.cursor()
+
+        # Call the wrapped function with the cursor as a keyword argument
+        kwargs['cursor'] = cursor
+
+        try:
+            result = func(*args, **kwargs)
+        except Exception as e:
+            # Handle exceptions if needed
+            connection.rollback()
+            raise e
+        finally:
+            # Commit the changes and close the connection
+            connection.commit()
+            connection.close()
+
+        return result
+
+    return wrapper

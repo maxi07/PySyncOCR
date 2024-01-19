@@ -129,8 +129,9 @@ def dump_config():
     logger.debug(f"Calling {' '.join(command)}")
     try:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        logger.debug(f"Received config.")
-        return json.loads(result.stdout.decode())
+        res = json.loads(result.stdout.decode())
+        logger.debug(f"Received {len(res)} onedrive configs")
+        return res
     except subprocess.CalledProcessError as e:
         logger.error(f"Error dumping rclone config: {e}")
         return None

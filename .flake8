@@ -1,5 +1,5 @@
 [flake8]
-exclude = .git,*migrations*,.vscode,__pycache__
+exclude = .git,*migrations*,.vscode,__pycache__,.venv,docs,tests,./venv
 max-line-length = 127
 extend-ignore = E501, F403, F405, E402
 count = True

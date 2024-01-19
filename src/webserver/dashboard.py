@@ -2,8 +2,6 @@ from flask import Blueprint, jsonify, render_template, request, redirect, g
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 from src.helpers.logger import logger
 from src.webserver.db import get_db
-from . import sock
-import json
 
 @bp.route("/")
 def index():

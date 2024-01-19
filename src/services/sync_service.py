@@ -8,12 +8,15 @@ from shutil import move
 from os.path import join
 from src.helpers.ProcessItem import ProcessItem, ProcessStatus
 from datetime import datetime
+from src.webserver.db import with_database
+from sqlite3 import Cursor
 
 class SyncService:
     def __init__(self, file_queue: Queue):
         self.file_queue = file_queue
 
-    def start_processing(self):
+    @with_database
+    def start_processing(self, cursor: Cursor):
         logger.info("Started Sync service")
         while True:
             item: ProcessItem = self.file_queue.get()  # Retrieve item from the queue
@@ -21,6 +24,9 @@ class SyncService:
                 break
             item.status = ProcessStatus.SYNC
             item.time_upload_started = datetime.now()
+
+            self.update_db_status(item, cursor)
+
             try:             
                 logger.info(f"Received new item for upload: {item.ocr_file}")
                 confitem = RcloneConfig.get(item.local_directory_above)
@@ -49,6 +55,7 @@ class SyncService:
                 self.move_to_failed(item.local_file_path)
             finally:
                 item.time_finished = datetime.now()
+                self.update_db_status(item, cursor)
                 self.file_queue.task_done()
 
     def move_to_failed(self, file_path: str):
@@ -60,5 +67,11 @@ class SyncService:
             move(file_path, join(failed_dir, os.path.basename(file_path)))
         except Exception as ex:
             logger.exception(f"Failed moving item from {file_path} to {str(config.get_filepath('sync_service.failed_dir'))}")
+
+    def update_db_status(self, item: ProcessItem, cursor: Cursor):
+        cursor.execute(
+            'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
+            (item.status.value, item.db_id)
+        )
 
 logger.debug(f"Loaded {__name__} module")

@@ -6,37 +6,30 @@ from src.helpers.config import config
 from shutil import copy
 from src.helpers.ProcessItem import ProcessItem, ProcessStatus, ItemType, OCRStatus
 from datetime import datetime
+from sqlite3 import Cursor
+from src.webserver.db import with_database
 
 class OcrService:
     def __init__(self, ocr_queue: Queue, sync_queue: Queue):
         self.ocr_queue = ocr_queue
         self.sync_queue = sync_queue
 
-    def start_processing(self):
+    @with_database
+    def start_processing(self, cursor: Cursor):
         logger.info("Started OCR service")
         while True:
             item: ProcessItem = self.ocr_queue.get()
             if item is None:  # Exit command
                 break
             item.status = ProcessStatus.OCR
+            cursor.execute(
+                'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
+                (item.status.value, item.db_id)
+            )
+            logger.debug(f"db state should now be {item.status.value}")
             item.time_ocr_started = datetime.now()
 
             logger.info(f"Processing file with OCR: {item.local_file_path}")
-
-            # Read PDF file properties
-            if item.item_type == ItemType.PDF:
-                try:
-                    pdf_reader = PyPDF2.PdfReader(item.local_file_path)
-                    item.pdf_pages = len(pdf_reader.pages)
-                    logger.debug(f"PDF file has {item.pdf_pages} pages to process")
-                except Exception as e:
-                    logger.error(f"Error reading PDF file: {item.local_file_path}")
-                    logger.exception(e)
-                    item.time_ocr_finished = datetime.now()
-                    item.ocr_status = OCRStatus.FAILED
-                    item.status = ProcessStatus.SYNC_PENDING
-                    self.sync_queue.put(item)
-                    continue
             
             try:
                 result = ocrmypdf.ocr(item.local_file_path, item.ocr_file, output_type='pdf', skip_text=True, rotate_pages=True, jpg_quality=80, png_quality=80, optimize=2, language=["eng"])
@@ -44,6 +37,11 @@ class OcrService:
                 logger.debug(f"OCR exited with code {result}")
                 logger.debug(f"Adding {item.ocr_file} to sync queue")
                 item.ocr_status = OCRStatus.COMPLETED
+
+                cursor.execute(
+                    'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
+                    (item.status.value, item.db_id)
+                )
 
                 if config.get("sync_service.keep_original"):
                     try:
@@ -69,6 +67,11 @@ class OcrService:
                 logger.exception(f"Failed processing {item.local_file_path} with OCR: {ex}")
                 item.ocr_status = OCRStatus.FAILED
             finally:
+                if item.ocr_status == OCRStatus.COMPLETED:
+                    cursor.execute(
+                    'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
+                    (item.status.value, item.db_id)
+                    )
                 item.time_ocr_finished = datetime.now()
                 item.status = ProcessStatus.SYNC_PENDING
                 self.sync_queue.put(item)

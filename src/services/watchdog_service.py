@@ -1,4 +1,6 @@
+import datetime
 import time
+import PyPDF2
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from queue import Queue
@@ -7,7 +9,12 @@ from src.helpers.config import config
 import os
 from PIL import Image
 from PyPDF2 import PdfReader
-from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
+from src.helpers.ProcessItem import ItemType, OCRStatus, ProcessItem, ProcessStatus
+from src.webserver.db import with_database
+from src.helpers.rclone_configManager import RcloneConfig
+import fitz
+from sqlite3 import Cursor
+
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -20,7 +27,8 @@ class FileHandler(FileSystemEventHandler):
         super().__init__()
         self.file_queue = file_queue
 
-    def on_created(self, event):
+    @with_database
+    def on_created(self, event, cursor: Cursor):
         """
         Callback method triggered when a file or directory is created.
 
@@ -74,9 +82,75 @@ class FileHandler(FileSystemEventHandler):
                     logger.warning(f"File {event.src_path} is neither a PDF or image file. Skipping.")
                     return 
 
+
         # Add the new file to the queue
-        logger.info(f"Added {item.local_file_path} to OCR queue")
+        try:
+            cursor.execute(
+                'INSERT INTO scanneddata (file_name, local_filepath) '
+                'VALUES (?, ?)',
+                (item.filename, item.local_directory_above)
+            )
+            last_inserted_id = cursor.execute('SELECT last_insert_rowid()').fetchone()[0]
+            item.db_id = last_inserted_id
+        except Exception as e:
+            logger.exception(f"Error adding new file to database: {e}")
+            last_inserted_id = None
+        
+        try:
+            # Generate preview image
+            previewimage_path = f'/static/images/pdfpreview/{last_inserted_id}.jpg'
+            self.pdf_to_jpeg(item.local_file_path, "src/webserver" + previewimage_path, 128, 50)
+
+            cursor.execute(
+                'UPDATE scanneddata SET previewimage_path = ? WHERE id = ?',
+                (previewimage_path, last_inserted_id)
+            )
+        except Exception as e:
+            logger.exception(f"Error adding preview image to database: {e}")
+
+        
+        try:
+            # Matching remote connection
+            confitem = RcloneConfig.get(item.local_directory_above)
+            if confitem:
+                logger.debug(f"Found matching config item: {confitem.id}")
+                item.connection = confitem.id
+                item.remote_file_path = confitem.remote
+                item.remote_directory = confitem.remote.split(":")[1]
+                cursor.execute(
+                    'UPDATE scanneddata SET remote_connection_id = ?, remote_filepath = ? WHERE id = ?',
+                    (item.connection, item.remote_directory, last_inserted_id)
+                )
+            else:
+                logger.warning(f"No matching config item found for {item.local_file_path}. Will continue to OCR but uploading will fail.")
+        except Exception as e:
+            logger.exception(f"Error matching remote connection: {e}")
+
+            # Read PDF file properties
+        if item.item_type == ItemType.PDF:
+            try:
+                pdf_reader = PyPDF2.PdfReader(item.local_file_path)
+                item.pdf_pages = len(pdf_reader.pages)
+                logger.debug(f"PDF file has {item.pdf_pages} pages to process")
+                cursor.execute(
+                    'UPDATE scanneddata SET pdf_pages = ? WHERE id = ?',
+                    (item.pdf_pages, last_inserted_id)
+                )
+            except Exception as e:
+                logger.error(f"Error reading PDF file: {item.local_file_path}")
+                logger.exception(e)        
         item.status = ProcessStatus.OCR_PENDING
+
+        try:
+            cursor.execute(
+                    'UPDATE scanneddata SET modified = CURRENT_TIMESTAMP WHERE id = ?',
+                    (last_inserted_id,)
+            )
+        except Exception as ex:
+            logger.exception(f"Failed updating modified time on current database item {ex}")
+
+
+        logger.info(f"Added {item.local_file_path} to OCR queue")
         self.file_queue.put(item)
 
     def is_image(self, file_path) -> bool:
@@ -98,6 +172,31 @@ class FileHandler(FileSystemEventHandler):
             return True
         except Exception as ex:
             return False
+        
+    def pdf_to_jpeg(self, pdf_path: str, output_path: str, target_height=128, compression_quality=50):
+        # Open the PDF file
+        pdf_document = fitz.open(pdf_path)
+
+        # Get the first page
+        first_page = pdf_document[0]
+
+        # Get the aspect ratio of the page
+        aspect_ratio = first_page.rect.width / first_page.rect.height
+
+        # Calculate the corresponding width based on the target height
+        target_width = int(target_height * aspect_ratio)
+
+        # Create a matrix for the desired size
+        matrix = fitz.Matrix(target_width / first_page.rect.width, target_height / first_page.rect.height)
+
+        # Create a pixmap for the page with the specified size
+        pixmap = first_page.get_pixmap(matrix=matrix)
+
+        # Save the pixmap as a JPEG image with compression
+        pixmap.save(output_path, "jpeg", jpg_quality=compression_quality)
+
+        # Close the PDF document
+        pdf_document.close()
 
 
 class FolderMonitor:
