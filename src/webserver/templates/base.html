@@ -44,22 +44,22 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", (event) => {
-            // Get the current page URL
-            var currentPage = window.location.href;
-
+            // Get the current page URL without any parameters
+            var currentPage = window.location.href.split('?')[0];
+        
             // Remove the active class from all navigation links
             $("#navbarSupportedContent a").removeClass("active");
-
+        
             // Check each navigation link and set the active class accordingly
             $("#navbarSupportedContent a").each(function () {
                 var linkHref = $(this).attr("href");
-
+        
                 // Check if the current page URL ends with the linkHref
                 if (currentPage.endsWith(linkHref)) {
                     $(this).closest("a").addClass("active");
                 }
             });
-        });
+        });        
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         crossorigin="anonymous"></script>
