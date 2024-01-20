@@ -13,5 +13,9 @@
             "password": "pysyncocr",
             "share_path": "PySyncOCR",
             "max_connections": 0          
+    },
+    "sql": {
+        "db_location": "instance/pysyncocr.sqlite",
+        "db_pdf_table": "scanneddata"
     }
 }

@@ -6,27 +6,21 @@ from src.helpers.config import config
 from shutil import copy
 from src.helpers.ProcessItem import ProcessItem, ProcessStatus, ItemType, OCRStatus
 from datetime import datetime
-from sqlite3 import Cursor
-from src.webserver.db import with_database
+from src.webserver.db import update_scanneddata_database
 
 class OcrService:
     def __init__(self, ocr_queue: Queue, sync_queue: Queue):
         self.ocr_queue = ocr_queue
         self.sync_queue = sync_queue
 
-    @with_database
-    def start_processing(self, cursor: Cursor):
+    def start_processing(self):
         logger.info("Started OCR service")
         while True:
             item: ProcessItem = self.ocr_queue.get()
             if item is None:  # Exit command
                 break
             item.status = ProcessStatus.OCR
-            cursor.execute(
-                'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
-                (item.status.value, item.db_id)
-            )
-            logger.debug(f"db state should now be {item.status.value}")
+            update_scanneddata_database(item.db_id, {"file_status": item.status.value})
             item.time_ocr_started = datetime.now()
 
             logger.info(f"Processing file with OCR: {item.local_file_path}")
@@ -37,12 +31,6 @@ class OcrService:
                 logger.debug(f"OCR exited with code {result}")
                 logger.debug(f"Adding {item.ocr_file} to sync queue")
                 item.ocr_status = OCRStatus.COMPLETED
-
-                cursor.execute(
-                    'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
-                    (item.status.value, item.db_id)
-                )
-
                 if config.get("sync_service.keep_original"):
                     try:
                         logger.debug(f"Copying file to original location for backup: {config.get_filepath('sync_service.original')}")
@@ -67,13 +55,9 @@ class OcrService:
                 logger.exception(f"Failed processing {item.local_file_path} with OCR: {ex}")
                 item.ocr_status = OCRStatus.FAILED
             finally:
-                if item.ocr_status == OCRStatus.COMPLETED:
-                    cursor.execute(
-                    'UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?',
-                    (item.status.value, item.db_id)
-                    )
                 item.time_ocr_finished = datetime.now()
                 item.status = ProcessStatus.SYNC_PENDING
+                update_scanneddata_database(item.db_id, {"file_status": item.status.value})
                 self.sync_queue.put(item)
 
             self.ocr_queue.task_done()

@@ -2,8 +2,7 @@ import sqlite3
 import click
 from flask import current_app, g
 from src.helpers.logger import logger
-from functools import wraps
-
+from src.helpers.config import config
 def get_db():
     logger.info("Creating database connection")
     if 'db' not in g:
@@ -41,27 +40,25 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
 
-def with_database(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
+def update_scanneddata_database(id: int, update_values: dict):
+    try:
         # Connect to the database
-        connection = sqlite3.connect('instance/pysyncocr.sqlite')
+        connection = sqlite3.connect(config.get("sql.db_location"))
+
+        # Create a cursor object
         cursor = connection.cursor()
+        logger.debug(f"Received values: {update_values} with keys {update_values.keys()}")
 
-        # Call the wrapped function with the cursor as a keyword argument
-        kwargs['cursor'] = cursor
+        # Construct the SET part of the query dynamically based on the dictionary
+        set_clause = ', '.join(f'{key} = ?' for key in update_values.keys())
 
-        try:
-            result = func(*args, **kwargs)
-        except Exception as e:
-            # Handle exceptions if needed
-            connection.rollback()
-            raise e
-        finally:
-            # Commit the changes and close the connection
-            connection.commit()
-            connection.close()
+        # Update the scanneddata table
+        query = f'UPDATE {config.get("sql.db_pdf_table")} SET {set_clause}, modified = CURRENT_TIMESTAMP WHERE id = ?'
+        cursor.execute(query, (*update_values.values(), id))
+        logger.debug(f"Updated database {config.get('sql.db_location')} for id {id} with values {update_values}")
 
-        return result
-
-    return wrapper
+        # Commit the changes and close the connection
+        connection.commit()
+        connection.close()
+    except Exception as ex:
+        logger.exception(f"Error updating database for id {id}: {ex}")

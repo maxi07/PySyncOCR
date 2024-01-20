@@ -1,13 +1,7 @@
-import sqlite3
+from src.helpers.ProcessItem import ItemType, ProcessItem
+from src.webserver.db import update_scanneddata_database
 
-# Connect to the database
-connection = sqlite3.connect('instance/pysyncocr.sqlite')
-
-# Create a cursor object
-cursor = connection.cursor()
-
-cursor.execute('UPDATE scanneddata SET file_status = ?, modified = CURRENT_TIMESTAMP WHERE id = ?', ("Test", 8))
-
-# Commit the changes and close the connection
-connection.commit()
-connection.close()
+item = ProcessItem("testing", ItemType.PDF)
+item.pdf_pages = 3
+item.db_id = 8
+update_scanneddata_database(item.db_id, {"pdf_pages": item.pdf_pages})

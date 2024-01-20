@@ -1,4 +1,5 @@
 import datetime
+import sqlite3
 import time
 import PyPDF2
 from watchdog.observers import Observer
@@ -9,12 +10,10 @@ from src.helpers.config import config
 import os
 from PIL import Image
 from PyPDF2 import PdfReader
-from src.helpers.ProcessItem import ItemType, OCRStatus, ProcessItem, ProcessStatus
-from src.webserver.db import with_database
+from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 from src.helpers.rclone_configManager import RcloneConfig
 import fitz
-from sqlite3 import Cursor
-
+from src.webserver.db import update_scanneddata_database
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -27,8 +26,7 @@ class FileHandler(FileSystemEventHandler):
         super().__init__()
         self.file_queue = file_queue
 
-    @with_database
-    def on_created(self, event, cursor: Cursor):
+    def on_created(self, event):
         """
         Callback method triggered when a file or directory is created.
 
@@ -85,12 +83,18 @@ class FileHandler(FileSystemEventHandler):
 
         # Add the new file to the queue
         try:
+            connection = sqlite3.connect(config.get("sql.db_location"))
+
+            # Create a cursor object
+            cursor = connection.cursor()
             cursor.execute(
                 'INSERT INTO scanneddata (file_name, local_filepath) '
                 'VALUES (?, ?)',
                 (item.filename, item.local_directory_above)
             )
+            connection.commit()
             last_inserted_id = cursor.execute('SELECT last_insert_rowid()').fetchone()[0]
+            connection.close()
             item.db_id = last_inserted_id
         except Exception as e:
             logger.exception(f"Error adding new file to database: {e}")
@@ -100,11 +104,7 @@ class FileHandler(FileSystemEventHandler):
             # Generate preview image
             previewimage_path = f'/static/images/pdfpreview/{last_inserted_id}.jpg'
             self.pdf_to_jpeg(item.local_file_path, "src/webserver" + previewimage_path, 128, 50)
-
-            cursor.execute(
-                'UPDATE scanneddata SET previewimage_path = ? WHERE id = ?',
-                (previewimage_path, last_inserted_id)
-            )
+            update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path})
         except Exception as e:
             logger.exception(f"Error adding preview image to database: {e}")
 
@@ -117,10 +117,7 @@ class FileHandler(FileSystemEventHandler):
                 item.connection = confitem.id
                 item.remote_file_path = confitem.remote
                 item.remote_directory = confitem.remote.split(":")[1]
-                cursor.execute(
-                    'UPDATE scanneddata SET remote_connection_id = ?, remote_filepath = ? WHERE id = ?',
-                    (item.connection, item.remote_directory, last_inserted_id)
-                )
+                update_scanneddata_database(item.db_id, {'remote_connection_id': item.connection,'remote_filepath': item.remote_directory})
             else:
                 logger.warning(f"No matching config item found for {item.local_file_path}. Will continue to OCR but uploading will fail.")
         except Exception as e:
@@ -132,24 +129,11 @@ class FileHandler(FileSystemEventHandler):
                 pdf_reader = PyPDF2.PdfReader(item.local_file_path)
                 item.pdf_pages = len(pdf_reader.pages)
                 logger.debug(f"PDF file has {item.pdf_pages} pages to process")
-                cursor.execute(
-                    'UPDATE scanneddata SET pdf_pages = ? WHERE id = ?',
-                    (item.pdf_pages, last_inserted_id)
-                )
+                update_scanneddata_database(item.db_id, {'pdf_pages': item.pdf_pages})
             except Exception as e:
                 logger.error(f"Error reading PDF file: {item.local_file_path}")
                 logger.exception(e)        
         item.status = ProcessStatus.OCR_PENDING
-
-        try:
-            cursor.execute(
-                    'UPDATE scanneddata SET modified = CURRENT_TIMESTAMP WHERE id = ?',
-                    (last_inserted_id,)
-            )
-        except Exception as ex:
-            logger.exception(f"Failed updating modified time on current database item {ex}")
-
-
         logger.info(f"Added {item.local_file_path} to OCR queue")
         self.file_queue.put(item)
 
@@ -197,6 +181,7 @@ class FileHandler(FileSystemEventHandler):
 
         # Close the PDF document
         pdf_document.close()
+
 
 
 class FolderMonitor:
