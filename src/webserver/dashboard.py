@@ -13,7 +13,7 @@ def index():
         db = get_db()
         page = request.args.get('page', 1, type=int)  # Get pageination from url args
         total_entries = db.execute('SELECT COUNT(*) FROM scanneddata').fetchone()[0]
-        entries_per_page = 10
+        entries_per_page = 12
         total_pages = math.ceil(total_entries / entries_per_page)
         offset = (page - 1) * entries_per_page
         pdfs = db.execute(
