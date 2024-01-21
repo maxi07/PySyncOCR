@@ -16,9 +16,9 @@ def use_backup():
 @pytest.fixture
 def onedrive_conf_setup():
     # Setup
-    config_file = str(config.get("sync_service.root_path"))
+    config_file = str(config.get("sync_service.root_folder"))
     rclone_config = ConfigManager(config_file)
-    rclone_config.add("test1", "test1:", "onedrive")
+    rclone_config.add("test1", "test1", "test2")
 
     # Assert
     # assert os.path.exists(f"{config.get('sync_service.root_folder')}/{local}")
@@ -29,7 +29,7 @@ def onedrive_conf_setup():
 def test_add(use_backup, onedrive_conf_setup):
     id = "test1"
     local = "test1"
-    remote = "test1:test1/"
+    remote = "test2:test1/"
     type = "onedrive"
 
     # assert os.path.exists("$home/PySyncOCR/test1")

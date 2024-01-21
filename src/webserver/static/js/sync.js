@@ -68,7 +68,7 @@ function evaluatePathMappingSubmitButton() {
 
 function deleteOneDriveConf(id) {
     const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', '/settings/onedrive', true);
+    xhr.open('DELETE', '/sync/onedrive', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -141,7 +141,7 @@ function validateTextInput(input) {
 
 function getConnections() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/settings/onedrive', true);
+    xhr.open('GET', '/sync/onedrive', true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status !== 200) {
@@ -178,7 +178,7 @@ function loadOneDriveDir(back=false) {
     loadingAnimation.style.display = "block";
     listgroup.style.display = "none";
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/settings/onedrive-directory', true);
+    xhr.open('POST', '/sync/onedrive-directory', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -324,7 +324,7 @@ function updateSameLevel(path, newDir) {
 
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/settings/pathmapping', true);
+    xhr.open('POST', '/sync/pathmapping', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -406,7 +406,7 @@ function addPathMappingToUI(local, remote, connection) {
 
 function deletePathMapping(id) {
     const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', '/settings/pathmapping', true);
+    xhr.open('DELETE', '/sync/pathmapping', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {

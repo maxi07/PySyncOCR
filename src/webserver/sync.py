@@ -1,17 +1,21 @@
-from flask import Blueprint, jsonify, render_template, request, redirect
-bp = Blueprint('settings', __name__, url_prefix='/settings')
+import math
+from flask import Blueprint, jsonify, render_template, request
+bp = Blueprint('sync', __name__, url_prefix='/sync')
 from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
 from src.helpers.rclone_setup import configure_rclone_onedrive_personal
 from src.helpers.rclone_configManager import RcloneConfig
 from . import sock
+from src.webserver.db import get_db
 import json
 
 @bp.route("/")
 def index():
     try:
-        logger.info("Loading settings...")
+        logger.info("Loading sync...")
         onedrive_configs = dump_config()
+
+        # Get path mappings
         try:
             with open("src/configs/onedrive_sync_config.json", "r") as f:
                 path_mappings = json.load(f)
@@ -28,14 +32,40 @@ def index():
         except Exception as e:
             logger.exception(e)
             path_mappings = {}
-        return render_template('settings.html',
+
+        # Get failed sync documents for table by checking all database
+        try:
+            db = get_db()
+            page_failed_pdfs = request.args.get('page_failed_pdfs', 1, type=int)  # Get pageination from url args
+            total_entries = db.execute('SELECT COUNT(*) FROM scanneddata WHERE LOWER(file_status) LIKE "%failed%"').fetchone()[0]
+            entries_per_page = 20
+            total_pages_failed_pdfs = math.ceil(total_entries / entries_per_page)
+            offset = (page_failed_pdfs - 1) * entries_per_page
+            failed_pdfs = db.execute(
+            'SELECT * FROM scanneddata '
+            'WHERE LOWER(file_status) LIKE "%failed%" '
+            'ORDER BY created DESC '
+            'LIMIT :limit OFFSET :offset',
+            {'limit': entries_per_page, 'offset': offset}
+            ).fetchall()
+        except Exception as ex:
+            logger.exception(f"Failed retrieving failed pdfs. {ex}")
+            failed_pdfs = []
+        
+        return render_template('sync.html',
                                onedrive_configs=onedrive_configs,
-                               path_mappings=path_mappings)
+                               path_mappings=path_mappings,
+                               failed_pdfs=failed_pdfs,
+                               total_pages_failed_pdfs=total_pages_failed_pdfs,
+                               page_failed_pdfs=page_failed_pdfs)
     except Exception as e:
         logger.exception(e)
-        return render_template('settings.html',
+        return render_template('sync.html',
                                onedrive_configs={},
-                               path_mappings={})
+                               path_mappings={},
+                               failed_pdfs=[],
+                               total_pages_failed_pdfs=0,
+                               page_failed_pdfs=1)
     
 @bp.delete("/onedrive")
 def deleteOneDriveConf():

@@ -1,4 +1,5 @@
 import platform
+import re
 from src.helpers.logger import logger
 import sys
 import subprocess
@@ -21,6 +22,7 @@ def check_install():
     check_and_install("python3", "python3")
     check_and_install("pip", "pip")
     check_and_install("OCRmyPDF", "ocrmypdf")
+    check_and_install("Tesseract German Language Pack", "tesseract-ocr-deu", True)
     check_and_install("RClone", "rclone")
     check_and_install("autotools-dev", "autotools-dev", True)
     check_and_install("automake", "automake")
@@ -84,7 +86,18 @@ def is_installed_linux(tool_name, is_package=False):
     """
     try:
         if is_package:
-            result = subprocess.run(["dpkg", "-s", tool_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True).stdout.decode('utf-8').strip().split('\n')[8]
+            result = subprocess.run(["dpkg", "-s", tool_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True).stdout.decode('utf-8')
+            # Define a regular expression to match the version number
+            version_pattern = re.compile(r"Version:\s+(\S+)")
+
+            # Find the version number in the sample output
+            match = version_pattern.search(result)
+
+            # Check if a match is found
+            if match:
+                result = match.group(1)
+            else:
+                logger.warning(f"Version number not found in the sample output for {tool_name}.")
         else:
             result = subprocess.run([tool_name, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             version = result.stdout.decode('utf-8').strip().split('\n')[0]

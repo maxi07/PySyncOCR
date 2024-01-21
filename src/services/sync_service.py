@@ -41,7 +41,7 @@ class SyncService:
                     res = upload_file(item.ocr_file, join(confitem.remote, item.filename.replace("_OCR", "")))  # Remove the "_OCR" from the filepath
                     if res == False:
                         item.status = ProcessStatus.SYNC_FAILED
-                        self.move_to_failed(item.local_file_path)
+                        self.move_to_failed(item)
                     else:
                         item.status = ProcessStatus.COMPLETED
                         if os.path.exists(item.local_file_path.replace("_OCR", "")):
@@ -50,20 +50,20 @@ class SyncService:
             except Exception as ex:
                 logger.exception(f"Failed syncing {item.local_file_path}: {ex}")
                 item.status = ProcessStatus.SYNC_FAILED
-                self.move_to_failed(item.local_file_path)
+                self.move_to_failed(item)
             finally:
                 item.time_finished = datetime.now()
                 update_scanneddata_database(item.db_id, {"file_status": item.status.value})
                 self.file_queue.task_done()
 
-    def move_to_failed(self, file_path: str):
+    def move_to_failed(self, item: ProcessItem):
         try:
             failed_dir = config.get_filepath('sync_service.failed_dir')
             if not os.path.exists(failed_dir):
                 os.mkdir(failed_dir)
-            logger.debug(f"Moving file {file_path} to failed directory at {join(failed_dir, os.path.basename(file_path))}")
-            move(file_path, join(failed_dir, os.path.basename(file_path)))
+            logger.debug(f"Moving file {item.local_file_path} to failed directory at {join(failed_dir, os.path.basename(item.local_file_path))}")
+            move(item.local_file_path, join(failed_dir, os.path.basename(item.local_file_path)))
         except Exception as ex:
-            logger.exception(f"Failed moving item from {file_path} to {str(config.get_filepath('sync_service.failed_dir'))}")
+            logger.exception(f"Failed moving item from {item.local_file_path} to {str(config.get_filepath('sync_service.failed_dir'))}")
 
 logger.debug(f"Loaded {__name__} module")

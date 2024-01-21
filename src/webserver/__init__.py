@@ -33,10 +33,11 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
 
-    from . import settings, dashboard
+    from . import dashboard
+    from . import sync
     app.register_blueprint(root.bp)
     app.register_blueprint(dashboard.bp)
-    app.register_blueprint(settings.bp)
+    app.register_blueprint(sync.bp)
     logger.debug(f"Registered blueprints with routes {app.url_map}")
     logger.info("Started FLASK server")
     return app
