@@ -441,3 +441,33 @@ function editPathMapping(id) {
     optionElement.textContent = document.getElementById(id + "_remote_pathmapping").innerText.split(":")[0];
     connection.appendChild(optionElement);
 }
+
+function deleteFailedSync(id) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('DELETE', '/sync/failedpdf', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status!== 200) {
+                console.error(xhr.responseText);
+                alert(xhr.responseText);
+            } else {
+                console.log(xhr.responseText);
+                const row = document.getElementById(id + '_failedpdf_row'); 
+                // Fade animation
+                row.style.transition = 'opacity 1.5s';
+                row.style.opacity = 0;
+
+                // Remove after fade
+                setTimeout(() => {
+                row.remove(); 
+                }, 500);
+            };
+        };
+    }
+    xhr.send(JSON.stringify({ "id": id }));
+}
+
+function downloadFailedSync(id) {
+    window.open("/sync/failedpdf?download_id=" + id);
+}

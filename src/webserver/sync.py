@@ -1,5 +1,5 @@
 import math
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, send_file
 bp = Blueprint('sync', __name__, url_prefix='/sync')
 from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
@@ -7,7 +7,9 @@ from src.helpers.rclone_setup import configure_rclone_onedrive_personal
 from src.helpers.rclone_configManager import RcloneConfig
 from . import sock
 from src.webserver.db import get_db
+from src.helpers.config import config
 import json
+import os
 
 @bp.route("/")
 def index():
@@ -164,3 +166,68 @@ def deletePathMapping():
     except Exception as ex:
         logger.exception(ex)
         return "Failed deleting mapping. " + ex, 500
+    
+@bp.delete("/failedpdf")
+def deleteFailedPDF():
+    db = get_db()
+    try:
+        json_data = request.get_json()
+        if not json_data:
+            logger.warning("No data received!")
+            return "No data received!", 400
+        else:
+            logger.info(f"Received data to delete: {json_data}")
+            
+            item_name = db.execute(
+            'SELECT file_name FROM scanneddata '
+            'WHERE id = :id',
+            {'id': json_data['id']}
+            ).fetchone()[0]
+            logger.info(f"Removing {os.path.join(config.get_filepath('sync_service.failed_dir'), item_name)}")
+            os.remove(os.path.join(config.get_filepath("sync_service.failed_dir"), item_name))
+            db = get_db()
+            db.execute(
+                f'UPDATE {config.get("sql.db_pdf_table")} SET file_status = :status, modified = CURRENT_TIMESTAMP WHERE id = :id',
+                {'status': 'Deleted', 'id': json_data['id']}
+            )
+            db.commit()
+            db.close()
+            return f"Success deleting {item_name}", 200
+    except Exception as ex:
+        logger.exception(f"Error deleting file: {ex}")
+        return "Failed deleting requested item", 500
+    finally:
+        db.close()
+
+@bp.get("/failedpdf")
+def downloadFailedPDF():
+    try:
+        download_id = int(request.args.get('download_id'))
+        if download_id is None or download_id <=0:
+            logger.warning(f"Downloading failed PDF with id {download_id}, invalid id")
+            return "Invalid download id", 400
+        logger.info(f"Downloading failed PDF... with id {download_id}")
+
+        # Get name in os from sql db
+        db = get_db()
+        item_name = db.execute(
+            'SELECT file_name FROM scanneddata '
+            'WHERE id = :id',
+            {'id': download_id}
+            ).fetchone()[0]
+
+        # Check if file exists
+        file_path = os.path.join(config.get_filepath("sync_service.failed_dir"), item_name)
+        logger.debug(f"Checking if file exists: {file_path}")
+        if not os.path.isfile(file_path):
+            logger.warning(f"Downloading failed PDF with id {download_id}, file does not exist")
+            return "File does not exist", 404
+        else:
+            logger.info(f"Downloading failed PDF with id {download_id}, file exists")
+            return send_file(file_path, as_attachment=True)
+    except ValueError:
+        logger.warning(f"Downloading failed PDF with id {download_id}, invalid id")
+        return "Invalid download id", 400
+    except Exception as ex:
+        logger.exception(f"Failed downloading PDF: {ex}")
+        return "Failed downloading PDF", 500

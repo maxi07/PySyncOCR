@@ -111,7 +111,7 @@
             </thead>
             <tbody>
                 {% for item in failed_pdfs %}
-                <tr id="{{ item.id }}_row">
+                <tr id="{{ item.id }}_failedpdf_row">
                     <td class="d-none d-sm-table-cell"><img src="{{ item.previewimage_path }}" alt="Preview" class="img-fluid" style="max-width: 200px; height:30px;"></td>
                     <td class="overflow-hidden">{{ item.file_name }}</td>
                     <td class="d-none d-sm-table-cell">{{ item.remote_filepath }}</td>
