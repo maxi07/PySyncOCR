@@ -8,8 +8,8 @@
 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     {% for pdf in pdfs %}
     <div class="col" id="{{ pdf.id }}_pdf_card">
-        <div class="card .h-100">
-            <div id="{{ pdf.id }}_pdf_card_image" class="bg-light text-center p-3">
+        <div class="card rounded .h-100">
+            <div id="{{ pdf.id }}_pdf_card_image" class="bg-light text-center p-3 rounded-top">
                 <span class="position-absolute top-0 end-0 badge bg-secondary"
                     style="margin-top: 10px; margin-right: 10px;">
                     {{ pdf.pdf_pages }}
@@ -27,8 +27,6 @@
                 </svg>
                 {% endif %}
             </div>
-
-            <hr>
             <div class="card-body">
                 <h5 class="card-title">{{ pdf.file_name }}</h5>
                 <p><i class="bi bi-clock"></i><strong> Created:</strong> {{ pdf.created }}<br>

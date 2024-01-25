@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg border-body bg-dark" data-bs-theme="dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">PySyncOCR</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -30,16 +30,33 @@
                     </li>
                 </ul>
                 <span class="navbar-text">
-                    by Maximilian Krause
+                    by Maximilian Krause<br>
                 </span>
             </div>
         </div>
     </nav>
-    <br>
-    <div class="container">
-        {% block content %}
-        {% endblock %}
-        <br>
+    <div style="background: rgb(2,170,189);
+    background: linear-gradient(133deg, rgba(2,170,189,1) 0%, rgba(0,205,172,1) 100%);color: white;">
+        <div class="container">
+            <br>
+            {% block content %}
+            {% endblock %}
+            <br>
+        </div>
+
+        <footer class="footer text-light rounded-top p-2" style="background-color: rgba(0, 0, 0, 0.6)">
+            <div class="container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col">
+                        Version 1.0
+                    </div>
+                    <div class="col-auto">
+                        <a href="https://github.com/maxi07" style="color: white; font-size: 1.5rem;"><i class="bi bi-github"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        
     </div>
 
     <script>
@@ -69,5 +86,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
         integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 </body>
+
 
 </html>
