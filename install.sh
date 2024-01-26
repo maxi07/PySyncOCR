@@ -2,7 +2,7 @@
 
 # Set the paths and configurations
 APP_DIR="$(pwd)"
-VENV_DIR="$APP_DIR/venv"
+VENV_DIR="$APP_DIR/.venv"
 MAIN_FILE="$APP_DIR/main.py"
 SERVICE_NAME="PySyncOCR"
 
