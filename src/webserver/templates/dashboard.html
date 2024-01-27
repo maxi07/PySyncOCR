@@ -87,7 +87,7 @@
                     <dotlottie-player id="welcome_lottie_player" src="https://lottie.host/d349819a-96e8-474c-a312-af3246e43da9/sSjLLuMZxT.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></dotlottie-player>
                 </div>
 
-                <p>Welcome to <strong>PySyncvOCR</strong>.<br>
+                <p>Welcome to <strong>PySyncOCR</strong>.<br>
                     Start by adding a new OneDrive connection over at the sync
                     menu. Next, create your first SMB target and connect it with a folder on your OneDrive with <i>Path
                         Mappings.</i></p>
@@ -112,6 +112,7 @@
 {% endif %}
 <script>
     var pdfsData = JSON.parse('{{ pdfs | tojson | safe }}');
+    var entries_per_page = parseInt('{{ entries_per_page }}')
 </script>
 <script src="/static/js/dashboard.js"></script>
 {% endblock %}

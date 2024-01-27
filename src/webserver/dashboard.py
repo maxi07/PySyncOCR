@@ -53,10 +53,10 @@ def index():
                     pdf['modified'] = input_datetime_modified.strftime('%d.%m.%Y %H:%M')
                 except Exception as ex:
                     logger.exception(f"Failed setting datetime for {pdf['id']}. {ex}")
-        return render_template('dashboard.html', pdfs=pdfs_dicts, total_pages=total_pages, page=page, first_use=first_use)
+        return render_template('dashboard.html', pdfs=pdfs_dicts, total_pages=total_pages, page=page, first_use=first_use, entries_per_page=entries_per_page)
     except Exception as e:
         logger.exception(e)
-        return render_template("dashboard.html", pdfs=[], total_pages=0, page=1, first_use=False)
+        return render_template("dashboard.html", pdfs=[], total_pages=0, page=1, first_use=False, entries_per_page=12)
     
 
 @sock.route("/websocket")

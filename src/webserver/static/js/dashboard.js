@@ -90,7 +90,7 @@ function addPdfCard(pdfData) {
 
     var cardDiv = document.createElement('div');
     cardDiv.id = pdfData.id + '_pdf_card';
-    cardDiv.classList.add('card', 'rounded', '.h-100');
+    cardDiv.classList.add('card', 'rounded', 'h-100');
 
     var imageDiv = document.createElement('div');
     imageDiv.id = pdfData.id + '_pdf_card_image';
@@ -199,8 +199,8 @@ function addPdfCard(pdfData) {
     colDiv.appendChild(cardDiv);
 
     var pdfGrid = document.getElementById("pdfs_grid");
-    if (pdfGrid.children.length >= 12) {
-        pdfGrid.removeChild(pdfGrid.lastChild);
+    if (pdfGrid.children.length >= entries_per_page) {
+        pdfGrid.removeChild(pdfGrid.lastElementChild);
         console.log("Removed last child");
     }
     // Append the card to the container
