@@ -9,39 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <style>
-        h1:not(.modal-title), h2, h3, p:not(.card) {color:white;}
-        .card p {color: initial;}
-        html, body {height:100%; margin: 0;}
-        
-        .content-wrapper {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        .navbar {
-            flex: 0 0 auto; /* Fixed height for the navbar */
-        }
-        
-        .content {
-            flex: 1; /* Expand to fill remaining height */
-            background: linear-gradient(133deg, rgba(2,170,189,1) 0%, rgba(0,205,172,1) 100%);
-            color: white;
-            padding-bottom: 70px; /* Adjust to match the height of the footer */
-        }
-        
-        .footer {
-            width: auto;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 1rem 0; /* Adjust padding as needed */
-            margin-top: -50px; /* Negative margin equal to the footer height */
-            height: 50px;
-        }
-        
-    </style>
-</head>
+    <link rel="stylesheet" type="text/css" href="/static/css/base.css"></head>
 
 <body>
     <div class="content-wrapper">
@@ -94,6 +62,26 @@
         </footer>
     </div>
 
+
+    <script>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            // Get the current page URL without any parameters
+            var currentPage = window.location.href.split('?')[0];
+
+            // Remove the active class from all navigation links
+            $("#navbarSupportedContent a").removeClass("active");
+
+            // Check each navigation link and set the active class accordingly
+            $("#navbarSupportedContent a").each(function () {
+                var linkHref = $(this).attr("href");
+
+                // Check if the current page URL ends with the linkHref
+                if (currentPage.endsWith(linkHref)) {
+                    $(this).closest("a").addClass("active");
+                }
+            });
+        });        
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"

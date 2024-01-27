@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, request, redirect, g
+from flask import Blueprint, render_template, request, g
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 from src.helpers.logger import logger
 from src.webserver.db import get_db
