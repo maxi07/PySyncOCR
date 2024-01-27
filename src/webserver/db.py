@@ -4,7 +4,7 @@ from flask import current_app, g
 from src.helpers.logger import logger
 from src.helpers.config import config
 def get_db():
-    logger.info("Creating database connection")
+    logger.debug("Creating database connection")
     if 'db' not in g:
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
@@ -16,7 +16,7 @@ def get_db():
 
 
 def close_db(e=None):
-    logger.info("Closing database connection")
+    logger.debug("Closing database connection")
     db = g.pop('db', None)
 
     if db is not None:
@@ -40,14 +40,14 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
 
-def update_scanneddata_database(id: int, update_values: dict):
+def update_scanneddata_database(id: int, update_values: dict, websocketQueue = None):
     try:
         # Connect to the database
         connection = sqlite3.connect(config.get("sql.db_location"))
 
         # Create a cursor object
         cursor = connection.cursor()
-        logger.debug(f"Received values: {update_values} with keys {update_values.keys()}")
+        logger.debug(f"Received values: {update_values} with keys {update_values.keys()} to update SQL db for id {id}")
 
         # Construct the SET part of the query dynamically based on the dictionary
         set_clause = ', '.join(f'{key} = ?' for key in update_values.keys())
@@ -60,5 +60,11 @@ def update_scanneddata_database(id: int, update_values: dict):
         # Commit the changes and close the connection
         connection.commit()
         connection.close()
+
+        if websocketQueue is None:
+            logger.warning("Websocket queue is None, did we forget to pass it to the function?")
+        else:
+            logger.debug(f"Updated websocket queue with update command for id {id}")
+            websocketQueue.put({"command": "update", "id": id})
     except Exception as ex:
         logger.exception(f"Error updating database for id {id}: {ex}")

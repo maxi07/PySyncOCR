@@ -110,7 +110,7 @@ def getOneDriveDirectories():
 
     
 @sock.route("/websocket-onedrive")
-def websocket(ws):
+def websocket_onedrive(ws):
     while True:
         data = ws.receive()
         if data is None:

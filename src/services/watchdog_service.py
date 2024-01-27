@@ -22,9 +22,10 @@ class FileHandler(FileSystemEventHandler):
     Attributes:
         file_queue (Queue): A queue to store the paths of newly created files.
     """
-    def __init__(self, file_queue: Queue):
+    def __init__(self, file_queue: Queue, websocket_messages_queue: Queue):
         super().__init__()
         self.file_queue = file_queue
+        self.websocket_messages_queue = websocket_messages_queue
 
     def on_created(self, event):
         """
@@ -100,11 +101,13 @@ class FileHandler(FileSystemEventHandler):
             logger.exception(f"Error adding new file to database: {e}")
             last_inserted_id = None
         
+        self.websocket_messages_queue.put({"command": "add", "id": item.db_id})
+
         try:
             # Generate preview image
             previewimage_path = f'/static/images/pdfpreview/{last_inserted_id}.jpg'
             self.pdf_to_jpeg(item.local_file_path, "src/webserver" + previewimage_path, 128, 50)
-            update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path})
+            update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path}, self.websocket_messages_queue)
         except Exception as e:
             logger.exception(f"Error adding preview image to database: {e}")
 
@@ -117,7 +120,7 @@ class FileHandler(FileSystemEventHandler):
                 item.connection = confitem.id
                 item.remote_file_path = confitem.remote
                 item.remote_directory = confitem.remote.split(":")[1]
-                update_scanneddata_database(item.db_id, {'remote_connection_id': item.connection,'remote_filepath': item.remote_directory})
+                update_scanneddata_database(item.db_id, {'remote_connection_id': item.connection,'remote_filepath': item.remote_directory}, self.websocket_messages_queue)
             else:
                 logger.warning(f"No matching config item found for {item.local_file_path}. Will continue to OCR but uploading will fail.")
         except Exception as e:
@@ -129,7 +132,7 @@ class FileHandler(FileSystemEventHandler):
                 pdf_reader = PyPDF2.PdfReader(item.local_file_path)
                 item.pdf_pages = len(pdf_reader.pages)
                 logger.debug(f"PDF file has {item.pdf_pages} pages to process")
-                update_scanneddata_database(item.db_id, {'pdf_pages': item.pdf_pages})
+                update_scanneddata_database(item.db_id, {'pdf_pages': item.pdf_pages}, self.websocket_messages_queue)
             except Exception as e:
                 logger.error(f"Error reading PDF file: {item.local_file_path}")
                 logger.exception(e)        
@@ -194,11 +197,12 @@ class FolderMonitor:
         event_handler (FileHandler): The custom file event handler.
         observer (Observer): The watchdog observer.
     """
-    def __init__(self, root_folder: str, file_queue: Queue):
+    def __init__(self, root_folder: str, file_queue: Queue, websocket_messages_queue: Queue):
         self.root_folder = root_folder
         self.file_queue = file_queue
-        self.event_handler = FileHandler(self.file_queue)
+        self.event_handler = FileHandler(self.file_queue, websocket_messages_queue)
         self.observer = Observer()
+        self.websocket_messages_queue = websocket_messages_queue
 
     def start_monitoring(self):
         """

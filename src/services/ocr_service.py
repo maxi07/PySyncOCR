@@ -11,9 +11,10 @@ from src.webserver.db import update_scanneddata_database
 
 
 class OcrService:
-    def __init__(self, ocr_queue: Queue, sync_queue: Queue):
+    def __init__(self, ocr_queue: Queue, sync_queue: Queue, websocket_messages_queue: Queue):
         self.ocr_queue = ocr_queue
         self.sync_queue = sync_queue
+        self.websocket_messages_queue = websocket_messages_queue
 
     def start_processing(self):
         logger.info("Started OCR service")
@@ -22,7 +23,7 @@ class OcrService:
             if item is None:  # Exit command
                 break
             item.status = ProcessStatus.OCR
-            update_scanneddata_database(item.db_id, {"file_status": item.status.value})
+            update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
             item.time_ocr_started = datetime.now()
 
             logger.info(f"Processing file with OCR: {item.local_file_path}")
@@ -59,7 +60,7 @@ class OcrService:
             finally:
                 item.time_ocr_finished = datetime.now()
                 item.status = ProcessStatus.SYNC_PENDING
-                update_scanneddata_database(item.db_id, {"file_status": item.status.value})
+                update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
                 self.sync_queue.put(item)
 
             self.ocr_queue.task_done()

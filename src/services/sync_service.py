@@ -11,8 +11,9 @@ from datetime import datetime
 from src.webserver.db import update_scanneddata_database
 
 class SyncService:
-    def __init__(self, file_queue: Queue):
+    def __init__(self, file_queue: Queue, websocket_messages_queue: Queue):
         self.file_queue = file_queue
+        self.websocket_messages_queue = websocket_messages_queue
 
     def start_processing(self):
         logger.info("Started Sync service")
@@ -23,7 +24,7 @@ class SyncService:
             item.status = ProcessStatus.SYNC
             item.time_upload_started = datetime.now()
 
-            update_scanneddata_database(item.db_id, {"file_status": item.status.value})
+            update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
 
             try:             
                 logger.info(f"Received new item for upload: {item.ocr_file}")
@@ -53,7 +54,7 @@ class SyncService:
                 self.move_to_failed(item)
             finally:
                 item.time_finished = datetime.now()
-                update_scanneddata_database(item.db_id, {"file_status": item.status.value})
+                update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
                 self.file_queue.task_done()
 
     def move_to_failed(self, item: ProcessItem):

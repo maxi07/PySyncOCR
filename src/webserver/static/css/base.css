@@ -1,11 +1,15 @@
 h1:not(.modal-title),
 h2,
 h3,
-p:not(.card) {
+p {
     color: white;
 }
 
 .card p {
+    color: initial;
+}
+
+.modal p {
     color: initial;
 }
 
