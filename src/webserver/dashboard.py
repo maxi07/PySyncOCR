@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, render_template, request, redirect, g
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 from src.helpers.logger import logger
 from src.webserver.db import get_db
+from src.helpers.config import config
 import locale
 from datetime import datetime
 import math
@@ -31,6 +32,10 @@ def index():
 
         # Convert sqlite3.Row objects to dictionaries
         pdfs_dicts = [dict(pdf) for pdf in pdfs]
+
+        # Get first use flag
+        first_use = bool(config.get("web_service.first_use"))
+        config.set("web_service.first_use", False)
         for pdf in pdfs_dicts:
             try:
                 input_datetime_created = datetime.strptime(pdf['created'], "%Y-%m-%d %H:%M:%S")
@@ -39,8 +44,8 @@ def index():
                 pdf['modified'] = input_datetime_modified.strftime('%d.%m.%Y %H:%M')
             except Exception as ex:
                 logger.exception(f"Failed setting datetime for {pdf['id']}. {ex}")
-        return render_template('dashboard.html', pdfs=pdfs_dicts, total_pages=total_pages, page=page)
+        return render_template('dashboard.html', pdfs=pdfs_dicts, total_pages=total_pages, page=page, first_use=first_use)
     except Exception as e:
         logger.exception(e)
-        return render_template("dashboard.html", pdfs=[], total_pages=0, page=1)
+        return render_template("dashboard.html", pdfs=[], total_pages=0, page=1, first_use=False)
     

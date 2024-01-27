@@ -41,7 +41,6 @@
 </div>
 <br>
 <!-- Pagination -->
-<!-- Pagination -->
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
 
@@ -64,29 +63,29 @@
         {% endif %}
 
         <!-- Numbered Pages -->
-        {% for page_num in range(1, total_pages + 1) if page - 5 <= page_num <= page + 5 %}
-        <li class="page-item {% if page_num == page %}active{% endif %}">
+        {% for page_num in range(1, total_pages + 1) if page - 5 <= page_num <=page + 5 %} <li
+            class="page-item {% if page_num == page %}active{% endif %}">
             <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-        </li>
-        {% endfor %}
+            </li>
+            {% endfor %}
 
-        <!-- Next Button -->
-        {% if page != total_pages %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page + 1 }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-        {% endif %}
+            <!-- Next Button -->
+            {% if page != total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page + 1 }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
 
-        <!-- Last Page Button -->
-        {% if page != total_pages %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ total_pages }}" aria-label="Last">
-                <span aria-hidden="true">&raquo;&raquo;</span>
-            </a>
-        </li>
-        {% endif %}
+            <!-- Last Page Button -->
+            {% if page != total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ total_pages }}" aria-label="Last">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
 
     </ul>
 </nav>
@@ -97,10 +96,46 @@
 <h2>Welcome!</h2>
 <p>There is nothing to see here yet until you start scanning your first PDF.</p>
 <div class="d-flex align-items-center justify-content-center">
-    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs"
-        type="module"></script>
     <dotlottie-player src="https://lottie.host/f3c4dbf0-a5bb-4320-92b6-ed55bb062ae3/jw3qzh8A0X.json"
         background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></dotlottie-player>
 </div>
+{% endif %}
+
+
+<!-- Welcome modal-->
+<div class="modal fade" id="welcome_modal" tabindex="-1" style="color: black;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Welcome</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center align-items-center">
+                    <dotlottie-player src="https://lottie.host/d349819a-96e8-474c-a312-af3246e43da9/sSjLLuMZxT.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></dotlottie-player>
+                </div>
+
+                <p>Welcome to <strong>PySyncvOCR</strong>.<br>
+                    Start by adding a new OneDrive connection over at the sync
+                    menu. Next, create your first SMB target and connect it with a folder on your OneDrive with <i>Path
+                        Mappings.</i></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" id="goto_sync_button" class="btn btn-primary" onclick="location.href='/sync'">Add
+                    OneDrive</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% if first_use %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modal = document.getElementById('welcome_modal');
+        var bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    });
+</script>
 {% endif %}
 {% endblock %}
