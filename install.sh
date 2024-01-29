@@ -40,6 +40,9 @@ source "$VENV_DIR/bin/activate" || log_error_and_exit "Failed to activate virtua
 log_message "Installing dependencies..."
 pip install -r requirements.txt || log_error_and_exit "Failed to install dependencies."
 
+log_message "Initializing database..."
+flask --app src/webserver init-db || log_error_and_exit "Failed to initialize database."
+
 # Create systemd service file
 log_message "Creating systemd service file..."
 SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
