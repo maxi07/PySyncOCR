@@ -1,5 +1,6 @@
-![PySyncLogo Dark](src/webserver/static/images/PySyncOCR_logos_white.png#gh-dark-mode-only)
-![PySyncLogo Dark](src/webserver/static/images/PySyncOCR_logos_dark.png#gh-light-mode-only)
+<img src="src/webserver/static/images/PySyncOCR_logos_white.png#gh-dark-mode-only" width="30%">
+<img src="src/webserver/static/images/PySyncOCR_logos_black.png#gh-light-mode-only" width="30%">
+
 Welcome to PySyncOCR, a Python app that will
 - Create a SMB server with custom targets
 - OCR any new document in ENG and GER
