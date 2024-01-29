@@ -11,6 +11,7 @@ from src.helpers.config import config
 import json
 import os
 
+
 @bp.route("/")
 def index():
     try:
@@ -44,16 +45,16 @@ def index():
             total_pages_failed_pdfs = math.ceil(total_entries / entries_per_page)
             offset = (page_failed_pdfs - 1) * entries_per_page
             failed_pdfs = db.execute(
-            'SELECT * FROM scanneddata '
-            'WHERE LOWER(file_status) LIKE "%failed%" '
-            'ORDER BY created DESC '
-            'LIMIT :limit OFFSET :offset',
-            {'limit': entries_per_page, 'offset': offset}
+                'SELECT * FROM scanneddata '
+                'WHERE LOWER(file_status) LIKE "%failed%" '
+                'ORDER BY created DESC '
+                'LIMIT :limit OFFSET :offset',
+                {'limit': entries_per_page, 'offset': offset}
             ).fetchall()
         except Exception as ex:
             logger.exception(f"Failed retrieving failed pdfs. {ex}")
             failed_pdfs = []
-        
+
         return render_template('sync.html',
                                onedrive_configs=onedrive_configs,
                                path_mappings=path_mappings,
@@ -68,7 +69,8 @@ def index():
                                failed_pdfs=[],
                                total_pages_failed_pdfs=0,
                                page_failed_pdfs=1)
-    
+
+
 @bp.delete("/onedrive")
 def deleteOneDriveConf():
     try:
@@ -86,7 +88,8 @@ def deleteOneDriveConf():
     except Exception as ex:
         logger.exception(ex)
         return "Failed deleting requested item", 500
-    
+
+
 @bp.get("/onedrive")
 def getOneDriveRemotes():
     try:
@@ -96,7 +99,8 @@ def getOneDriveRemotes():
     except Exception as ex:
         logger.exception(ex)
         return "Failed retrieving remotes", 500
-    
+
+
 @bp.post("/onedrive-directory")
 def getOneDriveDirectories():
     try:
@@ -108,7 +112,7 @@ def getOneDriveDirectories():
         logger.exception(ex)
         return "Failed retrieving remotes", 500
 
-    
+
 @sock.route("/websocket-onedrive")
 def websocket_onedrive(ws):
     while True:
@@ -166,7 +170,8 @@ def deletePathMapping():
     except Exception as ex:
         logger.exception(ex)
         return "Failed deleting mapping. " + ex, 500
-    
+
+
 @bp.delete("/failedpdf")
 def deleteFailedPDF():
     db = get_db()
@@ -177,11 +182,11 @@ def deleteFailedPDF():
             return "No data received!", 400
         else:
             logger.info(f"Received data to delete: {json_data}")
-            
+
             item_name = db.execute(
-            'SELECT file_name FROM scanneddata '
-            'WHERE id = :id',
-            {'id': json_data['id']}
+                'SELECT file_name FROM scanneddata '
+                'WHERE id = :id',
+                {'id': json_data['id']}
             ).fetchone()[0]
             logger.info(f"Removing {os.path.join(config.get_filepath('sync_service.failed_dir'), item_name)}")
             os.remove(os.path.join(config.get_filepath("sync_service.failed_dir"), item_name))
@@ -199,11 +204,12 @@ def deleteFailedPDF():
     finally:
         db.close()
 
+
 @bp.get("/failedpdf")
 def downloadFailedPDF():
     try:
         download_id = int(request.args.get('download_id'))
-        if download_id is None or download_id <=0:
+        if download_id is None or download_id <= 0:
             logger.warning(f"Downloading failed PDF with id {download_id}, invalid id")
             return "Invalid download id", 400
         logger.info(f"Downloading failed PDF... with id {download_id}")

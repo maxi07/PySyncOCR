@@ -1,4 +1,3 @@
-from typing import List
 from src.helpers.logger import logger
 import subprocess
 import json
@@ -36,10 +35,10 @@ def list_remotes() -> list[str]:
 
 def list_folders(connection: str, folder=None) -> dict | None:
     if folder is None:
-        command = ['rclone', 'lsf', connection, f"--dirs-only", "--recursive", "--max-depth", "2"]
+        command = ['rclone', 'lsf', connection, "--dirs-only", "--recursive", "--max-depth", "2"]
         logger.debug(f"Calling {' '.join(command)}")
     else:
-        command = ['rclone', 'lsf', connection + folder, f"--dirs-only", "--recursive", "--max-depth", "2"]
+        command = ['rclone', 'lsf', connection + folder, "--dirs-only", "--recursive", "--max-depth", "2"]
         logger.debug(f"Calling {' '.join(command)}")
 
     try:
@@ -57,7 +56,7 @@ def list_folders(connection: str, folder=None) -> dict | None:
                 for item in lines:
                     parts = item.split("/")
                     top_level_directory = parts[0]
-                    
+
                     if top_level_directory not in directory_dict:
                         directory_dict[top_level_directory] = 0
                     else:
@@ -109,7 +108,7 @@ def remove_folder(connection: str, path: str, foldername: str) -> bool:
         else:
             logger.error(f"Error removing folder at {path + foldername} rclone: {e}")
         return False
-    
+
 
 def upload_file(src_path: str, remote_path: str) -> bool:
     command = ['rclone', 'moveto', src_path, remote_path]
@@ -122,7 +121,7 @@ def upload_file(src_path: str, remote_path: str) -> bool:
     except subprocess.CalledProcessError as e:
         logger.error(f"Error uploading file from {src_path} to {remote_path}: {e}\n{e.stderr.decode()}")
         return False
-    
+
 
 def dump_config():
     command = ['rclone', 'config', 'dump']
@@ -135,7 +134,6 @@ def dump_config():
     except subprocess.CalledProcessError as e:
         logger.error(f"Error dumping rclone config: {e}")
         return None
-logger.debug(f"Loaded {__name__} module")
 
 
 def delete_config_item(id) -> bool:
@@ -148,3 +146,6 @@ def delete_config_item(id) -> bool:
     except subprocess.CalledProcessError as e:
         logger.error(f"Error deleting config item {id} rclone: {e}")
         return False
+
+
+logger.debug(f"Loaded {__name__} module")

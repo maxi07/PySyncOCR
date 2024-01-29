@@ -43,7 +43,7 @@ class Config:
             if value is not None:
                 return join(expanduser('~'), value)
             else:
-                return default          
+                return default
         except Exception as ex:
             logger.exception("Failed reading config", ex)
             return default

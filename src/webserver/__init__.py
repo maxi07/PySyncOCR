@@ -5,6 +5,8 @@ from src.helpers.logger import logger
 from . import root
 
 sock = Sock()
+
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)

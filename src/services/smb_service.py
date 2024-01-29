@@ -1,7 +1,7 @@
 from impacket import smbserver
-import logging
 from src.helpers.logger import logger
 from impacket.ntlm import compute_lmhash, compute_nthash
+
 
 class MySMBServer():
     def __init__(self, settings):
@@ -27,7 +27,7 @@ class MySMBServer():
         except Exception as e:
             logger.error(f"Error during SMB server setup: {e}")
             self.isInitialized = False
-    
+
     def onSessionStart(self, session):
         # You can add custom logic when a new session starts
         logger.info(f"New session started: {session.get_client_name()}")
@@ -38,5 +38,6 @@ class MySMBServer():
             self.server.start()
         else:
             logger.error("Cannot start SMB server as initialization is missing.")
+
 
 logger.debug(f"Loaded {__name__} module")

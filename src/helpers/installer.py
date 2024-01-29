@@ -4,8 +4,8 @@ from src.helpers.logger import logger
 import sys
 import subprocess
 import os
-import ocrmypdf
 import stat
+
 
 def check_install():
     """
@@ -42,7 +42,7 @@ def check_and_install(tool_name, package_name, is_package=False):
     - package_name (str): The name of the package/tool to check and install.
     """
     installed, output = is_installed_linux(package_name, is_package)
-    
+
     if not installed:
         logger.warning(f"{tool_name} is not detected, attempting install")
         install_package_linux(package_name)
@@ -103,13 +103,14 @@ def is_installed_linux(tool_name, is_package=False):
             version = result.stdout.decode('utf-8').strip().split('\n')[0]
             if version is None or len(version) == 0:
                 version = result.stderr.decode('utf-8').strip().split('\n')[0]
-            result = version if version is not None else "unknown"             
+            result = version if version is not None else "unknown"
         return True, result
     except FileNotFoundError:
         return False, ""
     except subprocess.CalledProcessError as e:
         return False, e.stderr.decode('utf-8').strip()
-    
+
+
 def check_jbig2():
     installed, output = is_installed_linux("jbig2")
     if not installed:
@@ -126,7 +127,6 @@ def check_jbig2():
             logger.info("Successfully installed JBIG2")
         except subprocess.CalledProcessError as e:
             logger.error(e.stderr.decode('utf-8').strip())
-
 
     installed, output = is_installed_linux("jbig2")
     if installed:

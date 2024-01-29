@@ -25,7 +25,6 @@ if __name__ == "__main__":
         logger.warning("Running in development mode!")
     check_install()
 
-
     root_folder = config.get_filepath("sync_service.root_folder")
     logger.info(f"Root folder is {root_folder}")
     ocr_queue = Queue()
@@ -50,7 +49,6 @@ if __name__ == "__main__":
     else:
         flask_thread = threading.Thread(target=start_server, name="Flask Service")
 
-
     watchdog_thread.start()
     ocr_thread.start()
     sync_thread.start()
@@ -72,4 +70,3 @@ if __name__ == "__main__":
         sync_queue.join()
         smb_thread.join()
         flask_thread.join()
-

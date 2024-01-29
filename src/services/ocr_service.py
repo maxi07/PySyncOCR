@@ -1,13 +1,11 @@
 from src.helpers.logger import logger
 from queue import Queue
 import ocrmypdf
-import PyPDF2
 from src.helpers.config import config
 from shutil import copy
-from src.helpers.ProcessItem import ProcessItem, ProcessStatus, ItemType, OCRStatus
+from src.helpers.ProcessItem import ProcessItem, ProcessStatus, OCRStatus
 from datetime import datetime
 from src.webserver.db import update_scanneddata_database
-
 
 
 class OcrService:
@@ -27,7 +25,7 @@ class OcrService:
             item.time_ocr_started = datetime.now()
 
             logger.info(f"Processing file with OCR: {item.local_file_path}")
-            
+
             try:
                 result = ocrmypdf.ocr(item.local_file_path, item.ocr_file, output_type='pdf', skip_text=True, rotate_pages=True, jpg_quality=80, png_quality=80, optimize=2, language=["eng", "deu"])
                 logger.info(f"OCR processing completed: {item.local_file_path}")
@@ -64,5 +62,6 @@ class OcrService:
                 self.sync_queue.put(item)
 
             self.ocr_queue.task_done()
+
 
 logger.debug(f"Loaded {__name__} module")

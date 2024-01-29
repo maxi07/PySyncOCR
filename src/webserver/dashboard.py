@@ -1,8 +1,7 @@
 import json
-from flask import Blueprint, render_template, request, g, current_app
+from flask import Blueprint, render_template, request, current_app
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 from src.helpers.logger import logger
-from src.helpers import ProcessItem
 from src.webserver.db import get_db
 from src.helpers.config import config
 import locale
@@ -13,6 +12,7 @@ from . import sock
 import queue
 
 websocket_messages_queue = queue.Queue()
+
 
 @bp.route("/")
 def index():
@@ -43,7 +43,7 @@ def index():
         first_use = bool(config.get("web_service.first_use"))
         if not current_app.debug:
             config.set("web_service.first_use", False)
-        
+
         if len(pdfs_dicts) > 0:
             for pdf in pdfs_dicts:
                 try:
@@ -57,7 +57,7 @@ def index():
     except Exception as e:
         logger.exception(e)
         return render_template("dashboard.html", pdfs=[], total_pages=0, page=1, first_use=False, entries_per_page=12)
-    
+
 
 @sock.route("/websocket")
 def websocket_dashboard(ws):
@@ -65,7 +65,7 @@ def websocket_dashboard(ws):
         try:
             # Check if there's a message in the queue
             # Then check for the command type (add or update) which will later trigger different js functions
-            signal = websocket_messages_queue.get_nowait() # should be of type int (dbid)
+            signal = websocket_messages_queue.get_nowait()  # should be of type int (dbid)
             if "command" in signal:
                 logger.debug(f"Got message from websocket queue with command: {signal['command']}")
             else:

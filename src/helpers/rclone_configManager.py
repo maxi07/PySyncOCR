@@ -22,6 +22,7 @@ The config should look like so:
 ]
 """
 
+
 class ConfigEntry:
     def __init__(self, id: str, local: str, remote: str, type):
         self.id = id
@@ -36,7 +37,7 @@ class ConfigManager:
         self.config_data = self.load_config()
 
     def __len__(self) -> int:
-            return len(self.config_data)
+        return len(self.config_data)
 
     def load_config(self):
         try:
@@ -52,7 +53,6 @@ class ConfigManager:
         except Exception as ex:
             logger.exception(f"Failed loading config from {self.config_file}: {ex}")
             quit()
-        
 
     def save_config(self):
         try:
@@ -73,7 +73,7 @@ class ConfigManager:
 
                 # Add new smb folder
                 try:
-                    os.makedirs(os.path.join(config.get_filepath("smb_service.share_path"),local), exist_ok=True)
+                    os.makedirs(os.path.join(config.get_filepath("smb_service.share_path"), local), exist_ok=True)
                     logger.info(f"Created folder {os.path.join(config.get_filepath('smb_service.share_path'),local)}")
                 except Exception as ex:
                     logger.exception(f"Failed creating folder {os.path.join(config.get_filepath('smb_service.share_path'),local)}:", ex)
@@ -96,7 +96,7 @@ class ConfigManager:
                 self.config_data.remove(entry)
             self.save_config()
             try:
-                os.removedirs(os.path.join(config.get_filepath("smb_service.share_path"),entry.get("local")))
+                os.removedirs(os.path.join(config.get_filepath("smb_service.share_path"), entry.get("local")))
                 logger.info(f"Deleted folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}")
             except Exception as ex:
                 logger.exception(f"Failed deleting folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}", ex)
@@ -113,6 +113,7 @@ class ConfigManager:
             return entries[0] if entries else None
         except Exception as ex:
             logger.exception(f"Failed getting config item: {ex}")
+
 
 RcloneConfig = ConfigManager("src/configs/onedrive_sync_config.json")
 

@@ -2,16 +2,18 @@ from flask import Blueprint, send_file, redirect, url_for
 from src.helpers.logger import logger
 bp = Blueprint('root', __name__)
 
+
 @bp.route('/')
 def index():
     logger.info("Loading index page...")
     return redirect(url_for('dashboard.index'))
 
-bp.get("/static/images/<path:filename>")
+
+@bp.get("/static/images/<path:filename>")
 def serve_image(filename):
     logger.info(f"Serving image {filename}")
     image_path = f'static/images/{filename}'
-    
+
     # Determine mimetype based on file extension
     if filename.lower().endswith('.png'):
         mimetype = 'image/png'

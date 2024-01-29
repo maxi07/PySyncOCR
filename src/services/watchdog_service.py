@@ -1,4 +1,3 @@
-import datetime
 import sqlite3
 import time
 import PyPDF2
@@ -14,6 +13,7 @@ from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 from src.helpers.rclone_configManager import RcloneConfig
 import fitz
 from src.webserver.db import update_scanneddata_database
+
 
 class FileHandler(FileSystemEventHandler):
     """
@@ -37,11 +37,11 @@ class FileHandler(FileSystemEventHandler):
         if event.is_directory:
             logger.debug(f"Ignoring new folder at {event.src_path}")
             return
-        
+
         if "_OCR.pdf" in event.src_path:
             logger.debug(f"Ignoring working _OCR file at {event.src_path}")
             return
-        
+
         if ":Zone.Identifier" in event.src_path:
             logger.debug(f"Ignoring Windows Security File file at {event.src_path}")
             try:
@@ -56,11 +56,10 @@ class FileHandler(FileSystemEventHandler):
             logger.debug(f"Ignoring hidden file at {event.src_path}")
             return
 
-
         if any(substr in event.src_path for substr in [str(config.get("sync_service.failed_dir")), str(config.get("sync_service.original_dir"))]):
             logger.debug(f"Ignoring new file in {event.src_path}")
             return
-        
+
         # Test if file is PDF or image. if neither can be opened, wait five seconds and try again.
         # Repeat this process until a maximum timeout of three minutes is reached
         timeout = 180
@@ -79,8 +78,7 @@ class FileHandler(FileSystemEventHandler):
                 time.sleep(5)
                 if time.time() - start_time > timeout:
                     logger.warning(f"File {event.src_path} is neither a PDF or image file. Skipping.")
-                    return 
-
+                    return
 
         # Add the new file to the queue
         try:
@@ -100,7 +98,7 @@ class FileHandler(FileSystemEventHandler):
         except Exception as e:
             logger.exception(f"Error adding new file to database: {e}")
             last_inserted_id = None
-        
+
         self.websocket_messages_queue.put({"command": "add", "id": item.db_id})
 
         try:
@@ -111,7 +109,6 @@ class FileHandler(FileSystemEventHandler):
         except Exception as e:
             logger.exception(f"Error adding preview image to database: {e}")
 
-        
         try:
             # Matching remote connection
             confitem = RcloneConfig.get(item.local_directory_above)
@@ -120,7 +117,7 @@ class FileHandler(FileSystemEventHandler):
                 item.connection = confitem.id
                 item.remote_file_path = confitem.remote
                 item.remote_directory = confitem.remote.split(":")[1]
-                update_scanneddata_database(item.db_id, {'remote_connection_id': item.connection,'remote_filepath': item.remote_directory}, self.websocket_messages_queue)
+                update_scanneddata_database(item.db_id, {'remote_connection_id': item.connection, 'remote_filepath': item.remote_directory}, self.websocket_messages_queue)
             else:
                 logger.warning(f"No matching config item found for {item.local_file_path}. Will continue to OCR but uploading will fail.")
         except Exception as e:
@@ -135,7 +132,7 @@ class FileHandler(FileSystemEventHandler):
                 update_scanneddata_database(item.db_id, {'pdf_pages': item.pdf_pages}, self.websocket_messages_queue)
             except Exception as e:
                 logger.error(f"Error reading PDF file: {item.local_file_path}")
-                logger.exception(e)        
+                logger.exception(e)
         item.status = ProcessStatus.OCR_PENDING
         logger.info(f"Added {item.local_file_path} to OCR queue")
         self.file_queue.put(item)
@@ -147,7 +144,7 @@ class FileHandler(FileSystemEventHandler):
                 return True
         except (IOError, Image.DecompressionBombError):
             return False
-        
+
     def is_pdf(self, file_path):
         try:
             with open(file_path, "rb") as file:
@@ -157,9 +154,9 @@ class FileHandler(FileSystemEventHandler):
                 else:
                     return False
             return True
-        except Exception as ex:
+        except Exception:
             return False
-        
+
     def pdf_to_jpeg(self, pdf_path: str, output_path: str, target_height=128, compression_quality=50):
         # Open the PDF file
         pdf_document = fitz.open(pdf_path)
@@ -184,7 +181,6 @@ class FileHandler(FileSystemEventHandler):
 
         # Close the PDF document
         pdf_document.close()
-
 
 
 class FolderMonitor:
@@ -230,5 +226,6 @@ class FolderMonitor:
         self.observer.join()
 
         logger.warning("Monitoring service stopped.")
+
 
 logger.debug(f"Loaded {__name__} module")

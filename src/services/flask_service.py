@@ -1,6 +1,8 @@
 from src.webserver import create_app
 from src.helpers.logger import logger
 import subprocess
+
+
 def start_server():
     gunicorn_command = [
         'gunicorn',
@@ -13,6 +15,7 @@ def start_server():
         subprocess.run(gunicorn_command, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error running Gunicorn: {e}")
+
 
 def start_dev_server():
     app = create_app()

@@ -3,6 +3,8 @@ import click
 from flask import current_app, g
 from src.helpers.logger import logger
 from src.helpers.config import config
+
+
 def get_db():
     logger.debug("Creating database connection")
     if 'db' not in g:
@@ -22,6 +24,7 @@ def close_db(e=None):
     if db is not None:
         db.close()
 
+
 def init_db():
     db = get_db()
     logger.info("Initializing database")
@@ -36,11 +39,13 @@ def init_db_command():
     init_db()
     click.echo('Initialized the database.')
 
+
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
 
-def update_scanneddata_database(id: int, update_values: dict, websocketQueue = None):
+
+def update_scanneddata_database(id: int, update_values: dict, websocketQueue=None):
     try:
         # Connect to the database
         connection = sqlite3.connect(config.get("sql.db_location"))

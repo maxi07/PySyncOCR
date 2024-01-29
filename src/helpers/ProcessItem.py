@@ -3,10 +3,11 @@ from enum import Enum
 import os
 from datetime import datetime
 
+
 class ProcessStatus(Enum):
     """Enumeration of possible process statuses.
-    
-    OCR_PENDING: OCR has not yet been run on the item. 
+
+    OCR_PENDING: OCR has not yet been run on the item.
     OCR: OCR is currently running on the item.
     SYNC_PENDING: Item is queued for syncing to remote storage.
     SYNC: Item is currently being synced to remote storage.
@@ -24,17 +25,18 @@ class ProcessStatus(Enum):
     SKIPPED = "Skipped"
     SYNC_FAILED = "Sync Failed"
 
+
 class OCRStatus(Enum):
     """Enumeration of possible OCR statuses.
-    
-    UNKNOWN: OCR status not yet determined.  
+
+    UNKNOWN: OCR status not yet determined.
     PENDING: Item is queued for OCR.
     PROCESSING: OCR is currently running on the item.
-    COMPLETED: OCR completed successfully on the item.  
+    COMPLETED: OCR completed successfully on the item.
     FAILED: OCR failed on the item.
     SKIPPED: Item was skipped and OCR was not performed.
     UNSUPPORTED: Item type is not supported for OCR.
-    DPI_ERROR: Image DPI is too low for accurate OCR.  
+    DPI_ERROR: Image DPI is too low for accurate OCR.
     INPUT_ERROR: Error reading input image/PDF.
     OUTPUT_ERROR: Error writing OCR output file.
     """
@@ -49,13 +51,15 @@ class OCRStatus(Enum):
     INPUT_ERROR = -5
     OUTPUT_ERROR = -6
 
+
 class ItemType(Enum):
     PDF = 1
     IMAGE = 2
     UNKNOWN = 3
 
+
 class ProcessItem:
-    def __init__(self, local_file_path: str, item_type: ItemType, status:ProcessStatus=ProcessStatus.OCR_PENDING):
+    def __init__(self, local_file_path: str, item_type: ItemType, status: ProcessStatus = ProcessStatus.OCR_PENDING):
         try:
             self.local_file_path = local_file_path
             if not os.path.exists(local_file_path):
@@ -65,8 +69,8 @@ class ProcessItem:
                 logger.error(f"Path is not a file: {local_file_path}")
                 return
             if not os.access(local_file_path, os.R_OK):
-                logger.error(f"File is not readable: {local_file_path}") 
-                return         
+                logger.error(f"File is not readable: {local_file_path}")
+                return
         except Exception as e:
             logger.exception(f"Error creating ProcessItem: {e}")
             return
