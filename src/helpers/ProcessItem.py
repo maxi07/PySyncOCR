@@ -59,6 +59,15 @@ class ItemType(Enum):
 
 
 class ProcessItem:
+    """ProcessItem represents an item to be processed for OCR and syncing.
+
+    This class contains metadata and status information about the processing
+    of a file, including the local and remote file paths, OCR status, sync 
+    status, timestamps, etc.
+
+    The __init__ method validates the input file and initializes all the
+    processing metadata attributes.
+    """
     def __init__(self, local_file_path: str, item_type: ItemType, status: ProcessStatus = ProcessStatus.OCR_PENDING):
         try:
             self.local_file_path = local_file_path
