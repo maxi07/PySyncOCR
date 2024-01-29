@@ -1,12 +1,14 @@
 from impacket import smbserver
+import logging
 from src.helpers.logger import logger
 from impacket.ntlm import compute_lmhash, compute_nthash
 
 class MySMBServer():
     def __init__(self, settings):
         logger.info("Initializing SMB server...")
+
         try:
-            self.server = smbserver.SimpleSMBServer()
+            self.server = smbserver.SimpleSMBServer("127.0.0.1")
         except PermissionError:
             logger.error("Cannot start SMB server. Please run the script with appropriate privileges (e.g., use sudo)")
             return
@@ -16,6 +18,8 @@ class MySMBServer():
 
         try:
             self.server.addShare(settings["share_name"].upper(), settings["share_path"], "PySyncOCR Share")
+            self.server.setSMB2Support(True)
+            self.server.setLogFile('')
             lmhash = compute_lmhash(settings["password"])
             nthash = compute_nthash(settings["password"])
             self.server.addCredential(settings["username"], 0, lmhash, nthash)
