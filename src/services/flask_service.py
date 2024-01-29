@@ -1,4 +1,5 @@
 from src.webserver import create_app
+from src.helpers.logger import logger
 import subprocess
 def start_server():
     gunicorn_command = [
@@ -15,4 +16,6 @@ def start_server():
 
 def start_dev_server():
     app = create_app()
+    app.logger.handlers = logger.handlers
+    app.logger.setLevel(logger.level)
     app.run(debug=True, use_reloader=False, threaded=True)

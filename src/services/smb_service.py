@@ -19,7 +19,6 @@ class MySMBServer():
         try:
             self.server.addShare(settings["share_name"].upper(), settings["share_path"], "PySyncOCR Share")
             self.server.setSMB2Support(True)
-            self.server.setLogFile('')
             lmhash = compute_lmhash(settings["password"])
             nthash = compute_nthash(settings["password"])
             self.server.addCredential(settings["username"], 0, lmhash, nthash)
