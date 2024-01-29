@@ -43,6 +43,7 @@ class SyncService:
                     res = upload_file(item.ocr_file, join(confitem.remote, item.filename.replace("_OCR", "")))  # Remove the "_OCR" from the filepath
                     if res is False:
                         item.status = ProcessStatus.SYNC_FAILED
+                        logger.error(f"Failed uploading {item.ocr_file} to onedrive")
                         self.move_to_failed(item)
                     else:
                         item.status = ProcessStatus.COMPLETED
