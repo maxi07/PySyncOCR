@@ -1,3 +1,5 @@
+[![Pytest](https://github.com/maxi07/PySyncOCR/actions/workflows/pytest.yml/badge.svg)](https://github.com/maxi07/PySyncOCR/actions/workflows/pytest.yml)
+
 <img src="src/webserver/static/images/PySyncOCR_logos_white.png#gh-dark-mode-only" width="30%">
 <img src="src/webserver/static/images/PySyncOCR_logos_black.png#gh-light-mode-only" width="30%">
 
