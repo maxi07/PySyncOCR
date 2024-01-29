@@ -25,4 +25,4 @@ jobs:
           pip install pytest requests
       - name: Test with pytest
         run: |
-          pytest -v tests/test_*.py
+          pytest -v tests/
