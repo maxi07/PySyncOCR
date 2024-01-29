@@ -14,6 +14,12 @@ import time
 import argparse
 
 
+"""
+PySyncOCR main module.
+
+This module handles the initialization and running of the various services.
+"""
+
 if __name__ == "__main__":
     logger.info("Starting PySyncOCR...")
     parser = argparse.ArgumentParser(

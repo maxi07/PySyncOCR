@@ -46,6 +46,15 @@ def init_app(app):
 
 
 def update_scanneddata_database(id: int, update_values: dict, websocketQueue=None):
+    """Updates the scanned data database table with new values for the given ID.
+
+    Connects to the SQLite database, constructs a dynamic SQL query to update
+    the row with the given ID and the provided update_values dictionary.
+    Commits the changes and closes the connection. Also optionally enqueues
+    an "update" command for the updated ID to a websocket queue.
+
+    Handles any errors and logs exceptions.
+    """
     try:
         # Connect to the database
         connection = sqlite3.connect(config.get("sql.db_location"))

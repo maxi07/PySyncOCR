@@ -14,6 +14,17 @@ import os
 
 @bp.route("/")
 def index():
+    """
+    Renders the sync page by:
+
+    - Loading the onedrive rclone configs with dump_config()
+    - Loading the path mappings from a json file
+    - Checking if the onedrive remotes in the mappings actually exist
+    - Getting a paginated list of failed pdf sync jobs from the database
+    - Passing all this data to the sync.html template
+
+    If there are any errors, catches them and renders the template with empty data.
+    """
     try:
         logger.info("Loading sync...")
         onedrive_configs = dump_config()
@@ -73,6 +84,7 @@ def index():
 
 @bp.delete("/onedrive")
 def deleteOneDriveConf():
+    """Deletes an OneDrive configuration item based on the provided ID in the request body"""
     try:
         logger.info("Deleting onedrive config...")
         json_data = request.get_json()
@@ -92,6 +104,14 @@ def deleteOneDriveConf():
 
 @bp.get("/onedrive")
 def getOneDriveRemotes():
+    """Gets a list of configured OneDrive remotes.
+
+    Returns:
+        A JSON response with a list of configured OneDrive remotes, and a 200 OK status code.
+
+    Raises:
+        500 Server Error if there is an error retrieving the remotes. Logs the exception.
+    """
     try:
         logger.info("Retrieving onedrive configs...")
         res = list_remotes()
@@ -103,6 +123,13 @@ def getOneDriveRemotes():
 
 @bp.post("/onedrive-directory")
 def getOneDriveDirectories():
+    """Retrieves the directories in a OneDrive path.
+
+    Expects a JSON request with the 'remote_id' and 'path' of the OneDrive to retrieve directories from.
+    Calls the list_folders function to get the directories.
+    Logs and returns the list of directories if successful, error messages otherwise.
+    Catches and logs any errors.
+    """
     try:
         json_data = request.get_json()
         logger.info(f"Retrieving onedrive directory for {json_data}...")
@@ -115,6 +142,12 @@ def getOneDriveDirectories():
 
 @sock.route("/websocket-onedrive")
 def websocket_onedrive(ws):
+    """
+    Handle realtime sync updates from rclone sent over a websocket.
+
+    Accepts a websocket connection and json data containing the onedrive remote name.
+    Calls configure_rclone_onedrive_personal to sync the remote, and sends back sync updates over the websocket.
+    """
     while True:
         data = ws.receive()
         if data is None:
@@ -140,6 +173,15 @@ def websocket_onedrive(ws):
 
 @bp.post("/pathmapping")
 def addPathMapping():
+    """Adds a path mapping between a local path and a remote path + remote ID.
+
+    Takes a JSON request with the following data:
+    - local_path: The local file path to map
+    - remote_path: The remote path on the cloud storage to map to
+    - remote_id: The ID of the remote cloud storage
+
+    Returns 200 if successful along with a message, 500 if failed along with an error message.
+    """
     try:
         json_data = request.get_json()
         if not json_data or "local_path" not in json_data or "remote_path" not in json_data or "remote_id" not in json_data:
@@ -157,6 +199,12 @@ def addPathMapping():
 
 @bp.delete("/pathmapping")
 def deletePathMapping():
+    """Deletes a path mapping.
+
+    Expects a JSON request with the 'id' of the mapping to delete.
+    Logs and returns a message indicating whether the delete succeeded.
+    Catches and logs any errors.
+    """
     try:
         json_data = request.get_json()
         if not json_data or "id" not in json_data:
@@ -174,6 +222,14 @@ def deletePathMapping():
 
 @bp.delete("/failedpdf")
 def deleteFailedPDF():
+    """Deletes a failed PDF file from the failed PDF directory.
+
+    Expects a JSON request with the ID of the failed PDF to delete.
+    Looks up the file name for the ID, deletes the file,
+    and updates the database.
+
+    Returns a success or error message.
+    """
     db = get_db()
     try:
         json_data = request.get_json()
@@ -207,6 +263,12 @@ def deleteFailedPDF():
 
 @bp.get("/failedpdf")
 def downloadFailedPDF():
+    """Downloads a failed PDF file for the given id from the failed PDF directory.
+    Returns the file if it exists, handles invalid ids and other errors.
+
+    Returns:
+        File if it exists or error message
+    """
     try:
         download_id = int(request.args.get('download_id'))
         if download_id is None or download_id <= 0:
