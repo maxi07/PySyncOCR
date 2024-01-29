@@ -42,6 +42,6 @@ def test_index(client, use_backup):
     assert soup.title.string == "PySyncOCR"
     # Find the anchor tag with class 'nav-link active' and 'Dashboard' text
     dashboard_link_active = soup.find('a', class_='nav-link active', string='Dashboard')
-    
+
     # Assert that the anchor tag is found
     assert dashboard_link_active is not None
