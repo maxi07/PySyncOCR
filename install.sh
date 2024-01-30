@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if script is run with sudo
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run with sudo." 1>&2
+    exit 1
+fi
+
 # Set the paths and configurations
 APP_DIR="$(pwd)"
 VENV_DIR="$APP_DIR/.venv"
