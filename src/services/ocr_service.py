@@ -19,7 +19,8 @@ class OcrService:
         while True:
             item: ProcessItem = self.ocr_queue.get()
             if item is None:  # Exit command
-                break
+                logger.info("Shutdown command received for OCR service")
+                return
             item.status = ProcessStatus.OCR
             update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
             item.time_ocr_started = datetime.now()

@@ -3,7 +3,7 @@ blinker==1.7.0
 cffi==1.16.0
 charset-normalizer==3.3.2
 click==8.1.7
-coloredlogs==15.0.1
+coloredlogs
 cryptography==41.0.7
 Deprecated==1.2.14
 deprecation==2.1.0

@@ -225,7 +225,7 @@ class FolderMonitor:
         self.observer.stop()
         self.observer.join()
 
-        logger.warning("Monitoring service stopped.")
+        logger.info("Monitoring service stopped.")
 
 
 logger.debug(f"Loaded {__name__} module")

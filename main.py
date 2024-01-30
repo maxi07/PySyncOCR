@@ -6,12 +6,22 @@ from src.services.watchdog_service import FolderMonitor
 from src.services.ocr_service import OcrService
 from src.services.sync_service import SyncService
 from src.services.smb_service import MySMBServer
-from src.services.flask_service import start_server, start_dev_server
+from src.services.flask_service import start_server, start_dev_server, stop_server
 from src.webserver.dashboard import websocket_messages_queue
 from queue import Queue
 from src.helpers.config import config
 import time
 import argparse
+import signal
+
+
+shutdown_flag = threading.Event()
+
+
+def shutdown_handler(sig, frame):
+    """Signal handler for SIGINT (Ctrl+C)."""
+    shutdown_flag.set()
+    logger.warning("Shutting down...")
 
 
 """
@@ -21,11 +31,14 @@ This module handles the initialization and running of the various services.
 """
 
 if __name__ == "__main__":
+    # Register the signal handler for SIGINT
+    signal.signal(signal.SIGINT, shutdown_handler)
     logger.info("Starting PySyncOCR...")
     parser = argparse.ArgumentParser(
                     prog='PySyncOCR',
                     description='PySyncOCR is a simple tool to sync scanned PDFs from SMB to cloud and OCR them.')
     parser.add_argument('--dev', action='store_true', help='Run in development mode')
+    parser.add_argument('--smb-port', type=int, help='Port to run the SMB server on')
     args = parser.parse_args()
     if args.dev:
         logger.warning("Running in development mode!")
@@ -38,7 +51,11 @@ if __name__ == "__main__":
 
     # Setup SMB
     smb_settings = config.get("smb_service")
-    smb_server = MySMBServer(smb_settings)
+
+    if args.smb_port:
+        smb_server = MySMBServer(smb_settings, args.smb_port)
+    else:
+        smb_server = MySMBServer(smb_settings)
 
     watchdog = FolderMonitor(root_folder, ocr_queue, websocket_messages_queue)
     ocr_service = OcrService(ocr_queue, sync_queue, websocket_messages_queue)
@@ -53,7 +70,7 @@ if __name__ == "__main__":
         logger.warning("Running FLASK dev server!")
         flask_thread = threading.Thread(target=start_dev_server, name="Flask Service DEV")
     else:
-        flask_thread = threading.Thread(target=start_server, name="Flask Service")
+        flask_thread = threading.Thread(target=start_server, name="Gunicorn Service")
 
     watchdog_thread.start()
     ocr_thread.start()
@@ -62,17 +79,25 @@ if __name__ == "__main__":
     flask_thread.start()
 
     try:
-        while True:
+        while not shutdown_flag.is_set():
             time.sleep(1)
     except KeyboardInterrupt:
-        watchdog.stop_monitoring()
-        watchdog_thread.join()
+        # Perform cleanup and shutdown
+        shutdown_flag.set()
 
-        # Add a sentinel value to the OCR service's queue to signal it to exit
-        ocr_queue.put(None)
-        ocr_thread.join()
+    watchdog.stop_monitoring()
+    watchdog_thread.join()
 
-        sync_queue.put(None)
-        sync_queue.join()
-        smb_thread.join()
-        flask_thread.join()
+    # Add a sentinel value to the OCR service's queue to signal it to exit
+    ocr_queue.put(None)
+    ocr_thread.join()
+
+    sync_queue.put(None)
+    sync_queue.join()
+    stop_webserver_thread = threading.Thread(target=stop_server)
+    stop_webserver_thread.start()
+    flask_thread.join()
+    smb_server.stop()
+    smb_thread.is_alive()
+    smb_thread.join()
+    logger.info("PySyncOCR stopped. Bye!")

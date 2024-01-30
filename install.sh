@@ -32,6 +32,16 @@ sudo apt-get update || log_error_and_exit "Failed to update package lists."
 sudo apt-get install -y python3 || log_error_and_exit "Failed to install Python."
 sudo apt-get install -y python3-venv || log_error_and_exit "Failed to install Python virtual environment."
 sudo apt-get install -y python3-pip || log_error_and_exit "Failed to install Python package manager."
+sudo apt-get install -y ocrmypdf || log_error_and_exit "Failed to install OCRmyPDF."
+sudo apt-get install -y tesseract-ocr || log_error_and_exit "Failed to install Tesseract OCR."
+sudo apt-get install -y tesseract-ocr-deu || log_error_and_exit "Failed to install Tesseract OCR for German language."
+sudo apt-get install -y tesseract-ocr-eng || log_error_and_exit "Failed to install Tesseract OCR for English language."
+sudo apt-get install -y rclone || log_error_and_exit "Failed to install Rclone."
+sudo apt-get install -y autotools-dev || log_error_and_exit "Failed to install AutoTools."
+sudo apt-get install -y automake || log_error_and_exit "Failed to install AutoMake."
+sudo apt-get install -y libtool || log_error_and_exit "Failed to install LibTool."
+sudo apt-get install -y libleptonica-dev || log_error_and_exit "Failed to install LibLeptonica."
+sudo ./src/helpers/install_jbig2.sh || log_error_and_exit "Failed to install JBIG2."
 
 # Get the current user and group
 USERNAME=$(whoami)

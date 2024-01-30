@@ -28,7 +28,6 @@ def check_install():
     check_and_install("automake", "automake")
     check_and_install("libtool", "libtool", True)
     check_and_install("libleptonica-dev", "libleptonica-dev", True)
-    check_and_install("RClone", "rclone")
     check_jbig2()
 
 
