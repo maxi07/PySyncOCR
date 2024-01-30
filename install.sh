@@ -24,6 +24,8 @@ log_error_and_exit() {
 log_message "Installing Python..."
 sudo apt-get update || log_error_and_exit "Failed to update package lists."
 sudo apt-get install -y python3 || log_error_and_exit "Failed to install Python."
+sudo apt-get install -y python3-venv || log_error_and_exit "Failed to install Python virtual environment."
+sudo apt-get install -y python3-pip || log_error_and_exit "Failed to install Python package manager."
 
 # Get the current user and group
 USERNAME=$(whoami)
