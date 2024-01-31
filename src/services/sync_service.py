@@ -21,7 +21,7 @@ class SyncService:
         while True:
             item: ProcessItem = self.file_queue.get()  # Retrieve item from the queue
             if item is None:  # Exit command
-                logger.info("Shutdown command received for sync service")
+                logger.debug("Shutdown command received for sync service")
                 return
             item.status = ProcessStatus.SYNC
             item.time_upload_started = datetime.now()

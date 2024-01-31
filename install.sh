@@ -41,6 +41,7 @@ sudo apt-get install -y autotools-dev || log_error_and_exit "Failed to install A
 sudo apt-get install -y automake || log_error_and_exit "Failed to install AutoMake."
 sudo apt-get install -y libtool || log_error_and_exit "Failed to install LibTool."
 sudo apt-get install -y libleptonica-dev || log_error_and_exit "Failed to install LibLeptonica."
+sudo apt-get install -y samba || log_error_and_exit "Failed to install Samba."
 sudo ./src/helpers/install_jbig2.sh || log_error_and_exit "Failed to install JBIG2."
 
 # Get the current user and group

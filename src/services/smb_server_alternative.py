@@ -10,11 +10,14 @@ class SambaController:
         try:
             subprocess.run(["sudo", "systemctl", "start", "smbd"], check=True)
             logger.info("Samba server started.")
+            subprocess.run(["sudo", "ufw", "allow", "samba"], check=True)
+            logger.info("Added Samba port to firewall.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error starting Samba server: {e}")
 
     def stop_server(self):
         try:
+            logger.debug("Stopping Samba server...")
             subprocess.run(["sudo", "systemctl", "stop", "smbd"], check=True)
             logger.info("Samba server stopped.")
         except subprocess.CalledProcessError as e:
@@ -25,7 +28,7 @@ class SambaController:
             subprocess.run(["sudo", "systemctl", "restart", "smbd"], check=True)
             logger.info("Samba server restarted.")
         except subprocess.CalledProcessError as e:
-            print(f"Error restarting Samba server: {e}")
+            logger.exception(f"Error restarting Samba server: {e}")
 
     def add_share_config(self, share_name, path, comment="PySyncOCR Share", require_authentication=True):
         try:
@@ -40,15 +43,36 @@ class SambaController:
                     smb_conf.write("guest ok = yes\n")
                     smb_conf.write("public = yes\n")
                 smb_conf.write("writable = yes\n")
+                smb_conf.write("browsable = yes\n")
                 logger.info(f"Added Samba share configuration for {share_name}.")
         except Exception as e:
-            print("Error adding Samba share configuration:", e)
+            logger.exception(f"Error adding Samba share configuration: {e}")
 
     def add_user(self, username, password):
         try:
             subprocess.run(["sudo", "useradd", username], check=True)
-            subprocess.run(["sudo", "smbpasswd", "-a", username], input=password.encode(), check=True)
-            logger.info(f"User {username} added to Samba.")
+        except subprocess.CalledProcessError as e:
+            if e.returncode == 9:
+                logger.warning(f"User {username} already exists.")
+            else:
+                logger.exception(f"Error adding user to Samba: {e}")
+                return
+
+        # Run sudo smbpasswd -a username
+        try:
+            process = subprocess.Popen(["sudo", "smbpasswd", "-a", username],
+                                       stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       universal_newlines=True)
+
+            # Provide password as input
+            stdout, stderr = process.communicate(input=password + '\n' + password + '\n')
+            # Check if any error occurred
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, process.args, stdout, stderr)
+            else:
+                logger.info(f"Added user {username} to Samba.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error adding user to Samba: {e}")
 
@@ -68,6 +92,16 @@ class SambaController:
             return False
         except Exception as e:
             logger.exception(f"Error checking Samba share: {e}")
+            return False
+
+    def check_is_running() -> bool:
+        try:
+            res = subprocess.run(["sudo", "systemctl", "is-active", "smbd"], check=True)
+            if res == "active":
+                return True
+            return False
+        except subprocess.CalledProcessError as e:
+            logger.exception(f"Error checking Samba server status: {e}")
             return False
 
 
