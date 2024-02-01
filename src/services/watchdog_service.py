@@ -1,3 +1,4 @@
+import shutil
 import sqlite3
 import time
 import PyPDF2
@@ -215,6 +216,10 @@ class FolderMonitor:
         except Exception as e:
             logger.exception("Failed starting watchdog", e)
             return
+
+        # Check for errors
+        self.move_pdfs_to_failed()
+
         logger.info(f"Started watchdog at {self.root_folder}")
 
     def stop_monitoring(self):
@@ -226,6 +231,36 @@ class FolderMonitor:
         self.observer.join()
 
         logger.info("Monitoring service stopped.")
+
+    def move_pdfs_to_failed(self):
+        logger.debug("Searching for failed documents...")
+        source_dir = config.get_filepath("sync_service.root_folder")
+        failed_dir = config.get_filepath("sync_service.failed_dir")
+        # Create the "failed" directory if it doesn't exist
+        if not os.path.exists(failed_dir):
+            logger.info("Failed dir didnt exist, creating dir")
+            os.makedirs(failed_dir)
+
+        # Walk through all directories and files in the source directory
+        for root, dirs, files in os.walk(source_dir):
+            # Remove the "failed" and "done" directories from the search
+            if "failed" in dirs:
+                dirs.remove("failed")
+            if "done" in dirs:
+                dirs.remove("done")
+
+            if len(files) > 0:
+                logger.warning(f"Found {len(files)} failed files in '{root}'")
+                # Move PDF files to the "failed" directory
+                for file in files:
+                    if file.lower().endswith(".pdf"):
+                        try:
+                            source_file = os.path.join(root, file)
+                            destination_file = os.path.join(failed_dir, file)
+                            shutil.move(source_file, destination_file)
+                            logger.warning(f"Moved '{file}' to '{failed_dir}'")
+                        except Exception as ex:
+                            logger.exception(f"Failed moving '{file}' to '{failed_dir}': {ex}")
 
 
 logger.debug(f"Loaded {__name__} module")
