@@ -11,6 +11,7 @@ APP_DIR="$(pwd)"
 VENV_DIR="$APP_DIR/.venv"
 MAIN_FILE="$APP_DIR/main.py"
 SERVICE_NAME="PySyncOCR"
+DB_FILE="$APP_DIR/instance/pysyncocr.sqlite3"
 
 # Log file
 LOG_FILE="$APP_DIR/install_log.txt"
@@ -60,7 +61,27 @@ log_message "Installing dependencies..."
 pip install -r requirements.txt || log_error_and_exit "Failed to install dependencies."
 
 log_message "Initializing database..."
-flask --app src/webserver init-db || log_error_and_exit "Failed to initialize database."
+# Check if database already exists
+if [ -f "$DB_FILE" ]; then
+    log_message "Database already exists."
+    # Ask to overwrite database
+    read -p "Do you want to overwrite the existing database? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        # Delete existing database
+        log_message "Deleting existing database..."
+        rm "$DB_FILE" || log_error_and_exit "Failed to delete existing database."
+        log_message "Existing database deleted."
+    fi
+else
+    log_message "Database does not exist."
+    # Create database
+    log_message "Creating database..."
+    flask --app src/webserver init-db || log_error_and_exit "Failed to initialize database."
+    log_message "Database created."
+fi
+
+
 
 # Create systemd service file
 log_message "Creating systemd service file..."
