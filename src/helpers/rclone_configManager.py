@@ -92,14 +92,25 @@ class ConfigManager:
     def delete(self, id) -> bool:
         try:
             entries_to_remove = [entry for entry in self.config_data if entry.get("id") == id]
-            for entry in entries_to_remove:
-                self.config_data.remove(entry)
+            if len(entries_to_remove) == 0:
+                logger.error(f"Entry with id '{id}' does not exist in database.")
+            else:
+                for entry in entries_to_remove:
+                    self.config_data.remove(entry)
             self.save_config()
             try:
                 os.removedirs(os.path.join(config.get_filepath("smb_service.share_path"), entry.get("local")))
                 logger.info(f"Deleted folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}")
+            except OSError as oser:
+                if oser.errno == 2:
+                    logger.error(f"Folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))} does not exist.")
+                elif oser.errno == 39:
+                    logger.error(f"Folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))} is not empty.")
+                else:
+                    logger.exception(f"Failed deleting folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}: {oser}")
+                    return False
             except Exception as ex:
-                logger.exception(f"Failed deleting folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}", ex)
+                logger.exception(f"Failed deleting folder {os.path.join(config.get_filepath('smb_service.share_path'),entry.get('local'))}: {ex}")
                 return False
             logger.info(f"Entry with id '{id}' deleted successfully.")
             return True

@@ -30,8 +30,15 @@
                             <a class="nav-link active" aria-current="page"
                                 href="{{ url_for('dashboard.index') }}">Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('sync.index') }}">Sync</a>
+                        <li class="nav-item position-relative">
+                            <a class="nav-link" href="{{ url_for('sync.index') }}">Sync
+                                {% if mapping_error or failed_documents > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <i class="bi bi-exclamation-triangle"></i> {{ failed_documents }}
+                                    <span class="visually-hidden">pathmapping error</span>
+                                </span>
+                                {% endif %}
+                            </a>
                         </li>
                     </ul>
                     <span class="navbar-text">

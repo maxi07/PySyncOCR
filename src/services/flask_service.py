@@ -42,3 +42,4 @@ def start_dev_server():
     app.logger.handlers = logger.handlers
     app.logger.setLevel(logger.level)
     app.run(debug=True, use_reloader=False, threaded=True)
+    app.errorhandler(Exception)(lambda e: logger.exception(e))

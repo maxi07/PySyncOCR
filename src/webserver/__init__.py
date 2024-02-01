@@ -2,6 +2,7 @@ import os
 from flask_sock import Sock
 from flask import Flask
 from src.helpers.logger import logger
+from src.webserver.context_processor import inject_template_data
 from . import root
 
 sock = Sock()
@@ -40,6 +41,7 @@ def create_app(test_config=None):
     app.register_blueprint(root.bp)
     app.register_blueprint(dashboard.bp)
     app.register_blueprint(sync.bp)
+    app.template_context_processors[None].append(inject_template_data)
     logger.debug(f"Registered blueprints with routes {app.url_map}")
     logger.info("Started FLASK server")
     return app

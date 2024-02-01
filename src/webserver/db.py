@@ -82,3 +82,35 @@ def update_scanneddata_database(id: int, update_values: dict, websocketQueue=Non
             websocketQueue.put({"command": "update", "id": id})
     except Exception as ex:
         logger.exception(f"Error updating database for id {id}: {ex}")
+
+
+def send_database_request(query: str):
+    """Sends a request to the database and returns the result.
+
+    Connects to the SQLite database, executes the provided query,
+    and returns the result.
+    Commits the changes and closes the connection.
+
+    Handles any errors and logs exceptions.
+    """
+    try:
+        # Connect to the database
+        connection = sqlite3.connect(config.get("sql.db_location"))
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Execute the query
+        logger.debug("Sending database request: " + query)
+        cursor.execute(query)
+
+        # Fetch the result
+        result = cursor.fetchall()
+
+        # Commit the changes and close the connection
+        connection.commit()
+        connection.close()
+
+        return result
+    except Exception as ex:
+        logger.exception(f"Error sending database request: {ex}")
