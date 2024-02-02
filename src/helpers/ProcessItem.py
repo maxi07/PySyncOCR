@@ -62,7 +62,7 @@ class ProcessItem:
     """ProcessItem represents an item to be processed for OCR and syncing.
 
     This class contains metadata and status information about the processing
-    of a file, including the local and remote file paths, OCR status, sync 
+    of a file, including the local and remote file paths, OCR status, sync
     status, timestamps, etc.
 
     The __init__ method validates the input file and initializes all the

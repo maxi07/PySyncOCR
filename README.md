@@ -22,5 +22,10 @@ The program accespts some options, which have to be added in the `sudo nano /etc
 Change this line:
 `ExecStart=/path/to/venv/bin/python3 /path/to/main.py --argument1 value1 --argument2 value2`
 
+## Upcoming Features
+- [ ] Notifications
+- [ ] Dashboard with KPIs
+- [ ] SMB Settings
+
 ## Development
 For developing we can use the built-in Flask server. To get debug output and use flask, run the `main.py` from VSCode with the `--dev` option or use the preconfigured launch.json.

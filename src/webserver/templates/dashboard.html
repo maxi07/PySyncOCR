@@ -1,9 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet" type="text/css" href="/static/css/dashboard.css">
 <h1>Dashboard</h1>
-<p>
-    See your latest scans here.
-</p>
+
+<!-- Dashboard widgets -->
+<div class="row g-4 mb-5">
+    <div class="col">
+        <div class="card mb-3 dashboard-widget" style="background-color: rgb(255, 165, 0, 0.7)"
+            id="widget_queue">
+            <div class="card-body">
+                <div class="row g-0">
+                    <div class="col-md-8">
+                        <h5 class="card-title">Queued</h5>
+                        <p class="card-text" style="font-size: 2rem;" id="widget_queue_content">{{ queued_pdfs }}</p>
+                    </div>
+                    <div class="col-md-4 d-none d-md-block">
+                        <i class="img-fluid rounded-start bi-hourglass-top position-absolute dashboard-widget-icon"
+                            alt="Queue icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <small class="text-body-secondary">{{ latest_timestamp_pending_string }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card mb-3 dashboard-widget" style="background-color: rgb(58, 167, 44);"
+            id="widget_processed">
+            <div class="card-body">
+                <div class="row g-0">
+                    <div class="col-md-8">
+                        <h5 class="card-title">Processed</h5>
+                        <p class="card-text" style="font-size: 2rem;" id="widget_processed_content">{{ processed_pdfs }}</p>
+                    </div>
+                    <div class="col-md-4 d-none d-md-block">
+                        <i class="img-fluid rounded-start bi-check2-square position-absolute dashboard-widget-icon"
+                            alt="Processed icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <small class="text-body-secondary">{{ latest_timestamp_completed_string }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2> Latest documents </h2>
 {% if pdfs %}
 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="pdfs_grid">
 </div>
@@ -59,7 +103,6 @@
 </nav>
 
 {% else %}
-<h2>Welcome!</h2>
 <p>There is nothing to see here yet until you start scanning your first PDF.</p>
 <div class="d-flex align-items-center justify-content-center">
     <dotlottie-player src="https://lottie.host/f3c4dbf0-a5bb-4320-92b6-ed55bb062ae3/jw3qzh8A0X.json"
@@ -84,7 +127,10 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center align-items-center">
-                    <dotlottie-player id="welcome_lottie_player" src="https://lottie.host/d349819a-96e8-474c-a312-af3246e43da9/sSjLLuMZxT.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></dotlottie-player>
+                    <dotlottie-player id="welcome_lottie_player"
+                        src="https://lottie.host/d349819a-96e8-474c-a312-af3246e43da9/sSjLLuMZxT.json"
+                        background="transparent" speed="1" style="width: 300px; height: 300px;" loop
+                        autoplay></dotlottie-player>
                 </div>
 
                 <p>Welcome to <strong>PySyncOCR</strong>.<br>

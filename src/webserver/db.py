@@ -6,7 +6,7 @@ from src.helpers.config import config
 
 
 def get_db():
-    logger.debug("Creating database connection")
+    # logger.debug("Creating database connection")
     if 'db' not in g:
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
@@ -18,7 +18,7 @@ def get_db():
 
 
 def close_db(e=None):
-    logger.debug("Closing database connection")
+    # logger.debug("Closing database connection")
     db = g.pop('db', None)
 
     if db is not None:

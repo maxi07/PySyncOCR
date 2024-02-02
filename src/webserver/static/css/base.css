@@ -33,7 +33,7 @@ body {
 .content {
     flex: 1;
     /* Expand to fill remaining height */
-    background: linear-gradient(133deg, rgba(2, 170, 189, 1) 0%, rgba(0, 205, 172, 1) 100%);
+    background: linear-gradient(133deg, rgba(2, 170, 189, 1) 0%, rgb(4, 236, 186) 100%);
     color: white;
     padding-bottom: 70px;
     /* Adjust to match the height of the footer */
