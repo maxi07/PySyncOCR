@@ -233,6 +233,12 @@ class FolderMonitor:
         logger.info("Monitoring service stopped.")
 
     def move_pdfs_to_failed(self):
+        """
+        Move PDF files from the root folder to the failed folder.
+
+        This checks all subdirectories of the root folder for any PDF files.
+        Any PDFs found are moved to the failed folder.
+        """
         logger.debug("Searching for failed documents...")
         source_dir = config.get_filepath("sync_service.root_folder")
         failed_dir = config.get_filepath("sync_service.failed_dir")
