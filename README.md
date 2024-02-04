@@ -9,6 +9,8 @@ Welcome to PySyncOCR, a Python app that will
 - Sync your document to a location of choice within your OneDrive
 - Have you let multiple sync targets
 
+<img src="doc/dashboard.png" width="100%">
+
 ## Installation
 Please clone the repo and run the `install.sh` with sudo privileges. This will create a service that automatically starts when the server boots and runs the `main.py`, which will launch different threads for the webserver, the watchdog, the SMB server and the OCR.
 
