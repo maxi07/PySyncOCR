@@ -3,6 +3,7 @@ from src.webserver import create_app
 from src.helpers.logger import logger
 from shutil import copy, move
 from bs4 import BeautifulSoup
+import re
 
 
 @pytest.fixture
@@ -45,3 +46,5 @@ def test_index(client, use_backup):
 
     # Assert that the anchor tag is found
     assert dashboard_link_active is not None
+
+    assert soup.find(string=re.compile("There is nothing to see here yet until you start scanning your first PDF."))
