@@ -30,20 +30,29 @@ log_error_and_exit() {
 # Install Python (if not already installed)
 log_message "Installing Python..."
 sudo apt-get update || log_error_and_exit "Failed to update package lists."
-sudo apt-get install -y python3 || log_error_and_exit "Failed to install Python."
-sudo apt-get install -y python3-venv || log_error_and_exit "Failed to install Python virtual environment."
-sudo apt-get install -y python3-pip || log_error_and_exit "Failed to install Python package manager."
-sudo apt-get install -y ocrmypdf || log_error_and_exit "Failed to install OCRmyPDF."
-sudo apt-get install -y tesseract-ocr || log_error_and_exit "Failed to install Tesseract OCR."
-sudo apt-get install -y tesseract-ocr-deu || log_error_and_exit "Failed to install Tesseract OCR for German language."
-sudo apt-get install -y tesseract-ocr-eng || log_error_and_exit "Failed to install Tesseract OCR for English language."
-sudo apt-get install -y rclone || log_error_and_exit "Failed to install Rclone."
-sudo apt-get install -y autotools-dev || log_error_and_exit "Failed to install AutoTools."
-sudo apt-get install -y automake || log_error_and_exit "Failed to install AutoMake."
-sudo apt-get install -y libtool || log_error_and_exit "Failed to install LibTool."
-sudo apt-get install -y libleptonica-dev || log_error_and_exit "Failed to install LibLeptonica."
-sudo apt-get install -y samba || log_error_and_exit "Failed to install Samba."
-sudo ./src/helpers/install_jbig2.sh || log_error_and_exit "Failed to install JBIG2."
+sudo apt-get install -y python3 python3-venv python3-pip ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba || log_error_and_exit "Failed to install Python and other dependencies."
+
+# Install JBIG2 (if not already installed)
+git clone https://github.com/agl/jbig2enc || log_error_and_exit "Failed to download JBIG2."
+cd jbig2enc
+./autogen.sh || log_error_and_exit "Failed to run autogen.sh."
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo "autogen.sh failed"
+    exit $STATUS
+fi
+./configure && make
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo "configure failed"
+    exit $STATUS
+fi
+sudo make install
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo "make install failed"
+    exit $STATUS
+fi
 
 # Get the current user and group
 USERNAME=$(whoami)
