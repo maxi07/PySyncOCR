@@ -65,11 +65,11 @@ if __name__ == "__main__":
     #     smb_server = MySMBServer(smb_settings)
 
     # New SMB setup
-    smb = SambaController()
-    if not smb.check_share_exists(config.get("smb_service.share_name")):
-        smb.add_share_config(config.get("smb_service.share_name"), config.get_filepath("smb_service.share_path"))
-        smb.add_user(config.get("smb_service.username"), config.get("smb_service.password"))
-    smb.start_server()
+    # smb = SambaController()
+    # if not smb.check_share_exists(config.get("smb_service.share_name")):
+    #     smb.add_share_config(config.get("smb_service.share_name"), config.get_filepath("smb_service.share_path"))
+    #     smb.add_user(config.get("smb_service.username"), config.get("smb_service.password"))
+    # smb.start_server()
 
     watchdog = FolderMonitor(root_folder, ocr_queue, websocket_messages_queue)
     ocr_service = OcrService(ocr_queue, sync_queue, websocket_messages_queue)
