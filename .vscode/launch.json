@@ -25,9 +25,8 @@
             "name": "Python: Main (SUDO) DEV",
             "type": "python",
             "request": "launch",
-            "module": "main",
+            "module": "src.main",
             "justMyCode": true,
-            "sudo": true,
             "args": [
                 "--dev"
             ]

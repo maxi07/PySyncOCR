@@ -45,7 +45,7 @@ def check_and_install(tool_name, package_name, is_package=False):
 
     if not installed:
         logger.warning(f"{tool_name} is not detected, attempting install")
-        install_package_linux(package_name)
+        # install_package_linux(package_name)
         try:
             installed, output = is_installed_linux(package_name, is_package)
             if not installed:

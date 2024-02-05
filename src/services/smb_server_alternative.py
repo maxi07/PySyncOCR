@@ -8,9 +8,9 @@ class SambaController:
 
     def start_server(self):
         try:
-            subprocess.run(["sudo", "systemctl", "start", "smbd"], check=True)
+            subprocess.run(["systemctl", "start", "smbd"], check=True)
             logger.info("Samba server started.")
-            subprocess.run(["sudo", "ufw", "allow", "samba"], check=True)
+            subprocess.run(["ufw", "allow", "samba"], check=True)
             logger.info("Added Samba port to firewall.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error starting Samba server: {e}")
@@ -18,14 +18,14 @@ class SambaController:
     def stop_server(self):
         try:
             logger.debug("Stopping Samba server...")
-            subprocess.run(["sudo", "systemctl", "stop", "smbd"], check=True)
+            subprocess.run(["systemctl", "stop", "smbd"], check=True)
             logger.info("Samba server stopped.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error stopping Samba server: {e}")
 
     def restart_server(self):
         try:
-            subprocess.run(["sudo", "systemctl", "restart", "smbd"], check=True)
+            subprocess.run(["systemctl", "restart", "smbd"], check=True)
             logger.info("Samba server restarted.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error restarting Samba server: {e}")
@@ -50,7 +50,7 @@ class SambaController:
 
     def add_user(self, username, password):
         try:
-            subprocess.run(["sudo", "useradd", username], check=True)
+            subprocess.run(["useradd", username], check=True)
         except subprocess.CalledProcessError as e:
             if e.returncode == 9:
                 logger.warning(f"User {username} already exists.")
@@ -60,7 +60,7 @@ class SambaController:
 
         # Run sudo smbpasswd -a username
         try:
-            process = subprocess.Popen(["sudo", "smbpasswd", "-a", username],
+            process = subprocess.Popen(["smbpasswd", "-a", username],
                                        stdin=subprocess.PIPE,
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE,
@@ -78,7 +78,7 @@ class SambaController:
 
     def delete_user(self, username):
         try:
-            subprocess.run(["sudo", "userdel", "-r", username], check=True)
+            subprocess.run(["userdel", "-r", username], check=True)
             logger.info(f"User {username} deleted from Samba.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error deleting user from Samba: {e}")
@@ -96,7 +96,7 @@ class SambaController:
 
     def check_is_running() -> bool:
         try:
-            res = subprocess.run(["sudo", "systemctl", "is-active", "smbd"], check=True)
+            res = subprocess.run(["systemctl", "is-active", "smbd"], check=True)
             if res == "active":
                 return True
             return False

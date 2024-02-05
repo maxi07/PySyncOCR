@@ -30,7 +30,7 @@ log_error_and_exit() {
 # Install Python (if not already installed)
 log_message "Installing Python..."
 sudo apt-get update || log_error_and_exit "Failed to update package lists."
-sudo apt-get install -y python3 python3-venv python3-pip ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba || log_error_and_exit "Failed to install Python and other dependencies."
+sudo apt-get install -y python3 python3-venv python3-pip ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libleptonica-dev samba || log_error_and_exit "Failed to install Python and other dependencies."
 
 # Install JBIG2 (if not already installed)
 git clone https://github.com/agl/jbig2enc || log_error_and_exit "Failed to download JBIG2."
