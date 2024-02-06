@@ -1,15 +1,15 @@
-from src.helpers.logger import logger
+from helpers.logger import logger
 logger.info("Loading ...")
-from src.helpers.installer import check_install
+from helpers.installer import check_install
 import threading
-from src.services.watchdog_service import FolderMonitor
-from src.services.ocr_service import OcrService
-from src.services.sync_service import SyncService
-from src.services.flask_service import start_server, start_dev_server
-from src.webserver.dashboard import websocket_messages_queue
-from src.services.smb_server_alternative import SambaController
+from services.watchdog_service import FolderMonitor
+from services.ocr_service import OcrService
+from services.sync_service import SyncService
+from services.flask_service import start_server, start_dev_server
+from webserver.dashboard import websocket_messages_queue
+from services.smb_server_alternative import SambaController
 from queue import Queue
-from src.helpers.config import config
+from helpers.config import config
 import time
 import argparse
 import signal

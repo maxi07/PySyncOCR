@@ -1,6 +1,6 @@
 import json
 from typing import Any
-from src.helpers.logger import logger
+from helpers.logger import logger
 from os.path import expanduser, join
 
 

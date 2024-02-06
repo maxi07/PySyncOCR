@@ -1,5 +1,5 @@
 import subprocess
-from src.helpers.logger import logger
+from helpers.logger import logger
 
 
 class SambaController:

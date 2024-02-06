@@ -1,8 +1,8 @@
 import pytest
 from shutil import copy, move
-from src.helpers.logger import logger
-from src.helpers.rclone_configManager import ConfigManager
-from src.helpers.config import config
+from helpers.logger import logger
+from helpers.rclone_configManager import ConfigManager
+from helpers.config import config
 
 
 @pytest.fixture

@@ -1,6 +1,6 @@
-from src.helpers.logger import logger
-from src.helpers.rclone_management_onedrive import list_remotes
-from src.webserver.db import send_database_request
+from helpers.logger import logger
+from helpers.rclone_management_onedrive import list_remotes
+from webserver.db import send_database_request
 import json
 
 

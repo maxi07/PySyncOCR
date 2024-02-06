@@ -1,10 +1,10 @@
 import json
 from flask import Blueprint, render_template, request, current_app
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
-from src.helpers.logger import logger
-from src.webserver.db import get_db
-from src.helpers.config import config
-from src.helpers.time_converter import format_time_difference
+from helpers.logger import logger
+from webserver.db import get_db
+from helpers.config import config
+from helpers.time_converter import format_time_difference
 import locale
 from datetime import datetime
 import time

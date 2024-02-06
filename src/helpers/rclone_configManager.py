@@ -1,6 +1,6 @@
 import json
-from src.helpers.logger import logger
-from src.helpers.config import config
+from helpers.logger import logger
+from helpers.config import config
 import os
 
 """

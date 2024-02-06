@@ -1,5 +1,5 @@
 from impacket import smbserver
-from src.helpers.logger import logger
+from helpers.logger import logger
 from impacket.ntlm import compute_lmhash, compute_nthash
 import sys
 import threading

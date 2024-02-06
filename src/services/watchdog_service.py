@@ -5,15 +5,15 @@ import PyPDF2
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from queue import Queue
-from src.helpers.logger import logger
-from src.helpers.config import config
+from helpers.logger import logger
+from helpers.config import config
 import os
 from PIL import Image
 from PyPDF2 import PdfReader
-from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
-from src.helpers.rclone_configManager import RcloneConfig
+from helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
+from helpers.rclone_configManager import RcloneConfig
 import fitz
-from src.webserver.db import update_scanneddata_database
+from webserver.db import update_scanneddata_database
 
 
 class FileHandler(FileSystemEventHandler):

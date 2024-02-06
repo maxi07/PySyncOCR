@@ -1,8 +1,8 @@
 import os
 from flask_sock import Sock
 from flask import Flask
-from src.helpers.logger import logger
-from src.webserver.context_processor import inject_template_data
+from helpers.logger import logger
+from webserver.context_processor import inject_template_data
 from . import root
 
 sock = Sock()

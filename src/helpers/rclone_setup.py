@@ -1,6 +1,6 @@
 import pexpect
 import re
-from src.helpers.logger import logger
+from helpers.logger import logger
 
 
 def extract_url(prompt):

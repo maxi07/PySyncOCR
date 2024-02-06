@@ -1,13 +1,13 @@
 import math
 from flask import Blueprint, jsonify, render_template, request, send_file
 bp = Blueprint('sync', __name__, url_prefix='/sync')
-from src.helpers.logger import logger
-from src.helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
-from src.helpers.rclone_setup import configure_rclone_onedrive_personal
-from src.helpers.rclone_configManager import RcloneConfig
+from helpers.logger import logger
+from helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
+from helpers.rclone_setup import configure_rclone_onedrive_personal
+from helpers.rclone_configManager import RcloneConfig
 from . import sock
-from src.webserver.db import get_db
-from src.helpers.config import config
+from webserver.db import get_db
+from helpers.config import config
 import json
 import os
 

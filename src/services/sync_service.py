@@ -1,14 +1,14 @@
 from queue import Queue
-from src.helpers.logger import logger
-from src.helpers.rclone_configManager import RcloneConfig
-from src.helpers.config import config
-from src.helpers.rclone_management_onedrive import upload_file
+from helpers.logger import logger
+from helpers.rclone_configManager import RcloneConfig
+from helpers.config import config
+from helpers.rclone_management_onedrive import upload_file
 import os
 from shutil import move
 from os.path import join
-from src.helpers.ProcessItem import ProcessItem, ProcessStatus
+from helpers.ProcessItem import ProcessItem, ProcessStatus
 from datetime import datetime
-from src.webserver.db import update_scanneddata_database
+from webserver.db import update_scanneddata_database
 
 
 class SyncService:

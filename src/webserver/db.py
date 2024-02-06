@@ -1,8 +1,8 @@
 import sqlite3
 import click
 from flask import current_app, g
-from src.helpers.logger import logger
-from src.helpers.config import config
+from helpers.logger import logger
+from helpers.config import config
 
 
 def get_db():

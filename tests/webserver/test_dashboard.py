@@ -1,6 +1,6 @@
 import pytest
-from src.webserver import create_app
-from src.helpers.logger import logger
+from webserver import create_app
+from helpers.logger import logger
 from shutil import copy, move
 from bs4 import BeautifulSoup
 import re

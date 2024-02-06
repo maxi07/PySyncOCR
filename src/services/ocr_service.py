@@ -1,11 +1,11 @@
-from src.helpers.logger import logger
+from helpers.logger import logger
 from queue import Queue
 import ocrmypdf
-from src.helpers.config import config
+from helpers.config import config
 from shutil import copy
-from src.helpers.ProcessItem import ProcessItem, ProcessStatus, OCRStatus
+from helpers.ProcessItem import ProcessItem, ProcessStatus, OCRStatus
 from datetime import datetime
-from src.webserver.db import update_scanneddata_database
+from webserver.db import update_scanneddata_database
 
 
 class OcrService:

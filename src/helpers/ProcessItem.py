@@ -1,4 +1,4 @@
-from src.helpers.logger import logger
+from helpers.logger import logger
 from enum import Enum
 import os
 from datetime import datetime

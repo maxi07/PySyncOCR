@@ -1,6 +1,6 @@
 import platform
 import re
-from src.helpers.logger import logger
+from helpers.logger import logger
 import sys
 import subprocess
 import os
