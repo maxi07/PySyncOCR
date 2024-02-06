@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Check if script is run with sudo
-if [ "$(id -u)" != "0" ]; then
-    echo "This script must be run with sudo." 1>&2
-    exit 1
-fi
+# if [ "$(id -u)" != "0" ]; then
+#    echo "This script must be run with sudo." 1>&2
+#    exit 1
+#fi
 
 # Set the paths and configurations
 APP_DIR="$(pwd)"
@@ -18,7 +18,7 @@ LOG_FILE="$APP_DIR/install_log.txt"
 
 # Function to log messages
 log_message() {
-    echo "[ $(date '+%Y-%m-%d %H:%M:%S') ] $1" | tee -a "$LOG_FILE"
+    echo "[ $(date '+%Y-%m-%d %H:%M:%S') ] $1" | sudo tee -a "$LOG_FILE"
 }
 
 # Function to log errors and exit
@@ -27,32 +27,24 @@ log_error_and_exit() {
     exit 1
 }
 
+install_jbig2() {
+    git clone https://github.com/agl/jbig2enc || log_error_and_exit "Failed to download JBIG2."
+    cd jbig2enc || log_error_and_exit "Failed to enter JBIG2 directory."
+    echo "New working dir: ${PWD}"
+    sed -i '1iAC_CONFIG_AUX_DIR(.)' configure.ac || log_error_and_exit "Failed to modify configure.ac."
+    ./autogen.sh || log_error_and_exit "Failed to run autogen.sh."
+    ./configure --verbose || log_error_and_exit "Failed to configure JBIG2."
+    make || log_error_and_exit "Failed to make JBIG2"
+    sudo make install || log_error_and_exit "Failed to install JBIG2."
+}
+
+
 # Install Python (if not already installed)
 log_message "Installing Python..."
-sudo apt-get update || log_error_and_exit "Failed to update package lists."
-sudo apt-get install -y python3 python3-venv python3-pip ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba || log_error_and_exit "Failed to install Python and other dependencies."
+sudo apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba || log_error_and_exit "Failed to install Python and other dependencies."
 
 # Install JBIG2 (if not already installed)
-git clone https://github.com/agl/jbig2enc || log_error_and_exit "Failed to download JBIG2."
-cd jbig2enc
-./autogen.sh || log_error_and_exit "Failed to run autogen.sh."
-STATUS=$?
-if [ $STATUS -ne 0 ]; then
-    echo "autogen.sh failed"
-    exit $STATUS
-fi
-./configure && make
-STATUS=$?
-if [ $STATUS -ne 0 ]; then
-    echo "configure failed"
-    exit $STATUS
-fi
-sudo make install
-STATUS=$?
-if [ $STATUS -ne 0 ]; then
-    echo "make install failed"
-    exit $STATUS
-fi
+install_jbig2
 
 # Get the current user and group
 USERNAME=$(whoami)
