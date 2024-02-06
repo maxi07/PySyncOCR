@@ -17,11 +17,11 @@ logger.critical("This is a critical message")
 logger.setLevel(logging.DEBUG)
 
 # Create a formatter
-formatter = logging.Formatter("%(asctime)s [%(levelname)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter("%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 # Create a colored formatter
 colored_formatter = coloredlogs.ColoredFormatter(
-    "%(asctime)s [%(levelname)s] %(message)s",
+    "%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     level_styles={
         'debug': {'color': 'white'},
