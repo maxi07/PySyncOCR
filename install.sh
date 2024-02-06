@@ -12,6 +12,7 @@ VENV_DIR="$APP_DIR/.venv"
 MAIN_FILE="$APP_DIR/main.py"
 SERVICE_NAME="PySyncOCR"
 DB_FILE="$APP_DIR/instance/pysyncocr.sqlite3"
+STARTING_DIR="$(pwd)"
 
 # Log file
 LOG_FILE="$APP_DIR/install_log.txt"
@@ -33,18 +34,23 @@ install_jbig2() {
     echo "New working dir: ${PWD}"
     sed -i '1iAC_CONFIG_AUX_DIR(.)' configure.ac || log_error_and_exit "Failed to modify configure.ac."
     ./autogen.sh || log_error_and_exit "Failed to run autogen.sh."
-    ./configure --verbose || log_error_and_exit "Failed to configure JBIG2."
-    make || log_error_and_exit "Failed to make JBIG2"
+    ./configure && make || log_error_and_exit "Failed to configure and make JBIG2."
     sudo make install || log_error_and_exit "Failed to install JBIG2."
 }
 
 
 # Install Python (if not already installed)
 log_message "Installing Python..."
-sudo apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba || log_error_and_exit "Failed to install Python and other dependencies."
+sudo apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip zlib1g-dev ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba make g++ build-essential || log_error_and_exit "Failed to install Python and other dependencies."
 
 # Install JBIG2 (if not already installed)
-install_jbig2
+if jbig2 --version >/dev/null 2>&1; then
+    log_message "JBIG2 already installed."
+else
+    log_message "Installing JBIG2..."
+    install_jbig2
+    cd "$(STARTING_DIR)" || log_error_and_exit "Failed to return to starting directory."
+fi
 
 # Get the current user and group
 USERNAME=$(whoami)
