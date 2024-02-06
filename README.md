@@ -17,7 +17,7 @@ Please clone the repo and run the `install.sh` with sudo privileges. This will c
 The script will install the program and run a service `PySyncOCR` which will automaically run at boot. To disable, please run `sudo systemctl stop PySyncOCR`. To view live debug information, run `sudo journalctl -f -u PySyncOCR`.
 
 > [!IMPORTANT]
-> The installer was built for Ubuntu 20.04 LTS, but should work on other Linux distributions.
+> The installer was built for Ubuntu 22.04 LTS, but should work on other Linux distributions.
 
 ## Options
 The program accespts some options, which have to be added in the `sudo nano /etc/systemd/system/PySyncOCR.service` service. The options are:
