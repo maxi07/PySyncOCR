@@ -1,5 +1,6 @@
 from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import list_remotes
+from src.services.smb_server_alternative import SambaController
 from src.webserver.db import send_database_request
 import json
 
@@ -29,8 +30,18 @@ def inject_template_data():
     except Exception as e:
         logger.exception(f"Failed counting failed documents: {e}")
         failed_documents = 0
+
+    # Check SMB status
+    try:
+        logger.debug("Checking SMB status...")
+        smb_status = SambaController.check_is_running()
+    except Exception as e:
+        logger.exception(f"Failed checking SMB status: {e}")
+        smb_status = False
+
     template_data = {
         'mapping_error': mapping_error,
-        'failed_documents': failed_documents
+        'failed_documents': failed_documents,
+        'smb_error': smb_status
     }
     return template_data

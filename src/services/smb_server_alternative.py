@@ -8,24 +8,37 @@ class SambaController:
 
     def start_server(self):
         try:
-            subprocess.run(["sudo", "systemctl", "start", "smbd"], check=True)
+            command = ["sudo", "systemctl", "start", "smbd"]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
             logger.info("Samba server started.")
-            subprocess.run(["sudo", "ufw", "allow", "samba"], check=True)
+
+            command = ["sudo", "ufw", "allow", "samba"]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
             logger.info("Added Samba port to firewall.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error starting Samba server: {e}")
 
     def stop_server(self):
         try:
-            logger.debug("Stopping Samba server...")
-            subprocess.run(["sudo", "systemctl", "stop", "smbd"], check=True)
+            logger.info("Stopping Samba server...")
+            command = ["sudo", "systemctl", "stop", "smbd"]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
             logger.info("Samba server stopped.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error stopping Samba server: {e}")
 
     def restart_server(self):
         try:
-            subprocess.run(["sudo", "systemctl", "restart", "smbd"], check=True)
+            command = ["sudo", "systemctl", "restart", "smbd"]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
             logger.info("Samba server restarted.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error restarting Samba server: {e}")
@@ -50,7 +63,10 @@ class SambaController:
 
     def add_user(self, username, password):
         try:
-            subprocess.run(["sudo", "useradd", username], check=True)
+            command = ["sudo", "useradd", username]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
         except subprocess.CalledProcessError as e:
             if e.returncode == 9:
                 logger.warning(f"User {username} already exists.")
@@ -78,17 +94,23 @@ class SambaController:
 
     def delete_user(self, username):
         try:
-            subprocess.run(["sudo", "userdel", "-r", username], check=True)
+            command = ["sudo", "userdel", "-r", username]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
             logger.info(f"User {username} deleted from Samba.")
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error deleting user from Samba: {e}")
 
     def check_share_exists(self, share_name):
         try:
+            logger.debug(f"Checking if Samba share {share_name} exists.")
             with open('/etc/samba/smb.conf', 'r') as smb_conf:
                 for line in smb_conf:
                     if line.strip().startswith(f"[{share_name}]"):
+                        logger.debug(f"Share {share_name} exists.")
                         return True
+            logger.debug(f"Share {share_name} does not exist.")
             return False
         except Exception as e:
             logger.exception(f"Error checking Samba share: {e}")
@@ -96,18 +118,24 @@ class SambaController:
 
     def check_is_running() -> bool:
         try:
-            res = subprocess.run(["sudo", "systemctl", "is-active", "smbd"], check=True)
-            if res == "active":
+            command = ["sudo", "systemctl", "is-active", "smbd"]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
+            if res.stdout.decode() == "active":
                 return True
             return False
         except subprocess.CalledProcessError as e:
             logger.exception(f"Error checking Samba server status: {e}")
             return False
 
-
-# Example usage
-# samba_controller = SambaController()
-# samba_controller.start_server()
-# samba_controller.configure_server(guest=False, credentials=('user1', 'password1'))
-# samba_controller.add_user('user1', 'password1')
-# samba_controller.stop_server()
+    def get_status_message() -> str:
+        try:
+            command = ["sudo", "systemctl", "show", "-p", "StatusText", "smbd"]
+            logger.debug(f"Calling {' '.join(command)}")
+            res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            logger.debug(f"Received {res}")
+            return res.stdout.decode().split("=")[1].strip()
+        except subprocess.CalledProcessError as e:
+            logger.exception(f"Error checking Samba server status: {e}")
+            return "Unknown"
