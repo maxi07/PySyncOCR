@@ -56,7 +56,7 @@ def index():
             total_pages_failed_pdfs = math.ceil(total_entries / entries_per_page)
             offset = (page_failed_pdfs - 1) * entries_per_page
             failed_pdfs = db.execute(
-                'SELECT * FROM scanneddata '
+                'SELECT *, DATETIME(created, "localtime") AS local_created, DATETIME(modified, "localtime") AS local_modified FROM scanneddata '
                 'WHERE LOWER(file_status) LIKE "%failed%" '
                 'ORDER BY created DESC '
                 'LIMIT :limit OFFSET :offset',
