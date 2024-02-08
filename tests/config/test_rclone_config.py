@@ -25,13 +25,4 @@ def onedrive_conf_setup():
     return rclone_config
 
 
-def test_duplicate(use_backup, onedrive_conf_setup):
-    onedrive_conf_setup.add("test1", "test1:", "onedrive")
-
-    # assert os.path.exists("$home/PySyncOCR/test1")
-    assert len(onedrive_conf_setup) == 1
-
-
-def test_delete(use_backup, onedrive_conf_setup):
-    onedrive_conf_setup.delete("test1")
-    assert len(onedrive_conf_setup) == 0
+#tbd

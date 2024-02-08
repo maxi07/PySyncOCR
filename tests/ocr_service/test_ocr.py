@@ -35,6 +35,7 @@ def setup_ocr_service():
         rmtree("tests/assets_backup")
 
 
+@pytest.mark.filterwarnings("ignore:pikepdf is missing some specialized decoders")
 def test_general(setup_ocr_service):
     ocr_service = setup_ocr_service.ocr_service
     # Now test the start_processing and put something into the queue
