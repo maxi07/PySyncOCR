@@ -16,14 +16,9 @@ def parse_timestamp(timestamp: str) -> datetime:
 
 
 def format_time_difference(timestamp: str) -> str:
-    print("Received timestamp: " + timestamp)
     updated_time = parse_timestamp(timestamp)
-    print("Parsed timestamp: " + str(updated_time))
     now = datetime.now()
-    print("Current time: " + str(now))
     time_difference = now - updated_time
-    print("Time difference: " + str(time_difference))
-    print("Time difference in seconds: " + str(time_difference.seconds))
 
     if time_difference < timedelta(0):
         raise ValueError("Time difference cannot be negative.")
