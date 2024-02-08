@@ -47,6 +47,10 @@ function updateDashboard(data) {
     queued_dashboard.innerText = data.pending_pdfs;
     const processing_dashboard = document.getElementById('widget_processed_content');
     processing_dashboard.innerText = data.processed_pdfs;
+    const timestamp_queued = document.getElementById('dashboard_latest_timestamp_pending_string');
+    timestamp_queued.innerText = data.pending_pdfs_latest_timestamp;
+    const timestamp_processed = document.getElementById('dashboard_latest_timestamp_completed_string');
+    timestamp_processed.innerText = data.processed_pdfs_latest_timestamp;
 }
 
 function updatePDFCard(pdfData) {
@@ -166,12 +170,12 @@ function addPdfCard(pdfData) {
 
     const brElement = "<br>";
 
-    var createdText = document.createElement('span');
-    createdText.innerHTML = `<i class="bi bi-clock"></i><strong> Updated:</strong> `;
-    var createdSpan = document.createElement('span');
-    createdSpan.id = pdfData.id + '_pdf_modified';
-    createdSpan.textContent = pdfData.modified;
-    createdSpan.innerHTML += brElement;
+    var modifiedText = document.createElement('span');
+    modifiedText.innerHTML = `<i class="bi bi-clock"></i><strong> Updated:</strong> `;
+    var modifiedSpan = document.createElement('span');
+    modifiedSpan.id = pdfData.id + '_pdf_modified';
+    modifiedSpan.textContent = pdfData.local_modified;
+    modifiedSpan.innerHTML += brElement;
 
     var smbText = document.createElement('span');
     smbText.innerHTML = `<i class="bi bi-folder"></i><strong> SMB:</strong> `;
@@ -194,8 +198,8 @@ function addPdfCard(pdfData) {
     statusSpan.textContent = pdfData.file_status;
     statusSpan.innerHTML += brElement;
 
-    infoParagraph.appendChild(createdText);
-    infoParagraph.appendChild(createdSpan);
+    infoParagraph.appendChild(modifiedText);
+    infoParagraph.appendChild(modifiedSpan);
     infoParagraph.appendChild(smbText);
     infoParagraph.appendChild(smbSpan);
     infoParagraph.appendChild(cloudText);

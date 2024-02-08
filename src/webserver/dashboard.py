@@ -112,8 +112,8 @@ def index():
         if len(pdfs_dicts) > 0:
             for pdf in pdfs_dicts:
                 try:
-                    input_datetime_created = datetime.strptime(pdf['created'], "%Y-%m-%d %H:%M:%S")
-                    input_datetime_modified = datetime.strptime(pdf['modified'], "%Y-%m-%d %H:%M:%S")
+                    input_datetime_created = datetime.strptime(pdf['local_created'], "%Y-%m-%d %H:%M:%S")
+                    input_datetime_modified = datetime.strptime(pdf['local_modified'], "%Y-%m-%d %H:%M:%S")
                     pdf['local_created'] = input_datetime_created.strftime('%d.%m.%Y %H:%M')
                     pdf['local_modified'] = input_datetime_modified.strftime('%d.%m.%Y %H:%M')
                 except Exception as ex:
@@ -166,8 +166,8 @@ def websocket_dashboard(ws):
             pdf = [dict(pdf) for pdf in pdf_list][0]
             logger.debug(f"Loaded {db_id} pdf from db")
             try:
-                input_datetime_created = datetime.strptime(pdf['created'], "%Y-%m-%d %H:%M:%S")
-                input_datetime_modified = datetime.strptime(pdf['modified'], "%Y-%m-%d %H:%M:%S")
+                input_datetime_created = datetime.strptime(pdf['local_created'], "%Y-%m-%d %H:%M:%S")
+                input_datetime_modified = datetime.strptime(pdf['local_modified'], "%Y-%m-%d %H:%M:%S")
                 pdf['local_created'] = input_datetime_created.strftime('%d.%m.%Y %H:%M')
                 pdf['local_modified'] = input_datetime_modified.strftime('%d.%m.%Y %H:%M')
             except Exception as ex:
