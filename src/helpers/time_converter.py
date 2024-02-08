@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import time
 
 
 def parse_timestamp(timestamp):
@@ -20,8 +21,9 @@ def parse_timestamp(timestamp):
 
 def format_time_difference(timestamp):
     updated_time = parse_timestamp(timestamp)
+    updated_time_local = convert_string_to_local_timestamp(updated_time)
     now = datetime.now()
-    time_difference = now - updated_time
+    time_difference = now - updated_time_local
 
     if time_difference < timedelta(seconds=60):
         return "just now"
@@ -43,3 +45,18 @@ def format_time_difference(timestamp):
     else:
         years = time_difference.days // 365
         return f"{years} {'year' if years == 1 else 'years'} ago"
+
+
+# Function to get the local timezone offset and abbreviation
+def get_local_timezone_info():
+    offset = timedelta(seconds=-time.timezone)
+    abbreviation = time.tzname[0] if time.daylight == 0 else time.tzname[1]
+    return offset, abbreviation
+
+
+# Function to convert SQLite timestamp to local timezone# Function to convert string to local timezone timestamp
+def convert_string_to_local_timestamp(string_timestamp):
+    sqlite_timestamp = datetime.strptime(string_timestamp, "%Y-%m-%d %H:%M:%S")
+    offset, _ = get_local_timezone_info()
+    local_timestamp = sqlite_timestamp + offset
+    return local_timestamp.strftime("%Y-%m-%d %H:%M:%S")

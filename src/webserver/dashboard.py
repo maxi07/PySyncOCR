@@ -4,7 +4,7 @@ bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 from src.helpers.logger import logger
 from src.webserver.db import get_db
 from src.helpers.config import config
-from src.helpers.time_converter import format_time_difference
+from src.helpers.time_converter import format_time_difference, convert_string_to_local_timestamp
 import locale
 from datetime import datetime
 import time
@@ -39,7 +39,7 @@ def index():
             total_pages = 1
             page = 1
 
-        # Count total processed PDFs (with status synced)
+        # Count total processed PDFs (with status completed)
         try:
             processed_pdfs = db.execute(
                 'SELECT COUNT(*) FROM scanneddata '
@@ -54,7 +54,7 @@ def index():
         try:
             queued_pdfs = db.execute(
                 'SELECT COUNT(*) FROM scanneddata '
-                'WHERE file_status = "Pending"'
+                'WHERE LOWER(file_status) LIKE "%pending%"'
                 ).fetchone()[0]
             logger.debug(f"Found {queued_pdfs} queued pdfs")
         except Exception as e:
@@ -114,8 +114,8 @@ def index():
                 try:
                     input_datetime_created = datetime.strptime(pdf['created'], "%Y-%m-%d %H:%M:%S")
                     input_datetime_modified = datetime.strptime(pdf['modified'], "%Y-%m-%d %H:%M:%S")
-                    pdf['created'] = input_datetime_created.strftime('%d.%m.%Y %H:%M')
-                    pdf['modified'] = input_datetime_modified.strftime('%d.%m.%Y %H:%M')
+                    pdf['created'] = convert_string_to_local_timestamp(input_datetime_created.strftime('%d.%m.%Y %H:%M'))
+                    pdf['modified'] = convert_string_to_local_timestamp(input_datetime_modified.strftime('%d.%m.%Y %H:%M'))
                 except Exception as ex:
                     logger.exception(f"Failed setting datetime for {pdf['id']}. {ex}")
 
@@ -168,13 +168,39 @@ def websocket_dashboard(ws):
             try:
                 input_datetime_created = datetime.strptime(pdf['created'], "%Y-%m-%d %H:%M:%S")
                 input_datetime_modified = datetime.strptime(pdf['modified'], "%Y-%m-%d %H:%M:%S")
-                pdf['created'] = input_datetime_created.strftime('%d.%m.%Y %H:%M')
-                pdf['modified'] = input_datetime_modified.strftime('%d.%m.%Y %H:%M')
+                pdf['created'] = convert_string_to_local_timestamp(input_datetime_created.strftime('%d.%m.%Y %H:%M'))
+                pdf['modified'] = convert_string_to_local_timestamp(input_datetime_modified.strftime('%d.%m.%Y %H:%M'))
             except Exception as ex:
                 logger.exception(f"Failed setting datetime for {pdf['id']}. {ex}")
             data_to_send = {'id': pdf['id'], 'command': signal['command'], 'data': pdf}
-            logger.debug(f"Sending update data for {data_to_send['id']} to websocket")
+            logger.debug(f"Sending update data {data_to_send} to websocket")
             ws.send(json.dumps(data_to_send))
+
+            # Now check the number of pending and finished docs to update dashboard
+            try:
+                pending_pdfs = db.execute(
+                    'SELECT COUNT(*) FROM scanneddata '
+                    'WHERE LOWER(file_status) LIKE "%pending%"'
+                    ).fetchone()[0]
+                logger.debug(f"Found {pending_pdfs} queued pdfs")
+            except Exception as e:
+                logger.exception(f"Error getting pending pdf count: {e}")
+                pending_pdfs = "Unknown"
+
+            try:
+                processed_pdfs = db.execute(
+                            'SELECT COUNT(*) FROM scanneddata '
+                            'WHERE file_status = "Completed" '
+                            ).fetchone()[0]
+                logger.debug(f"Found {processed_pdfs} completed pdfs")
+            except Exception as e:
+                logger.exception(f"Error getting processed pdf count: {e}")
+                processed_pdfs = "Unknown"
+
+            data_to_send = {'command': 'update_dashboard', 'data': {'pending_pdfs': pending_pdfs, 'processed_pdfs': processed_pdfs}}
+            ws.send(json.dumps(data_to_send))
+            logger.debug("Sent update dashboard command to websocket")
+            logger.debug("Waiting for next signal")
         except queue.Empty:
             pass
         time.sleep(0.2)
