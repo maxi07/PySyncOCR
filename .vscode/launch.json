@@ -7,7 +7,7 @@
 
         {
             "name": "Python: Aktuelle Datei",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
@@ -15,7 +15,7 @@
         },
         {
             "name": "Python: Main (SUDO)",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "main",
             "justMyCode": true,
@@ -23,7 +23,7 @@
         },
         {
             "name": "Python: Main (SUDO) DEV",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "main",
             "justMyCode": true,
