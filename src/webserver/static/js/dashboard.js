@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Received add command");
             // Find pdfcard suing id
             addPdfCard(jsonData.data);
+        } else if (jsonData.command === 'update_dashboard') {
+            console.log("Received update_dashboard command");
+            // If it is, update the dashboard
+            updateDashboard(jsonData.data);
         }
 
     });
@@ -35,6 +39,15 @@ document.addEventListener('DOMContentLoaded', function () {
         addPdfCard(pdfData);
     });
 });
+
+function updateDashboard(data) {
+    console.log("Updating dashboard");
+    // Find the dashboard
+    const queued_dashboard = document.getElementById('widget_queue_content');
+    queued_dashboard.innerText = data.pending_pdfs;
+    const processing_dashboard = document.getElementById('widget_processed_content');
+    processing_dashboard.innerText = data.processed_pdfs;
+}
 
 function updatePDFCard(pdfData) {
     console.log("Updating card id " + pdfData.id);
