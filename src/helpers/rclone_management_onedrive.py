@@ -30,6 +30,9 @@ def list_remotes() -> list[str]:
         return result_list
     except subprocess.CalledProcessError as e:
         logger.error(f"Error getting remotes rclone: {e}")
+        logger.error(e.stderr.decode())
+        if "permission denied" in e.stderr.decode():
+            logger.error("Please check that you have the correct permissions to run rclone.")
         return []
 
 
@@ -87,6 +90,7 @@ def create_folder(connection: str, path: str, foldername: str) -> bool:
         return True
     except subprocess.CalledProcessError as e:
         logger.error(f"Error creating folder rclone: {e}")
+        logger.error(e.stderr.decode())
         return False
 
 
@@ -107,6 +111,7 @@ def remove_folder(connection: str, path: str, foldername: str) -> bool:
             logger.error(f"Directory {foldername} at {path} cannot be deleted, as its not empty.")
         else:
             logger.error(f"Error removing folder at {path + foldername} rclone: {e}")
+            logger.error(e.stderr.decode())
         return False
 
 
@@ -133,6 +138,7 @@ def dump_config():
         return res
     except subprocess.CalledProcessError as e:
         logger.error(f"Error dumping rclone config: {e}")
+        logger.error(e.stderr.decode())
         return None
 
 
@@ -145,6 +151,7 @@ def delete_config_item(id) -> bool:
         return True
     except subprocess.CalledProcessError as e:
         logger.error(f"Error deleting config item {id} rclone: {e}")
+        logger.error(e.stderr.decode())
         return False
 
 
