@@ -23,7 +23,6 @@ jobs:
       - name: Install Packages
         run: |
           echo "Working dir is $(pwd)"
-          ls -al
           sudo bash ./install.sh --install-service=FALSE
       - name: Install dependencies
         run: |
