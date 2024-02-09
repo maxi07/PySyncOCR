@@ -46,8 +46,8 @@ install_jbig2() {
 }
 
 
-# Install Python (if not already installed)
-log_message "Installing Python..."
+# Install Packages (if not already installed)
+log_message "Installing Packages..."
 sudo apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip zlib1g-dev ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng rclone autotools-dev automake autoconf libtool libtool libleptonica-dev samba make g++ build-essential || log_error_and_exit "Failed to install Python and other dependencies."
 
 # Install JBIG2 (if not already installed)
@@ -56,7 +56,7 @@ if jbig2 --version >/dev/null 2>&1; then
 else
     log_message "Installing JBIG2..."
     install_jbig2
-    cd "$(STARTING_DIR)" || log_error_and_exit "Failed to return to starting directory."
+    cd "$STARTING_DIR" || log_error_and_exit "Failed to return to starting directory."
 fi
 
 # Get the current user and group
