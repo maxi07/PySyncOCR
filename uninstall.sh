@@ -44,6 +44,18 @@ rm -rf "$VENV_DIR" || log_error_and_exit "Failed to remove virtual environment."
 log_message "Uninstalling dependencies installed with apt-get..."
 sudo apt-get remove --purge -y ocrmypdf tesseract-ocr tesseract-ocr-deu tesseract-ocr-eng autotools-dev automake libtool libleptonica-dev || log_error_and_exit "Failed to uninstall dependencies."
 
+# Remove smbconfig
+log_message "Removing smb config..."
+# Search samba config and remove relevant part
+# Define the name of the share you want to remove
+share_name="PySyncOCR"
+
+# Define the path to your Samba configuration file
+samba_conf="/etc/samba/smb.conf"
+
+# Use sed to remove the lines containing the share configuration
+sed -i "/^\[$share_name\]/,/^$/d" "$samba_conf" || log_error_and_exit "Failed to remove smb config."
+
 # Remove jbig2enc
 log_message "Removing jbig2enc..."
 cd "$APP_DIR"
