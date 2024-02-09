@@ -50,6 +50,13 @@ class SambaController:
             if not os.path.exists(config.get_filepath("smb_service.share_path")):
                 os.mkdir(config.get_filepath("smb_service.share_path"), mode=777)
                 logger.info(f"Created directory {config.get_filepath('smb_server.share_path')}")
+
+                # Set owner of folder to user "ocr"
+                command = ["sudo", "chown", "ocr:ocr", config.get_filepath("smb_service.share_path")]
+                logger.debug(f"Calling {' '.join(command)}")
+                res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+                logger.debug(f"Received {res}")
+                logger.info(f"Set owner of {config.get_filepath('smb_service.share_path')} to user ocr.")
             else:
                 logger.debug(f"Directory {config.get_filepath('smb_service.share_path')} already exists.")
         except Exception as e:
@@ -62,7 +69,7 @@ class SambaController:
                 smb_conf.write(f"path = {path}\n")
                 smb_conf.write(f"comment = {comment}\n")
                 if require_authentication:
-                    smb_conf.write("valid users = @smbusers\n")
+                    smb_conf.write("valid users = ocr\n")
                     smb_conf.write("guest ok = no\n")
                 else:
                     smb_conf.write("guest ok = yes\n")
