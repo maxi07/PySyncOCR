@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
+      - name: Install Packages
+        run: |
+          sudo ./install.sh --install-service=FALSE
       - name: Install dependencies
         run: |
           pip install -r requirements.txt

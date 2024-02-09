@@ -13,9 +13,17 @@ MAIN_FILE="$APP_DIR/main.py"
 SERVICE_NAME="PySyncOCR"
 DB_FILE="$APP_DIR/instance/pysyncocr.sqlite3"
 STARTING_DIR="$(pwd)"
-
-# Log file
+INSTALL_SERVICE=true
 LOG_FILE="$APP_DIR/install_log.txt"
+
+# Parse command line options
+for arg in "$@"; do
+    case $arg in
+        --install-service=FALSE)
+            INSTALL_SERVICE=false
+            ;;
+    esac
+done
 
 # Function to log messages
 log_message() {
@@ -89,7 +97,7 @@ else
 fi
 
 
-
+if [ "$INSTALL_SERVICE" = true ]; then
 # Create systemd service file
 log_message "Creating systemd service file..."
 SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
@@ -124,5 +132,9 @@ if sudo systemctl is-active --quiet "$SERVICE_NAME.service"; then
 else
     log_message "Service failed to start."
 fi
+else
+    log_message "Skipping service installation."
+fi
+
 
 echo "Installation complete. Log file: $LOG_FILE"
