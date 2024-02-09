@@ -22,7 +22,7 @@ def start_server():
     gunicorn_command = [
         python_interpreter,
         '-m', 'gunicorn',
-        '-w', '4',  # Number of worker processes
+        '-w', '2',  # Number of worker processes
         '-b', '0.0.0.0:5000',  # Host and port on which to bind
         'src.webserver:create_app()',  # Replace with your actual app module and instance
     ]

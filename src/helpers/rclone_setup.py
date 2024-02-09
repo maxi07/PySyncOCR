@@ -1,6 +1,7 @@
 import pexpect
 import re
 from src.helpers.logger import logger
+import subprocess
 
 
 def extract_url(prompt):
@@ -12,6 +13,13 @@ def extract_url(prompt):
 
 
 def configure_rclone_onedrive_personal(name):
+    try:
+        set_ip_forwarding()
+        set_port_forwarding()
+    except Exception as e:
+        logger.exception(f"Error while setting up ip / port forwarding: {e}")
+        return False
+
     # Run the rclone config command using pexpect
     process = pexpect.spawn('rclone config')
     logger.info("Configuring OneDrive with rclone, please wait...")
@@ -108,6 +116,36 @@ def configure_rclone_onedrive_personal(name):
     finally:
         # Close the process
         process.close()
+
+
+def execute_command(command, action_name):
+    try:
+        logger.debug(f"Calling {' '.join(command)}")
+        res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        logger.debug(f"Received {res}")
+        logger.info(f"{action_name}")
+    except subprocess.CalledProcessError as e:
+        logger.exception(f"Error performing {action_name}: {e}")
+
+
+def set_ip_forwarding():
+    # Enable IP forwarding
+    logger.info("Enabling IP forwarding...")
+    command = ["sudo", "sysctl", "-w", "net.ipv4.ip_forward=1"]
+    execute_command(command, "Enabled IP forwarding")
+
+
+def set_port_forwarding():
+    logger.info("Setting up port forwarding...")
+    internal_ip = subprocess.check_output(['hostname', '-I']).decode().split()[0]
+
+    # Forward traffic on port 53682 to the internal IP dynamically
+    command = ["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-i", "eth0", "-p", "tcp", "--dport", "53682", "-j", "DNAT", "--to-destination", f"{internal_ip}:53682"]
+    execute_command(command, f"Port forwarding for port 53682 set to {internal_ip}")
+
+    # Allow forwarded traffic to reach the internal IP on port 53682
+    command = ["sudo", "iptables", "-A", "FORWARD", "-p", "tcp", "-d", internal_ip, "--dport", "53682", "-j", "ACCEPT"]
+    execute_command(command, "Forwarded traffic allowed to reach the internal IP on port 53682")
 
 
 logger.debug(f"Loaded {__name__} module")
