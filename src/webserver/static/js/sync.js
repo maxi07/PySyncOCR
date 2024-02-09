@@ -94,7 +94,7 @@ function deleteOneDriveConf(id) {
 }
 
 function addOneDrive() {
-    const animation = document.getElementById("waitingAnimation");
+    const animation = document.getElementById("waitingAnimationonedriveadd");
     const form = document.getElementById("onedrive_name_container");
     const addButton = document.getElementById("add_onedrive_button");
     const statusUpdateElement = document.getElementById("statusUpdate");
