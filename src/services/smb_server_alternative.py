@@ -51,7 +51,7 @@ class SambaController:
                 os.mkdir(config.get_filepath("smb_server.share_path"), mode=777)
                 logger.info(f"Created directory {config.get_filepath('smb_server.share_path')}")
             else:
-                logger.debug(f"Directory {config.get_filepath('smb_server.share_path')} already exists.")
+                logger.debug(f"Directory {config.get_filepath('smb_service.share_path')} already exists.")
         except Exception as e:
             logger.exception(f"Error creating directory: {e}")
             return
