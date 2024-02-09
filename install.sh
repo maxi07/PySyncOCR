@@ -30,14 +30,6 @@ for arg in "$@"; do
     esac
 done
 
-# Install dependencies if flag is not set to skip
-if [ "$SKIP_PIP" = false ]; then
-    log_message "Installing dependencies..."
-    pip install -r requirements.txt || log_error_and_exit "Failed to install dependencies."
-else
-    log_message "Skipping pip requirements installation."
-fi
-
 # Function to log messages
 log_message() {
     echo "[ $(date '+%Y-%m-%d %H:%M:%S') ] $1" | sudo tee -a "$LOG_FILE"
@@ -91,6 +83,7 @@ if [ "$SKIP_PIP" = false ]; then
 else
     log_message "Skipping pip requirements installation."
 fi
+
 
 log_message "Initializing database..."
 # Check if database already exists
