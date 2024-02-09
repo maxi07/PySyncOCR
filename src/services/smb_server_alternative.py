@@ -47,8 +47,8 @@ class SambaController:
 
     def add_share_config(self, share_name, path, comment="PySyncOCR Share", require_authentication=True):
         try:
-            if not os.path.exists(config.get_filepath("smb_server.share_path")):
-                os.mkdir(config.get_filepath("smb_server.share_path"), mode=777)
+            if not os.path.exists(config.get_filepath("smb_service.share_path")):
+                os.mkdir(config.get_filepath("smb_service.share_path"), mode=777)
                 logger.info(f"Created directory {config.get_filepath('smb_server.share_path')}")
             else:
                 logger.debug(f"Directory {config.get_filepath('smb_service.share_path')} already exists.")
