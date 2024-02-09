@@ -1,5 +1,7 @@
 import subprocess
+import os
 from src.helpers.logger import logger
+from src.helpers.config import config
 
 
 class SambaController:
@@ -44,6 +46,16 @@ class SambaController:
             logger.exception(f"Error restarting Samba server: {e}")
 
     def add_share_config(self, share_name, path, comment="PySyncOCR Share", require_authentication=True):
+        try:
+            if not os.path.exists(config.get_filepath("smb_server.share_path")):
+                os.mkdir(config.get_filepath("smb_server.share_path"), mode=777)
+                logger.info(f"Created directory {config.get_filepath('smb_server.share_path')}")
+            else:
+                logger.debug(f"Directory {config.get_filepath('smb_server.share_path')} already exists.")
+        except Exception as e:
+            logger.exception(f"Error creating directory: {e}")
+            return
+
         try:
             with open('/etc/samba/smb.conf', 'a') as smb_conf:
                 smb_conf.write(f"\n[{share_name}]\n")
