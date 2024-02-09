@@ -22,7 +22,9 @@ jobs:
           cache: 'pip'
       - name: Install Packages
         run: |
-          sudo ./install.sh --install-service=FALSE
+          echo "Working dir is $(pwd)"
+          ls -al
+          sudo bash ./install.sh --install-service=FALSE
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
