@@ -95,6 +95,7 @@ class FileHandler(FileSystemEventHandler):
             connection.commit()
             last_inserted_id = cursor.execute('SELECT last_insert_rowid()').fetchone()[0]
             connection.close()
+            logger.debug(f"Added new file to database with id {last_inserted_id}")
             item.db_id = last_inserted_id
         except Exception as e:
             logger.exception(f"Error adding new file to database: {e}")
