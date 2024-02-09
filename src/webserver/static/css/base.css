@@ -17,6 +17,10 @@ p {
     color: initial;
 }
 
+.modal {
+    color:initial
+}
+
 html,
 body {
     height: 100%;

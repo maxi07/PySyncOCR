@@ -37,10 +37,10 @@ def index():
         port = "Unknown"
 
     try:
-        share_path = config.get("smb_service.share_path")
+        share_name = config.get("smb_service.share_name")
     except Exception as ex:
-        logger.exception(f"Error while loading share_path: {ex}")
-        share_path = "Unknown"
+        logger.exception(f"Error while loading share_name: {ex}")
+        share_name = "Unknown"
 
     try:
         return render_template("smb.html",
@@ -49,6 +49,6 @@ def index():
                                username=username,
                                password=password,
                                port=port,
-                               share_path=share_path)
+                               share_name=share_name)
     except Exception as e:
         return "Failed loading SMB settings: " + str(e)
