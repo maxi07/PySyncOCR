@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "Working dir is $(pwd)"
           ls -al
-          sudo bash ./install.sh --install-service=FALSE
+          sudo bash ./install.sh --install-service=FALSE --skip-pip=TRUE
       - name: Install dependencies
         run: |
           pip install -r requirements.txt

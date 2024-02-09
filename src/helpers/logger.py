@@ -24,13 +24,16 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(colored_formatter)
 
 # Create a file handler and set the formatter
-file_handler = logging.FileHandler("logfile.log")
-file_handler.setLevel(logging.WARNING)
-file_handler.setFormatter(colored_formatter)
+try:
+    file_handler = logging.FileHandler("logfile.log")
+    file_handler.setLevel(logging.WARNING)
+    file_handler.setFormatter(colored_formatter)
+    logger.addHandler(file_handler)
+except PermissionError:
+    logger.warning("Cannot store log files locally due to permission error.")
 
-# Add both handlers to the logger
+# Add handlers to the logger
 logger.addHandler(console_handler)
-logger.addHandler(file_handler)
 
 
 # Customize log messages before formatting

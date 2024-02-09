@@ -15,15 +15,29 @@ DB_FILE="$APP_DIR/instance/pysyncocr.sqlite3"
 STARTING_DIR="$(pwd)"
 INSTALL_SERVICE=true
 LOG_FILE="$APP_DIR/install_log.txt"
+INSTALL_SERVICE=true
+SKIP_PIP=false
 
-# Parse command line options
+
 for arg in "$@"; do
     case $arg in
         --install-service=FALSE)
             INSTALL_SERVICE=false
             ;;
+        --skip-pip=TRUE)
+            SKIP_PIP=true
+            ;;
     esac
 done
+
+# Install dependencies if flag is not set to skip
+if [ "$SKIP_PIP" = false ]; then
+    log_message "Installing dependencies..."
+    pip install -r requirements.txt || log_error_and_exit "Failed to install dependencies."
+else
+    log_message "Skipping pip requirements installation."
+fi
+
 # Function to log messages
 log_message() {
     echo "[ $(date '+%Y-%m-%d %H:%M:%S') ] $1" | sudo tee -a "$LOG_FILE"
@@ -70,9 +84,13 @@ python3 -m venv "$VENV_DIR" || log_error_and_exit "Failed to create virtual envi
 # Activate virtual environment
 source "$VENV_DIR/bin/activate" || log_error_and_exit "Failed to activate virtual environment."
 
-# Install dependencies
-log_message "Installing dependencies..."
-pip install -r requirements.txt || log_error_and_exit "Failed to install dependencies."
+# Install dependencies if flag is not set to skip
+if [ "$SKIP_PIP" = false ]; then
+    log_message "Installing dependencies..."
+    pip install -r requirements.txt || log_error_and_exit "Failed to install dependencies."
+else
+    log_message "Skipping pip requirements installation."
+fi
 
 log_message "Initializing database..."
 # Check if database already exists
