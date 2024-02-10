@@ -57,7 +57,7 @@ samba_conf="/etc/samba/smb.conf"
 sed -i "/^\[$share_name\]/,/^$/d" "$samba_conf" || log_error_and_exit "Failed to remove smb config."
 
 # Remove shared OCR folder
-rm -rf "/home/ocr/pysyncocr" || log_error_and_exit "Failed to remove shared OCR folder."
+rm -rf "/home/ocr/pysyncocr_shared" || log_error_and_exit "Failed to remove shared OCR folder."
 
 # Remove jbig2enc
 log_message "Removing jbig2enc..."
