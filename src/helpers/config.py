@@ -11,8 +11,8 @@ class Config:
             with open(config_file) as f:
                 self._config = json.load(f)
                 logger.debug("Reading config")
-        except Exception:
-            logger.exception("Failed reading config")
+        except Exception as ex:
+            logger.exception(f"Failed reading config: {ex}")
             quit(-2)
 
     def __iter__(self):
@@ -30,7 +30,7 @@ class Config:
             # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
             return value if value is not None else default
         except Exception as ex:
-            logger.exception("Failed reading config", ex)
+            logger.exception(f"Failed reading config: {ex}")
             return default
 
     def get_filepath(self, key: str, default=None):
@@ -45,7 +45,7 @@ class Config:
             else:
                 return default
         except Exception as ex:
-            logger.exception("Failed reading config", ex)
+            logger.exception(f"Failed reading config: {ex}")
             return default
 
     def set(self, key, value):
