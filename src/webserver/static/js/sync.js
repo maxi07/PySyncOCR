@@ -59,7 +59,7 @@ function evaluatePathMappingSubmitButton() {
     const submitButtonpathmapping = document.getElementById('add_path_mapping_button');
     const localpathinput = document.getElementById('local_path');
     const remotePathInput = document.getElementById('remote_path');
-    
+
     // Enable or disable the button based on whether the input has content
     submitButtonpathmapping.disabled = !localpathinput.value.trim();
     submitButtonpathmapping.disabled = localpathinput.classList.contains('is-invalid');
@@ -70,7 +70,7 @@ function deleteOneDriveConf(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/sync/onedrive', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status !== 200) {
                 console.error(xhr.responseText);
@@ -78,51 +78,85 @@ function deleteOneDriveConf(id) {
             } else {
                 console.log(xhr.responseText);
                 // Fade out the row before removing it
-                const row = document.getElementById(id + '_row'); 
+                const row = document.getElementById(id + '_row');
                 // Fade animation
                 row.style.transition = 'opacity 1.5s';
                 row.style.opacity = 0;
 
                 // Remove after fade
                 setTimeout(() => {
-                row.remove(); 
+                    row.remove();
                 }, 500);
             };
         };
     }
-    xhr.send(JSON.stringify({"id": id}));
+    xhr.send(JSON.stringify({ "id": id }));
 }
 
 function addOneDrive() {
     const animation = document.getElementById("waitingAnimationonedriveadd");
+    const animation_statustext = document.getElementById("waitingAnimationonedriveadd_statustext");
     const form = document.getElementById("onedrive_name_container");
     const addButton = document.getElementById("add_onedrive_button");
     const statusUpdateElement = document.getElementById("statusUpdate");
+    const sshTunnelInfoElement = document.getElementById("sshTunnelSetupInfo");
+    const sshInstallInfoElement = document.getElementById("sshInstallInfo");
+    const cloud_header = document.getElementById("cloud_header");
+    const sshErrorMsg = document.getElementById("sshErrorMsg");
     addButton.style.disabled = true;
     animation.style.display = "block";
     form.style.display = "none";
+    cloud_header.style.display = "none";
 
-    const socket = new WebSocket('ws://' + window.location.host + '/websocket-onedrive');
-    socket.addEventListener('message', ev => {
-        statusUpdateElement.style.display = "block";
-        console.log(ev.data);
-        // Test if ev.data begins with 'http'
-        if (ev.data.startsWith("http")) {
-            // If it does, it's a link to the file
-            document.getElementById("updateText").innerHTML = '<a href="' + ev.data + '" target="_blank">' + "To authenticate, please visit <br>" + ev.data + '</a>';
-            window.open(ev.data, '_blank');
-        } else if (ev.data.startsWith("Success")) {
-            window.location.reload();
-        } else {
-            // Otherwise, it's just text
+    // Check if ssh is enabled. We need a ssh tunnel for proper authentication with onedrive (duh..)
+    animation_statustext.innerText = "Checking if SSH is enabled...";
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/sync/check-ssh', true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
             animation.style.display = "none";
-            document.getElementById("updateText").innerHTML = ev.data;
-        }
-    });
-    socket.addEventListener('open', ev => {
-        console.log('Connected to websocket');
-        socket.send(JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
-    });
+            if (xhr.status !== 200) {
+                console.error(xhr.responseText);
+                sshErrorMsg.innerText = xhr.responseText;
+                addButton.innerText = "Retry";
+                // Show the ssh setup modal
+                sshInstallInfoElement.style.display = "block";
+            } else {
+                console.log(xhr.responseText);
+                
+                // Show the ssh tunnel setup modal and reroute the next button
+                sshTunnelInfoElement.style.display = "block";
+                addButton.onclick = function () {
+                    animation.style.display = "block;";
+                    sshTunnelInfoElement.style.display = "none;";
+                    // Run websocket for status updates during rclone config
+                    animation_statustext.innerText = "Waiting for connection...";
+                    const socket = new WebSocket('ws://' + window.location.host + '/websocket-onedrive');
+                    socket.addEventListener('message', ev => {
+                        statusUpdateElement.style.display = "block";
+                        console.log(ev.data);
+                        // Test if ev.data begins with 'http'
+                        if (ev.data.startsWith("http")) {
+                            // If it does, it's a link to the file
+                            document.getElementById("updateText").innerHTML = '<a href="' + ev.data + '" target="_blank">' + "To authenticate, please visit <br>" + ev.data + '</a>';
+                            window.open(ev.data, '_blank');
+                        } else if (ev.data.startsWith("Success")) {
+                            window.location.reload();
+                        } else {
+                            // Otherwise, it's just text
+                            animation.style.display = "none";
+                            document.getElementById("updateText").innerHTML = ev.data;
+                        }
+                    });
+                    socket.addEventListener('open', ev => {
+                        console.log('Connected to websocket');
+                        socket.send(JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
+                    });
+                };
+            };
+        };
+    }
+    xhr.send();
 }
 
 
@@ -142,7 +176,7 @@ function validateTextInput(input) {
 function getConnections() {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', '/sync/onedrive', true);
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status !== 200) {
                 console.error(xhr.responseText);
@@ -153,7 +187,7 @@ function getConnections() {
 
                 // Clear existing options
                 selectElement.innerHTML = '';
-                
+
                 responseJSON = JSON.parse(xhr.responseText);
                 // Add new options
                 responseJSON.forEach(optionText => {
@@ -169,7 +203,7 @@ function getConnections() {
 }
 
 
-function loadOneDriveDir(back=false) {
+function loadOneDriveDir(back = false) {
     const backbuttondiv = document.getElementById("remoteonedrivebackbutton");
     const loadingAnimation = document.getElementById("waitingAnimationPathMapping");
     const listgroup = document.getElementById('onedrivelistgroup');
@@ -180,7 +214,7 @@ function loadOneDriveDir(back=false) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/sync/onedrive-directory', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status !== 200) {
                 console.error(xhr.responseText);
@@ -207,10 +241,10 @@ function loadOneDriveDir(back=false) {
                     arrowIcon.classList.add('bi', 'bi-arrow-return-right');
 
                     if (value > 0) {
-                    listItem.appendChild(span);
-                    listItem.appendChild(arrowIcon);
+                        listItem.appendChild(span);
+                        listItem.appendChild(arrowIcon);
                     } else {
-                    listItem.appendChild(span);
+                        listItem.appendChild(span);
                     }
 
 
@@ -243,7 +277,7 @@ function handleRemotePathClick(event) {
 
     // Remove 'active' class from all items
     onedriveLocalListGroup.querySelectorAll('.list-group-item').forEach(item => {
-      item.classList.remove('active');
+        item.classList.remove('active');
     });
 
     // Add 'active' class to the clicked item
@@ -281,32 +315,32 @@ function handleRemotePathDoubleClick(event) {
         currentOneDrivePath += targetItem.textContent.trim() + "/";
         console.log("User is now in dir: " + currentOneDrivePath);
         loadOneDriveDir();
-    } 
+    }
 }
 
 function updateSameLevel(path, newDir) {
     // Remove leading and trailing slashes, then split the path into an array of directories
     const pathArray = path.replace(/^\/|\/$/g, '').split('/');
-  
+
     // Remove the last element (directory) from the array
     pathArray.pop();
-  
+
     // Append the new directory to the array
     pathArray.push(newDir);
-  
+
     // Join the array back into a string with '/' as the separator
     let newPath = '/' + pathArray.join('/') + '/';
-  
+
     return newPath;
-  }
-  
-  function updateDeeperLevel(currentFilePath, newDirectoryName) {
+}
+
+function updateDeeperLevel(currentFilePath, newDirectoryName) {
     currentFilePath += newDirectoryName + '/';
     return currentFilePath;
-  }
+}
 
 
-  function addPathMapping() {
+function addPathMapping() {
     // Hide form
     const modalbody = document.getElementById("pathmappingmodal_body");
     modalbody.style.display = "none";
@@ -326,7 +360,7 @@ function updateSameLevel(path, newDir) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/sync/pathmapping', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             waitingAnimation.style.display = "none";
             const finalPathMappingStatus = document.getElementById("finalPathMappingStatus");
@@ -401,16 +435,16 @@ function addPathMappingToUI(local, remote, connection) {
                         class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             </div>`
-    document.getElementById("pathmappingscontainer").appendChild(newCard);    
+    document.getElementById("pathmappingscontainer").appendChild(newCard);
 }
 
 function deletePathMapping(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/sync/pathmapping', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status!== 200) {
+            if (xhr.status !== 200) {
                 console.error(xhr.responseText);
                 alert(xhr.responseText);
             } else {
@@ -421,7 +455,7 @@ function deletePathMapping(id) {
 
                 // Remove after fade
                 setTimeout(() => {
-                    card.remove(); 
+                    card.remove();
                 }, 1500);
             };
         };
@@ -446,21 +480,21 @@ function deleteFailedSync(id) {
     const xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/sync/failedpdf', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status!== 200) {
+            if (xhr.status !== 200) {
                 console.error(xhr.responseText);
                 alert(xhr.responseText);
             } else {
                 console.log(xhr.responseText);
-                const row = document.getElementById(id + '_failedpdf_row'); 
+                const row = document.getElementById(id + '_failedpdf_row');
                 // Fade animation
                 row.style.transition = 'opacity 1.5s';
                 row.style.opacity = 0;
 
                 // Remove after fade
                 setTimeout(() => {
-                row.remove(); 
+                    row.remove();
                 }, 500);
             };
         };
@@ -470,4 +504,19 @@ function deleteFailedSync(id) {
 
 function downloadFailedSync(id) {
     window.open("/sync/failedpdf?download_id=" + id);
+}
+
+function copyCommand() {
+    var commandElement = document.querySelector('.terminal-command');
+    var commandText = commandElement.innerText;
+
+    var textarea = document.createElement('textarea');
+    textarea.value = commandText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, 99999); // for mobile
+    navigator.clipboard.writeText(textarea.value);
+    document.body.removeChild(textarea);
+
+    console.log('Command copied to clipboard!');
 }

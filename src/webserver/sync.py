@@ -3,13 +3,14 @@ from flask import Blueprint, jsonify, render_template, request, send_file
 bp = Blueprint('sync', __name__, url_prefix='/sync')
 from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
-from src.helpers.rclone_setup import configure_rclone_onedrive_personal
+from src.helpers.rclone_setup import configure_rclone_onedrive_personal, check_ssh_enabled
 from src.helpers.rclone_configManager import RcloneConfig
 from . import sock
 from src.webserver.db import get_db
 from src.helpers.config import config
 import json
 import os
+import socket
 
 
 @bp.route("/")
@@ -66,12 +67,19 @@ def index():
             logger.exception(f"Failed retrieving failed pdfs. {ex}")
             failed_pdfs = []
 
+        try:
+            hostname = socket.gethostname()
+        except Exception as e:
+            logger.exception(e)
+            hostname = "unknown"
+
         return render_template('sync.html',
                                onedrive_configs=onedrive_configs,
                                path_mappings=path_mappings,
                                failed_pdfs=failed_pdfs,
                                total_pages_failed_pdfs=total_pages_failed_pdfs,
-                               page_failed_pdfs=page_failed_pdfs)
+                               page_failed_pdfs=page_failed_pdfs,
+                               hostname=hostname)
     except Exception as e:
         logger.exception(e)
         return render_template('sync.html',
@@ -79,7 +87,8 @@ def index():
                                path_mappings={},
                                failed_pdfs=[],
                                total_pages_failed_pdfs=0,
-                               page_failed_pdfs=1)
+                               page_failed_pdfs=1,
+                               hostname="unknown")
 
 
 @bp.delete("/onedrive")
@@ -299,3 +308,20 @@ def downloadFailedPDF():
     except Exception as ex:
         logger.exception(f"Failed downloading PDF: {ex}")
         return "Failed downloading PDF", 500
+
+
+@bp.get("/check-ssh")
+def checkSSH():
+    """Checks if SSH is enabled and active."""
+
+    res = check_ssh_enabled()
+    if res == 0:
+        return "SSH is enabled and active.", 200
+    elif res == -1:
+        return "SSH is not installed.", 500
+    elif res == -2:
+        return "SSH is not active.", 500
+    elif res == -3:
+        return "SSH is not enabled.", 500
+    else:
+        return "Unknown error", 500
