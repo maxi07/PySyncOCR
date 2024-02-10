@@ -45,5 +45,5 @@ def create_app(test_config=None):
     app.register_blueprint(smb.bp)
     app.template_context_processors[None].append(inject_template_data)
     logger.debug(f"Registered blueprints with routes {app.url_map}")
-    logger.info("Started FLASK server")
+    logger.info("Started web server")
     return app

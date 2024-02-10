@@ -167,7 +167,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="addonedriveLabel">Add OneDrive config</h1>
+                    <h1 class="modal-title fs-5" id="addonedriveLabel">Add OneDrive Account</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -189,11 +189,22 @@
                             <input type="text" class="form-control" id="onedrive_name" name="onedrive_name"
                                 placeholder="Name">
                             <div id="name_help" class="form-text">This name must be unique for the connection.</div>
+                            <br>
+                            <label for="onedrive_selector" class="col-form-label">Select OneDrive Account</label><br>
+                            <div class="btn-group" id="onedrive_selector" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_personal" autocomplete="off" checked>
+                                <label class="btn btn-outline-primary" for="onedrive_selector_personal"><i class="bi bi-person"></i> Personal</label>
+                              
+                                <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_sharepoint" autocomplete="off" disabled>
+                                <label class="btn btn-outline-primary" for="onedrive_selector_sharepoint"><i class="bi bi-briefcase"></i> SharePoint</label>
+                              </div>
+                              <div id="onedrive_help" class="form-text text-danger">SharePoint is currently not supported (but soon!)</div>
                         </div>
                         <div class="text-danger" id="allowedCharsErrorMsgOneDriveConn" style="display: none;">
                             Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
                         </div>
                     </div>
+                    
 
                     <!-- Waiting animation -->
                     <div class="text-center" id="waitingAnimationonedriveadd" style="display: none;">
@@ -235,7 +246,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                     <!-- SSH Install -->
