@@ -12,7 +12,11 @@ Welcome to PySyncOCR, a Python app that will
 <img src="doc/dashboard.png" width="100%">
 
 ## Installation
-Please clone the repo and run the `install.sh` with sudo privileges. This will create a service that automatically starts when the server boots and runs the `main.py`, which will launch different threads for the webserver, the watchdog, the SMB server and the OCR.
+1. Clone the repository using `git clone https://github.com/maxi07/PySyncOCR.git`
+2. Cd into the directory using `cd PySyncOCR`
+3. Install app using `sudo ./install.sh`
+
+This will create a service that automatically starts when the server boots and runs the `main.py`, which will launch different threads for the webserver, the watchdog, the SMB server and the OCR.
 
 The script will install the program and run a service `PySyncOCR` which will automaically run at boot. To disable, please run `sudo systemctl stop PySyncOCR`. To view live debug information, run `sudo journalctl -f -u PySyncOCR`.
 
