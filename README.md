@@ -18,13 +18,13 @@ Welcome to PySyncOCR, a Python app that will
 
 This will create a service that automatically starts when the server boots and runs the `main.py`, which will launch different threads for the webserver, the watchdog, the SMB server and the OCR.
 
-The script will install the program and run a service `PySyncOCR` which will automaically run at boot. To disable, please run `sudo systemctl stop PySyncOCR`. To view live debug information, run `sudo journalctl -f -u PySyncOCR`.
+The script will install the program and run a service `PySyncOCR` which will automatically run at boot. To disable, please run `sudo systemctl stop PySyncOCR`. To view live debug information, run `sudo journalctl -f -u PySyncOCR`.
 
 > [!IMPORTANT]
 > The installer was built for Ubuntu 22.04 LTS, but should work on other Linux distributions.
 
 ## Options
-The program accespts some options, which have to be added in the `sudo nano /etc/systemd/system/PySyncOCR.service` service. The options are:
+The program accepts some options, which have to be added in the `sudo nano /etc/systemd/system/PySyncOCR.service` service. The options are:
 - `--dev` - to run the Flask server
 - `--smb-port` to change the smb port
 
@@ -35,6 +35,7 @@ Change this line:
 - [ ] Notifications
 - [x] Dashboard with KPIs
 - [ ] SMB Settings
+- [ ] SharePoint integration
 
 ## Development
 For developing we can use the built-in Flask server. To get debug output and use flask, run the `main.py` from VSCode with the `--dev` option or use the preconfigured launch.json.
