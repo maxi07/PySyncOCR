@@ -52,14 +52,14 @@ class SambaController:
                 logger.info(f"Created directory {config.get_filepath('smb_server.share_path')}")
 
                 # Set owner of folder to user "ocr"
-                command = ["sudo", "chown", "ocr:ocr", config.get_filepath("smb_service.share_path")]
+                command = ["sudo", "chown", "-R", "ocr:ocr", config.get_filepath("smb_service.share_path")]
                 logger.debug(f"Calling {' '.join(command)}")
                 res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
                 logger.debug(f"Received {res}")
                 logger.info(f"Set owner of {config.get_filepath('smb_service.share_path')} to user ocr.")
 
                 # Set permissions of folder to user "ocr"
-                command = ["sudo", "chmod", "777", config.get_filepath("smb_service.share_path")]
+                command = ["sudo", "chmod", "-R", "755", config.get_filepath("smb_service.share_path")]
                 logger.debug(f"Calling {' '.join(command)}")
                 res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
                 logger.debug(f"Received {res}")
