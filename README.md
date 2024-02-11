@@ -18,6 +18,8 @@ Welcome to PySyncOCR, a Python app that will
 
 This will create a service that automatically starts when the server boots and runs the `main.py`, which will launch different threads for the webserver, the watchdog, the SMB server and the OCR.
 
+To access the webserver, go to the servers ip and use port `5000`
+
 The script will install the program and run a service `PySyncOCR` which will automatically run at boot. To disable, please run `sudo systemctl stop PySyncOCR`. To view live debug information, run `sudo journalctl -f -u PySyncOCR`.
 
 > [!IMPORTANT]
