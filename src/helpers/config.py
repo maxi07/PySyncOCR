@@ -28,7 +28,11 @@ class Config:
             for k in keys:
                 value = value.get(k, {})
             # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
-            return value if value is not None else default
+            if value is not None:
+                return value
+            else:
+                logger.warning(f"Key {key} not found in config")
+                return default
         except Exception as ex:
             logger.exception(f"Failed reading config: {ex}")
             return default
@@ -39,7 +43,7 @@ class Config:
             value = self._config
             for k in keys:
                 value = value.get(k, {})
-            logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
+            # logger.debug(f"Read config key {key} with value {value} of type {type(value)}")
             if value is not None:
                 return join(expanduser('~'), value)
             else:
