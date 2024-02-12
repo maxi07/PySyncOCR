@@ -61,9 +61,7 @@ function evaluatePathMappingSubmitButton() {
     const remotePathInput = document.getElementById('remote_path');
 
     // Enable or disable the button based on whether the input has content
-    submitButtonpathmapping.disabled = !localpathinput.value.trim();
-    submitButtonpathmapping.disabled = localpathinput.classList.contains('is-invalid');
-    submitButtonpathmapping.disabled = !remotePathInput.value.startsWith('/');
+    submitButtonpathmapping.disabled = !(localpathinput.value.trim() && !localpathinput.classList.contains('is-invalid') && remotePathInput.value.startsWith('/'));
 }
 
 function deleteOneDriveConf(id) {
@@ -131,26 +129,26 @@ function addOneDrive() {
                     sshTunnelInfoElement.style.display = "none;";
                     // Run websocket for status updates during rclone config
                     animation_statustext.innerText = "Waiting for connection...";
-                    const socket = new WebSocket('ws://' + window.location.host + '/websocket-onedrive');
-                    socket.addEventListener('message', ev => {
+                    var socket = io.connect('http://' + window.location.host + '/websocket-onedrive');
+                    socket.on('message_update', function (data) {
                         statusUpdateElement.style.display = "block";
-                        console.log(ev.data);
-                        // Test if ev.data begins with 'http'
-                        if (ev.data.startsWith("http")) {
+                        console.log("Received message: " + data);
+                        // Test if data begins with 'http'
+                        if (data.startsWith("http")) {
                             // If it does, it's a link to the file
-                            document.getElementById("updateText").innerHTML = '<a href="' + ev.data + '" target="_blank">' + "To authenticate, please visit <br>" + ev.data + '</a>';
-                            window.open(ev.data, '_blank');
-                        } else if (ev.data.startsWith("Success")) {
+                            document.getElementById("updateText").innerHTML = '<a href="' + data + '" target="_blank">' + "To authenticate, please visit <br>" + data + '</a>';
+                            window.open(data, '_blank');
+                        } else if (data.startsWith("Success")) {
                             window.location.reload();
                         } else {
                             // Otherwise, it's just text
                             animation.style.display = "none";
-                            document.getElementById("updateText").innerHTML = ev.data;
+                            document.getElementById("updateText").innerHTML = data;
                         }
                     });
-                    socket.addEventListener('open', ev => {
-                        console.log('Connected to websocket');
-                        socket.send(JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
+                    socket.on('connect', function () {
+                        console.log('Connected to onedrive websocket');
+                        socket.emit('message_update', JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
                     });
                 };
             };
@@ -436,6 +434,11 @@ function addPathMappingToUI(local, remote, connection) {
                 </div>
             </div>`
     document.getElementById("pathmappingscontainer").appendChild(newCard);
+
+    try {
+        const emptymsg = document.getElementById("emptypathmappingsmessage")
+        emptymsg.style.display = "none";
+    } catch {}
 }
 
 function deletePathMapping(id) {

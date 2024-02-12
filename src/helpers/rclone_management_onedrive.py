@@ -20,14 +20,16 @@ def list_remotes() -> list[str]:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         logger.debug(f"Received {result}")
 
-        # Split the input string by lines and remove empty lines
-        lines = [line.strip() for line in result.stdout.decode().split('\n') if line.strip()]
+        # Split the data by newline characters to get individual lines
+        lines = result.stdout.decode().split('\n')
 
-        # Remove colons from each line
-        filtered_list = [item for item in lines if ": onedrive" in item]
-        result_list = [line.replace(': onedrive', '') for line in filtered_list]
-        logger.debug(f"Found remotes: {str(result_list)}")
-        return result_list
+        # Remove additional spaces from the values
+        result2 = [value.replace(' ', '') for value in lines]
+
+        # Use list comprehension to filter lines and extract values before ':'
+        result = [line.split(':')[0].strip() for line in result2 if ':onedrive' in line]
+        logger.debug(f"Found remotes: {str(result)}")
+        return result
     except subprocess.CalledProcessError as e:
         logger.error(f"Error getting remotes rclone: {e}")
         logger.error(e.stderr.decode())

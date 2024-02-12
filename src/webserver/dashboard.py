@@ -2,14 +2,14 @@ import json
 from flask import Blueprint, render_template, request, current_app
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 from src.helpers.logger import logger
-from src.webserver.db import get_db
+from src.webserver.db import get_db, send_database_request, send_database_request_with_headers
 from src.helpers.config import config
 from src.helpers.time_converter import format_time_difference
 import locale
 from datetime import datetime
 import time
 import math
-from . import sock
+from . import socketio
 import queue
 
 websocket_messages_queue = queue.Queue()
@@ -143,8 +143,19 @@ def index():
                                latest_timestamp_completed_string="Unknown")
 
 
-@sock.route("/websocket")
-def websocket_dashboard(ws):
+@socketio.on('connect', namespace='/websocket')
+def websocket_connect():
+    logger.debug("Client connected to websocket")
+    socketio.start_background_task(target=websocket_dashboard_loop)
+    # emit('message_update', json.dumps({'data': 'Connected', 'count': 0}))
+
+
+@socketio.on('disconnect', namespace='/websocket')
+def websocket_disconnect():
+    logger.debug("Client disconnected from websocket")
+
+
+def websocket_dashboard_loop():
     while True:
         try:
             # Check if there's a message in the queue
@@ -157,13 +168,12 @@ def websocket_dashboard(ws):
                 continue
 
             db_id = signal['id']
-            db = get_db()
-            pdf_list = db.execute(
+            pdf_list = send_database_request_with_headers(
                 'SELECT *, DATETIME(created, "localtime") AS local_created, DATETIME(modified, "localtime") AS local_modified FROM scanneddata '
-                'WHERE id = :id',
-                {'id': db_id}
-            ).fetchall()
-            pdf = [dict(pdf) for pdf in pdf_list][0]
+                'WHERE id = {}'.format(db_id)
+            )
+
+            pdf = pdf_list[0]
             logger.debug(f"Loaded {db_id} pdf from db")
             try:
                 input_datetime_created = datetime.strptime(pdf['local_created'], "%Y-%m-%d %H:%M:%S")
@@ -174,24 +184,24 @@ def websocket_dashboard(ws):
                 logger.exception(f"Failed setting datetime for {pdf['id']}. {ex}")
             data_to_send = {'id': pdf['id'], 'command': signal['command'], 'data': pdf}
             logger.debug(f"Sending update data {data_to_send} to websocket")
-            ws.send(json.dumps(data_to_send))
+            socketio.emit('message_update', json.dumps(data_to_send), namespace="/websocket")
 
             # Now check the number of pending and finished docs to update dashboard
             try:
-                pending_pdfs = db.execute(
+                pending_pdfs = send_database_request(
                     'SELECT COUNT(*) FROM scanneddata '
                     'WHERE LOWER(file_status) LIKE "%pending%"'
-                    ).fetchone()[0]
+                    )[0][0]
                 logger.debug(f"Found {pending_pdfs} queued pdfs")
             except Exception as e:
                 logger.exception(f"Error getting pending pdf count: {e}")
                 pending_pdfs = "Unknown"
 
             try:
-                processed_pdfs = db.execute(
+                processed_pdfs = send_database_request(
                             'SELECT COUNT(*) FROM scanneddata '
                             'WHERE file_status = "Completed" '
-                            ).fetchone()[0]
+                            )[0][0]
                 logger.debug(f"Found {processed_pdfs} completed pdfs")
             except Exception as e:
                 logger.exception(f"Error getting processed pdf count: {e}")
@@ -200,12 +210,12 @@ def websocket_dashboard(ws):
             # Now get the latest timestamps for the dashboard
             # Get the latest timestamp from the file_status=pending
             try:
-                latest_timestamp_pending = db.execute(
+                latest_timestamp_pending = send_database_request(
                     'SELECT DATETIME(created, "localtime") FROM scanneddata '
                     'WHERE file_status = "Pending" '
                     'ORDER BY created DESC '
                     'LIMIT 1'
-                    ).fetchone()
+                    )[0]
                 if latest_timestamp_pending is not None:
                     logger.debug(f"Found latest timestamp for pending documents: {latest_timestamp_pending[0]}")
                     latest_timestamp_pending_string = "Updated " + format_time_difference(latest_timestamp_pending[0])
@@ -218,12 +228,12 @@ def websocket_dashboard(ws):
 
             # Get the latest timestamp from the file_status=completed
             try:
-                latest_timestamp_completed = db.execute(
+                latest_timestamp_completed = send_database_request(
                     'SELECT DATETIME(modified, "localtime") FROM scanneddata '
                     'WHERE file_status = "Completed" '
                     'ORDER BY modified DESC '
                     'LIMIT 1'
-                    ).fetchone()
+                    )[0]
                 if latest_timestamp_completed is not None:
                     logger.debug(f"Found latest timestamp for synced documents: {latest_timestamp_completed[0]}")
                     latest_timestamp_completed_string = "Updated " + format_time_difference(latest_timestamp_completed[0])
@@ -239,7 +249,7 @@ def websocket_dashboard(ws):
                                                                     'pending_pdfs_latest_timestamp': latest_timestamp_pending_string,
                                                                     'processed_pdfs_latest_timestamp': latest_timestamp_completed_string}}
             logger.debug(f"Sending update dashboard data {data_to_send} to websocket")
-            ws.send(json.dumps(data_to_send))
+            socketio.emit('message_update', json.dumps(data_to_send), namespace="/websocket")
             logger.debug("Sent update dashboard command to websocket")
             logger.debug("Waiting for next signal")
         except queue.Empty:

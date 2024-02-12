@@ -5,12 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
         loadinglottieanimation.style.display = 'none';
     });
 
-    const socket = new WebSocket('ws://' + window.location.host + '/websocket');
-    socket.addEventListener('message', ev => {
-        console.log("Received" + ev.data);
-
+    var socket = io.connect('http://' + window.location.host + '/websocket');
+    socket.on('message_update', function(data) {
         // convert ev.data to josn object
-        var jsonData = JSON.parse(ev.data);
+        var jsonData = JSON.parse(data);
+        console.log("Received message: " + data);
 
         // Test if command property if jsonData is equal to 'update'
         if (jsonData.command === 'update') {
@@ -26,10 +25,12 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Received update_dashboard command");
             // If it is, update the dashboard
             updateDashboard(jsonData.data);
+        } else {
+            console.log("Unknown command received.");
         }
 
     });
-    socket.addEventListener('open', ev => {
+    socket.on('connect', function () {
         console.log('Connected to websocket');
     });
 
