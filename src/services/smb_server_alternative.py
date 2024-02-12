@@ -49,7 +49,7 @@ class SambaController:
         try:
             if not os.path.exists(config.get_filepath("smb_service.share_path")):
                 os.mkdir(config.get_filepath("smb_service.share_path"), mode=777)
-                logger.info(f"Created directory {config.get_filepath('smb_server.share_path')}")
+                logger.info(f"Created directory {config.get_filepath('smb_service.share_path')}")
 
                 # Set owner of folder to user "ocr"
                 command = ["sudo", "chown", "-R", "ocr:ocr", config.get_filepath("smb_service.share_path")]
@@ -59,7 +59,7 @@ class SambaController:
                 logger.info(f"Set owner of {config.get_filepath('smb_service.share_path')} to user ocr.")
 
                 # Set permissions of folder to user "ocr"
-                command = ["sudo", "chmod", "-R", "755", config.get_filepath("smb_service.share_path")]
+                command = ["sudo", "chmod", "-R", "775", config.get_filepath("smb_service.share_path")]
                 logger.debug(f"Calling {' '.join(command)}")
                 res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
                 logger.debug(f"Received {res}")
@@ -100,6 +100,27 @@ class SambaController:
                 logger.exception(f"Error adding user to Samba: {e}")
                 return
 
+        username = config.get("smb_service.username")
+        try:
+            if not os.path.exists(config.get("sync_service.user_path")):
+                os.mkdir(config.get("sync_service.user_path"), mode=755)
+                logger.info(f"Created directory {config.get('sync_service.user_path')}")
+                # Set owner of folder to user "ocr"
+                command = ["sudo", "chown", "-R", username + ":" + username, config.get("sync_service.user_path")]
+                logger.debug(f"Calling {' '.join(command)}")
+                res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+                logger.debug(f"Received {res}")
+                logger.info(f"Set owner of {config.get('sync_service.user_path')} to user {username}.")
+                # Set permissions of folder to user "ocr"
+                command = ["sudo", "chmod", "-R", "755", config.get("sync_service.user_path")]
+                logger.debug(f"Calling {' '.join(command)}")
+                res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+                logger.debug(f"Received {res}")
+                logger.info(f"Set permissions of {config.get('sync_service.user_path')} to user {username}.")
+        except Exception as e:
+            logger.exception(f"Error creating home directory: {e}")
+            return
+
         # Run sudo smbpasswd -a username
         try:
             process = subprocess.Popen(["sudo", "smbpasswd", "-a", username],
@@ -136,7 +157,7 @@ class SambaController:
                     if line.strip().startswith(f"[{share_name}]"):
                         logger.debug(f"Share {share_name} exists.")
                         return True
-            logger.debug(f"Share {share_name} does not exist.")
+            logger.info(f"Share {share_name} does not exist.")
             return False
         except Exception as e:
             logger.exception(f"Error checking Samba share: {e}")

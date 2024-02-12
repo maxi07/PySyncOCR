@@ -1,6 +1,7 @@
 {
     "sync_service": {
         "root_folder": "/home/ocr/pysyncocr_shared",
+        "user_path": "/home/ocr",
         "failed_dir": "/home/ocr/pysyncocr_shared/failed",
         "keep_original": false,
         "original_dir": "/home/ocr/pysyncocr_shared/original"

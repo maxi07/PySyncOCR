@@ -1,4 +1,5 @@
 import json
+import subprocess
 from src.helpers.logger import logger
 from src.helpers.config import config
 import os
@@ -73,10 +74,26 @@ class ConfigManager:
 
                 # Add new smb folder
                 try:
-                    os.makedirs(os.path.join(config.get_filepath("smb_service.share_path"), local), exist_ok=True)
-                    logger.info(f"Created folder {os.path.join(config.get_filepath('smb_service.share_path'),local)}")
+                    # Create folder
+                    folder_to_create = os.path.join(config.get_filepath("smb_service.share_path"), local)
+                    os.makedirs(folder_to_create, exist_ok=True, mode=775)
+                    logger.info(f"Created folder {folder_to_create}")
+
+                    # Set owner of folder to user "ocr"
+                    command = ["sudo", "chown", "-R", "ocr:ocr", folder_to_create]
+                    logger.debug(f"Calling {' '.join(command)}")
+                    res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+                    logger.debug(f"Received {res}")
+                    logger.info(f"Set owner of {folder_to_create} to user ocr.")
+
+                    # Set permissions of folder to user "ocr"
+                    command = ["sudo", "chmod", "-R", "775", folder_to_create]
+                    logger.debug(f"Calling {' '.join(command)}")
+                    res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+                    logger.debug(f"Received {res}")
+                    logger.info(f"Set permissions of {folder_to_create} to user ocr.")
                 except Exception as ex:
-                    logger.exception(f"Failed creating folder {os.path.join(config.get_filepath('smb_service.share_path'),local)}:", ex)
+                    logger.exception(f"Failed creating folder {folder_to_create}: {ex}")
                     return False
                 self.config_data.append(new_entry)
                 self.save_config()
