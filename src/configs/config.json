@@ -1,9 +1,9 @@
 {
     "sync_service": {
-        "root_folder": "PySyncOCR",
-        "failed_dir": "PySyncOCR/failed",
+        "root_folder": "/home/ocr/pysyncocr_shared",
+        "failed_dir": "/home/ocr/pysyncocr_shared/failed",
         "keep_original": false,
-        "original_dir": "PySyncOCR/original"
+        "original_dir": "/home/ocr/pysyncocr_shared/original"
     },
     "smb_service": {
         "server_name": "PySyncOCR",
