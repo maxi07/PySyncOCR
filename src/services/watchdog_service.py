@@ -13,7 +13,7 @@ from PyPDF2 import PdfReader
 from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 from src.helpers.rclone_configManager import RcloneConfig
 import fitz
-from src.webserver.db import update_scanneddata_database
+from src.webserver.db import send_database_request, update_scanneddata_database
 
 
 class FileHandler(FileSystemEventHandler):
@@ -215,7 +215,7 @@ class FolderMonitor:
             self.observer.schedule(self.event_handler, self.root_folder, recursive=True)
             self.observer.start()
         except Exception as e:
-            logger.exception("Failed starting watchdog", e)
+            logger.exception(f"Failed starting watchdog: {e}")
             return
 
         # Check for errors
@@ -252,7 +252,7 @@ class FolderMonitor:
         for root, dirs, files in os.walk(source_dir):
             # Remove the "failed" and "done" directories from the search
             if "failed" in dirs:
-                dirs.remove("failed")
+                dirs.remove("failed") 
             if "done" in dirs:
                 dirs.remove("done")
 
@@ -263,9 +263,17 @@ class FolderMonitor:
                     if file.lower().endswith(".pdf"):
                         try:
                             source_file = os.path.join(root, file)
+                            source_file_top_dir = os.path.basename(os.path.dirname(source_file))
+                            source_file_filename = os.path.basename(source_file)
                             destination_file = os.path.join(failed_dir, file)
                             shutil.move(source_file, destination_file)
                             logger.warning(f"Moved '{file}' to '{failed_dir}'")
+
+                            # Now try to update the db item to failed
+                            try:
+                                send_database_request('UPDATE ' + config.get("sql.db_pdf_table") + ' SET file_status="' + str(ProcessStatus.FAILED.value) + '" WHERE local_filepath="' + source_file_top_dir + '" AND file_name="' + source_file_filename + '"')
+                            except Exception as ex:
+                                logger.exception(f"Failed updating database item to failed: {ex}")
                         except Exception as ex:
                             logger.exception(f"Failed moving '{file}' to '{failed_dir}': {ex}")
 
