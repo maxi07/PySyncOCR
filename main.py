@@ -5,7 +5,7 @@ import threading
 from src.services.watchdog_service import FolderMonitor
 from src.services.ocr_service import OcrService
 from src.services.sync_service import SyncService
-from src.services.flask_service import start_server, start_dev_server
+from src.services.flask_service import start_dev_server, start_socketio_server
 from src.webserver.dashboard import websocket_messages_queue
 from src.services.smb_server_alternative import SambaController
 from queue import Queue
@@ -54,16 +54,6 @@ if __name__ == "__main__":
     ocr_queue = Queue()
     sync_queue = Queue()
 
-    # Setup SMB
-
-    # This is for the smb_service_old
-    # smb_settings = config.get("smb_service")
-
-    # if args.smb_port:
-    #     smb_server = MySMBServer(smb_settings, args.smb_port)
-    # else:
-    #     smb_server = MySMBServer(smb_settings)
-
     # New SMB setup
     smb = SambaController()
     if not smb.check_share_exists(config.get("smb_service.share_name")):
@@ -78,18 +68,16 @@ if __name__ == "__main__":
     watchdog_thread = threading.Thread(target=watchdog.start_monitoring, name="Watchdog Service")
     ocr_thread = threading.Thread(target=ocr_service.start_processing, name="OCR Service")
     sync_thread = threading.Thread(target=sync_service.start_processing, name="Sync Service")
-    # smb_thread = threading.Thread(target=smb_server.start, name="SMB Service")
 
     if args.dev:
         logger.warning("Running FLASK dev server!")
         flask_thread = threading.Thread(target=start_dev_server, name="Flask Service DEV")
     else:
-        flask_thread = threading.Thread(target=start_server, name="Gunicorn Service")
+        flask_thread = threading.Thread(target=start_socketio_server, name="SocketIO Service")
 
     watchdog_thread.start()
     ocr_thread.start()
     sync_thread.start()
-    # smb_thread.start()
     flask_thread.start()
 
     try:
@@ -114,7 +102,5 @@ if __name__ == "__main__":
     flask_thread.join()
     logger.debug("Flask thread joined")
     smb.stop_server()
-    # smb_server.stop()
-    # smb_thread.is_alive()
-    # smb_thread.join()
+
     logger.info("PySyncOCR stopped. Bye!")

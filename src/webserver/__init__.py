@@ -5,7 +5,7 @@ from src.webserver.context_processor import inject_template_data
 from . import root
 from flask_socketio import SocketIO
 
-socketio = SocketIO(async_mode='threading')
+socketio = SocketIO()
 
 
 def create_app(test_config=None):

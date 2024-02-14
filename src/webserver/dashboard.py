@@ -7,10 +7,10 @@ from src.helpers.config import config
 from src.helpers.time_converter import format_time_difference
 import locale
 from datetime import datetime
-import time
 import math
 from . import socketio
 import queue
+
 
 websocket_messages_queue = queue.Queue()
 
@@ -147,7 +147,6 @@ def index():
 def websocket_connect():
     logger.debug("Client connected to websocket")
     socketio.start_background_task(target=websocket_dashboard_loop)
-    # emit('message_update', json.dumps({'data': 'Connected', 'count': 0}))
 
 
 @socketio.on('disconnect', namespace='/websocket')
@@ -156,6 +155,8 @@ def websocket_disconnect():
 
 
 def websocket_dashboard_loop():
+    logger.info("Started websocket dashboard loop")
+
     while True:
         try:
             # Check if there's a message in the queue
@@ -254,4 +255,4 @@ def websocket_dashboard_loop():
             logger.debug("Waiting for next signal")
         except queue.Empty:
             pass
-        time.sleep(0.2)
+        socketio.sleep(0.2)

@@ -252,7 +252,7 @@ class FolderMonitor:
         for root, dirs, files in os.walk(source_dir):
             # Remove the "failed" and "done" directories from the search
             if "failed" in dirs:
-                dirs.remove("failed") 
+                dirs.remove("failed")
             if "done" in dirs:
                 dirs.remove("done")
 
