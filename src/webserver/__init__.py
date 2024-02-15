@@ -1,11 +1,11 @@
 import os
-from flask_sock import Sock
 from flask import Flask
 from src.helpers.logger import logger
 from src.webserver.context_processor import inject_template_data
 from . import root
+from flask_socketio import SocketIO
 
-sock = Sock()
+socketio = SocketIO()
 
 
 def create_app(test_config=None):
@@ -30,7 +30,7 @@ def create_app(test_config=None):
         pass
 
     # initialize websocket
-    sock.init_app(app)
+    socketio.init_app(app)
 
     # initialize SQL db
     from . import db

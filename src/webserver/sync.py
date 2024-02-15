@@ -5,7 +5,7 @@ from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
 from src.helpers.rclone_setup import configure_rclone_onedrive_personal, check_ssh_enabled
 from src.helpers.rclone_configManager import RcloneConfig
-from . import sock
+from . import socketio
 from src.webserver.db import get_db
 from src.helpers.config import config
 import json
@@ -149,35 +149,33 @@ def getOneDriveDirectories():
         return "Failed retrieving remotes", 500
 
 
-@sock.route("/websocket-onedrive")
-def websocket_onedrive(ws):
+@socketio.on('connect', namespace='/websocket-onedrive')
+def websocket_connect():
+    logger.debug("Client connected to onedrive websocket")
+    socketio.emit('message_update', 'Connected to onedrive websocket', namespace='/websocket-onedrive')
+
+
+@socketio.on('disconnect', namespace='/websocket-onedrive')
+def websocket_disconnect():
+    logger.debug("Client disconnected from onedrive websocket")
+
+
+@socketio.on('message_update', namespace='/websocket-onedrive')
+def handle_message(message):
     """
     Handle realtime sync updates from rclone sent over a websocket.
 
     Accepts a websocket connection and json data containing the onedrive remote name.
     Calls configure_rclone_onedrive_personal to sync the remote, and sends back sync updates over the websocket.
     """
-    while True:
-        data = ws.receive()
-        if data is None:
-            break
-        else:
-            logger.info(f"Received data: {data}")
-            json_data = json.loads(data)
-            if "name" in json_data:
-                try:
-                    for update in configure_rclone_onedrive_personal(json_data["name"]):
-                        logger.debug(f"Received signal from rclone: {update}")
-                        if update.startswith("http"):
-                            ws.send(update)
-                        elif update == "0":
-                            ws.send("Success: " + update)
-                        else:
-                            ws.send("Failed: " + update)
-                except StopIteration as e:
-                    ws.send("An error occured: " + str(e.value) + "\n Please try again later.")
-            else:
-                ws.send("Failed - cant handle this.")
+    if message is None:
+        return
+    else:
+        logger.info(f"Received data: {message}")
+        json_data = json.loads(message)
+        socketio.emit('message_update', 'Connecting to OneDrive...', namespace='/websocket-onedrive')
+        if "name" in json_data:
+            socketio.start_background_task(target=configure_rclone_onedrive_personal, name=json_data["name"])
 
 
 @bp.post("/pathmapping")
@@ -195,6 +193,10 @@ def addPathMapping():
         json_data = request.get_json()
         if not json_data or "local_path" not in json_data or "remote_path" not in json_data or "remote_id" not in json_data:
             return "Missing required data in request", 400
+
+        if not json_data["local_path"] or not json_data["remote_path"] or not json_data["remote_id"]:
+            return "Values cannot be empty", 400
+
         logger.info(f"Received path mapping: {json_data}")
         res = RcloneConfig.add(json_data["local_path"], json_data["remote_path"], json_data["remote_id"])
         if res:

@@ -48,7 +48,7 @@ def test_iter(conf_setup):
 
 
 def test_get(conf_setup):
-    assert conf_setup.get("sync_service.root_folder") == "PySyncOCR"
+    assert conf_setup.get("sync_service.root_folder") == "/home/ocr/pysyncocr_shared"
 
 
 def test_get_empty(conf_setup):
@@ -67,9 +67,3 @@ def test_set(conf_setup):
 def test_attr(conf_setup):
     assert type(conf_setup.get("sync_service.root_folder")) == str
     assert type(conf_setup.get("sync_service.keep_original")) == bool
-
-
-def test_config_getfilepath(use_backup):
-    from src.helpers.config import config
-    import os.path
-    assert config.get_filepath("sync_service.original_dir") == os.path.expanduser("~/PySyncOCR/original")

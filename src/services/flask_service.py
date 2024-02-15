@@ -1,7 +1,6 @@
 from src.webserver import create_app
 from src.helpers.logger import logger
-import subprocess
-import os
+from src.webserver import socketio
 
 gunicorn_process = None  # Global variable to hold the gunicorn process
 stop_server_flag = False  # Flag to indicate when to stop the server
@@ -15,26 +14,10 @@ def stop_server():
         stop_server_flag = True
 
 
-def start_server():
-    global gunicorn_process, stop_server_flag
-    python_interpreter = os.path.join(os.getcwd(), '.venv', 'bin', 'python')
-
-    gunicorn_command = [
-        python_interpreter,
-        '-m', 'gunicorn',
-        '-w', '2',  # Number of worker processes
-        '-b', '0.0.0.0:5000',  # Host and port on which to bind
-        'src.webserver:create_app()',  # Replace with your actual app module and instance
-    ]
-
-    try:
-        gunicorn_process = subprocess.Popen(gunicorn_command)
-        gunicorn_process.wait()  # Wait for the process to finish
-    except Exception as e:
-        logger.error(f"Error running Gunicorn: {e}")
-    finally:
-        # Perform cleanup before exiting
-        logger.info("Gunicorn server stopped.")
+def start_socketio_server():
+    logger.info("Starting socketio server...")
+    app = create_app()
+    socketio.run(app, debug=False, allow_unsafe_werkzeug=False, log_output=True, use_reloader=False)
 
 
 def start_dev_server():

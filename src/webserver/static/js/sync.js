@@ -61,9 +61,7 @@ function evaluatePathMappingSubmitButton() {
     const remotePathInput = document.getElementById('remote_path');
 
     // Enable or disable the button based on whether the input has content
-    submitButtonpathmapping.disabled = !localpathinput.value.trim();
-    submitButtonpathmapping.disabled = localpathinput.classList.contains('is-invalid');
-    submitButtonpathmapping.disabled = !remotePathInput.value.startsWith('/');
+    submitButtonpathmapping.disabled = !(localpathinput.value.trim() && !localpathinput.classList.contains('is-invalid') && remotePathInput.value.startsWith('/'));
 }
 
 function deleteOneDriveConf(id) {
@@ -98,7 +96,6 @@ function addOneDrive() {
     const animation_statustext = document.getElementById("waitingAnimationonedriveadd_statustext");
     const form = document.getElementById("onedrive_name_container");
     const addButton = document.getElementById("add_onedrive_button");
-    const statusUpdateElement = document.getElementById("statusUpdate");
     const sshTunnelInfoElement = document.getElementById("sshTunnelSetupInfo");
     const sshInstallInfoElement = document.getElementById("sshInstallInfo");
     const cloud_header = document.getElementById("cloud_header");
@@ -127,30 +124,42 @@ function addOneDrive() {
                 // Show the ssh tunnel setup modal and reroute the next button
                 sshTunnelInfoElement.style.display = "block";
                 addButton.onclick = function () {
-                    animation.style.display = "block;";
-                    sshTunnelInfoElement.style.display = "none;";
+                    animation.style.display = "block";
+                    sshTunnelInfoElement.style.display = "none";
                     // Run websocket for status updates during rclone config
                     animation_statustext.innerText = "Waiting for connection...";
-                    const socket = new WebSocket('ws://' + window.location.host + '/websocket-onedrive');
-                    socket.addEventListener('message', ev => {
-                        statusUpdateElement.style.display = "block";
-                        console.log(ev.data);
-                        // Test if ev.data begins with 'http'
-                        if (ev.data.startsWith("http")) {
+                    addButton.style.display = "none";
+                    var rclonePopup = null;
+                    var socket = io.connect('http://' + window.location.host + '/websocket-onedrive', {reconnection: false});
+                    socket.on('message_update', function (data) {
+                        console.log("Received message: " + data);
+                        // Test if data begins with 'http'
+                        if (data.startsWith("http")) {
                             // If it does, it's a link to the file
-                            document.getElementById("updateText").innerHTML = '<a href="' + ev.data + '" target="_blank">' + "To authenticate, please visit <br>" + ev.data + '</a>';
-                            window.open(ev.data, '_blank');
-                        } else if (ev.data.startsWith("Success")) {
+                            animation_statustext.innerHTML = '<a href="#" onclick="openAuthWindow(\'' + data + '\')">To authenticate, please visit <br>' + data + '</a>';
+                            // openAuthWindow(data);
+                        } else if (data.startsWith("Success")) {
+                            try {
+                                rCloneAuthPopup.close();
+                            } catch {}
                             window.location.reload();
                         } else {
                             // Otherwise, it's just text
-                            animation.style.display = "none";
-                            document.getElementById("updateText").innerHTML = ev.data;
+                            if (data.startsWith("Error")) {
+                                const error_display = document.getElementById("errormsg_display");
+                                const errormsg = document.getElementById("error_msg_fromdisplay");
+                                errormsg.innerText = data;
+                                error_display.style.display = "block";
+                                animation.style.display = "none";
+                                addButton.innerText = "Retry";
+                            } else {
+                                animation_statustext.innerText = data;
+                            }
                         }
                     });
-                    socket.addEventListener('open', ev => {
-                        console.log('Connected to websocket');
-                        socket.send(JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
+                    socket.on('connect', function () {
+                        console.log('Connected to onedrive websocket');
+                        socket.emit('message_update', JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
                     });
                 };
             };
@@ -159,6 +168,9 @@ function addOneDrive() {
     xhr.send();
 }
 
+function openAuthWindow(url) {
+    rCloneAuthPopup = window.open(url, "rClone Authentication", "width=400,height=600");
+}
 
 function validateTextInput(input) {
     // Regular expression pattern for allowed characters
@@ -436,6 +448,11 @@ function addPathMappingToUI(local, remote, connection) {
                 </div>
             </div>`
     document.getElementById("pathmappingscontainer").appendChild(newCard);
+
+    try {
+        const emptymsg = document.getElementById("emptypathmappingsmessage")
+        emptymsg.style.display = "none";
+    } catch {}
 }
 
 function deletePathMapping(id) {

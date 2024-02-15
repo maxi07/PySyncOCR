@@ -114,3 +114,47 @@ def send_database_request(query: str):
         return result
     except Exception as ex:
         logger.exception(f"Error sending database request: {ex}")
+
+
+def send_database_request_with_headers(query: str) -> list[dict]:
+    """Sends a request to the database and returns the result.
+
+    Connects to the SQLite database, executes the provided query,
+    and returns the result.
+    Commits the changes and closes the connection.
+    Returns list of dict with row descriptions.
+
+    Handles any errors and logs exceptions.
+    """
+    try:
+        # Connect to the database
+        connection = sqlite3.connect(config.get("sql.db_location"))
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # Execute the query
+        logger.debug("Sending database request: " + query)
+        cursor.execute(query)
+
+        # Fetch all the results
+        rows = cursor.fetchall()
+
+        # Fetch the column names from the cursor description
+        columns = [col[0] for col in cursor.description]
+
+        # Convert the rows into dictionaries
+        result_dicts = []
+        for row in rows:
+            result_dicts.append(dict(zip(columns, row)))
+
+        # Commit the changes
+        connection.commit()
+
+        # Close the connection
+        connection.close()
+
+        return result_dicts
+    except Exception as ex:
+        logger.exception(f"Error sending database request: {ex}")
+        return None
