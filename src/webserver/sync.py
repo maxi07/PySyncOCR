@@ -152,6 +152,7 @@ def getOneDriveDirectories():
 @socketio.on('connect', namespace='/websocket-onedrive')
 def websocket_connect():
     logger.debug("Client connected to onedrive websocket")
+    socketio.emit('message_update', 'Connected to onedrive websocket', namespace='/websocket-onedrive')
 
 
 @socketio.on('disconnect', namespace='/websocket-onedrive')
@@ -172,20 +173,9 @@ def handle_message(message):
     else:
         logger.info(f"Received data: {message}")
         json_data = json.loads(message)
+        socketio.emit('message_update', 'Connecting to OneDrive...', namespace='/websocket-onedrive')
         if "name" in json_data:
-            try:
-                for update in configure_rclone_onedrive_personal(json_data["name"]):
-                    logger.debug(f"Received signal from rclone: {update}")
-                    if update.startswith("http"):
-                        socketio.emit('message_update', update, namespace='/websocket-onedrive')
-                    elif update == "0":
-                        socketio.emit('message_update', "Success: " + update, namespace='/websocket-onedrive')
-                    else:
-                        socketio.emit('message_update', "Failed: " + update, namespace='/websocket-onedrive')
-            except StopIteration as e:
-                socketio.emit('message_update', "An error occured: " + str(e.value) + "\n Please try again later.", namespace='/websocket-onedrive')
-        else:
-            socketio.emit('message_update', "Failed - cant handle this.", message_namespace='/websocket-onedrive')
+            socketio.start_background_task(target=configure_rclone_onedrive_personal, name=json_data["name"])
 
 
 @bp.post("/pathmapping")

@@ -272,9 +272,19 @@
                         </div>
                     </div>
 
-                    <!-- Status update -->
-                    <div class="text-center" id="statusUpdate" style="display: none;">
-                        <p class="mt-2" id="updateText">I am hidden</p>
+                    <!-- Error display -->
+                    <div id="errormsg_display" style="display: none;">
+                        <div id="lottieWarning" class="d-flex justify-content-center align-items-center">
+                            <dotlottie-player id="terminal_lottie_player" src="/static/lottie/error.json"
+                                background="transparent" speed="1" direction="1" playMode="normal" style="width: 150px; height: 150px;"
+                                autoplay></dotlottie-player>
+                        </div>
+                        <div class="text-center">
+                            <h5>Error</h5>
+                        </div>
+                        <p class="text-center">
+                            <span id="error_msg_fromdisplay"></span><br>
+                        </p>
                     </div>
                 </div>
                 <div class="modal-footer">

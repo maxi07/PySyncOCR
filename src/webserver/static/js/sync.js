@@ -96,7 +96,6 @@ function addOneDrive() {
     const animation_statustext = document.getElementById("waitingAnimationonedriveadd_statustext");
     const form = document.getElementById("onedrive_name_container");
     const addButton = document.getElementById("add_onedrive_button");
-    const statusUpdateElement = document.getElementById("statusUpdate");
     const sshTunnelInfoElement = document.getElementById("sshTunnelSetupInfo");
     const sshInstallInfoElement = document.getElementById("sshInstallInfo");
     const cloud_header = document.getElementById("cloud_header");
@@ -125,25 +124,37 @@ function addOneDrive() {
                 // Show the ssh tunnel setup modal and reroute the next button
                 sshTunnelInfoElement.style.display = "block";
                 addButton.onclick = function () {
-                    animation.style.display = "block;";
-                    sshTunnelInfoElement.style.display = "none;";
+                    animation.style.display = "block";
+                    sshTunnelInfoElement.style.display = "none";
                     // Run websocket for status updates during rclone config
                     animation_statustext.innerText = "Waiting for connection...";
-                    var socket = io.connect('http://' + window.location.host + '/websocket-onedrive');
+                    addButton.style.display = "none";
+                    var rclonePopup = null;
+                    var socket = io.connect('http://' + window.location.host + '/websocket-onedrive', {reconnection: false});
                     socket.on('message_update', function (data) {
-                        statusUpdateElement.style.display = "block";
                         console.log("Received message: " + data);
                         // Test if data begins with 'http'
                         if (data.startsWith("http")) {
                             // If it does, it's a link to the file
-                            document.getElementById("updateText").innerHTML = '<a href="' + data + '" target="_blank">' + "To authenticate, please visit <br>" + data + '</a>';
-                            window.open(data, '_blank');
+                            animation_statustext.innerHTML = '<a href="#" onclick="openAuthWindow(\'' + data + '\')">To authenticate, please visit <br>' + data + '</a>';
+                            // openAuthWindow(data);
                         } else if (data.startsWith("Success")) {
+                            try {
+                                rCloneAuthPopup.close();
+                            } catch {}
                             window.location.reload();
                         } else {
                             // Otherwise, it's just text
-                            animation.style.display = "none";
-                            document.getElementById("updateText").innerHTML = data;
+                            if (data.startsWith("Error")) {
+                                const error_display = document.getElementById("errormsg_display");
+                                const errormsg = document.getElementById("error_msg_fromdisplay");
+                                errormsg.innerText = data;
+                                error_display.style.display = "block";
+                                animation.style.display = "none";
+                                addButton.innerText = "Retry";
+                            } else {
+                                animation_statustext.innerText = data;
+                            }
                         }
                     });
                     socket.on('connect', function () {
@@ -157,6 +168,9 @@ function addOneDrive() {
     xhr.send();
 }
 
+function openAuthWindow(url) {
+    rCloneAuthPopup = window.open(url, "rClone Authentication", "width=400,height=600");
+}
 
 function validateTextInput(input) {
     // Regular expression pattern for allowed characters

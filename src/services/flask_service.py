@@ -17,7 +17,7 @@ def stop_server():
 def start_socketio_server():
     logger.info("Starting socketio server...")
     app = create_app()
-    socketio.run(app, debug=False, allow_unsafe_werkzeug=False, log_output=True)
+    socketio.run(app, debug=False, allow_unsafe_werkzeug=False, log_output=True, use_reloader=False)
 
 
 def start_dev_server():

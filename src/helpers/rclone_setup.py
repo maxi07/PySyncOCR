@@ -3,6 +3,7 @@ import re
 from src.helpers.logger import logger
 from src.helpers.run_subprocess import run_subprocess
 from flask import current_app
+from src.webserver import socketio
 
 
 def extract_url(prompt):
@@ -17,6 +18,8 @@ def configure_rclone_onedrive_personal(name):
     # Run the rclone config command using pexpect
     process = pexpect.spawn('rclone config')
     logger.info("Configuring OneDrive with rclone, please wait...")
+    socketio.emit("message_update", "Connecting to OneDrive...", namespace="/websocket-onedrive")
+    socketio.sleep(0.1)
     try:
         # Wait for the initial output and print it
         process.expect("Quit config", timeout=10)
@@ -37,10 +40,12 @@ def configure_rclone_onedrive_personal(name):
         except pexpect.exceptions.TIMEOUT:
             if "already exists" in process.buffer.decode():
                 logger.error("Remote with that name already exists.")
-                return -2
+                socketio.emit("message_update", "Remote with that name already exists.", namespace="/websocket-onedrive")
+                socketio.sleep(0.1)
             else:
                 logger.error(process.buffer.decode())
-                return -1
+                socketio.emit("message_update", "Error: " + process.buffer.decode(), namespace="/websocket-onedrive")
+                socketio.sleep(0.1)
         process.sendline('onedrive')
         logger.debug("Selected option onedrive")
 
@@ -71,7 +76,8 @@ def configure_rclone_onedrive_personal(name):
         if auth_url:
             logger.info("If your browser doesn't open automatically, go to the following link:")
             logger.info(auth_url)
-            yield auth_url
+            socketio.emit("message_update", auth_url, namespace="/websocket-onedrive")
+            socketio.sleep(0.1)
 
             # Continue handling prompts
             process.expect('Your choice>', timeout=120)
@@ -93,19 +99,23 @@ def configure_rclone_onedrive_personal(name):
             process.sendline('y')
             logger.debug("Selected [y] for final confirmation")
             logger.info("Success setting up OneDrive!")
-            yield "0"
+            socketio.emit("message_update", "Success setting up OneDrive!", namespace="/websocket-onedrive")
+            socketio.sleep(0.1)
         else:
             logger.error("Failed to extract authorization URL.")
-            return -3
+            socketio.emit("message_update", "Failed to extract authorization URL.", namespace="/websocket-onedrive")
+            socketio.sleep(0.1)
 
     except pexpect.EOF:
         logger.error("Error: Unexpected end of input.")
         logger.error(process.before.decode())
-        return -4
+        socketio.emit("message_update", "Error: Unexpected end of input.", namespace="/websocket-onedrive")
+        socketio.sleep(0.1)
 
     except Exception:
         logger.error(process.buffer.decode())
-        return -5
+        socketio.emit("message_update", process.buffer.decode(), namespace="/websocket-onedrive")
+        socketio.sleep(0.1)
 
     finally:
         # Close the process
