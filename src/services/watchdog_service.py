@@ -14,7 +14,6 @@ from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 from src.helpers.rclone_configManager import RcloneConfig
 import fitz
 from src.webserver.db import send_database_request, update_scanneddata_database
-from main import root_path
 
 
 class FileHandler(FileSystemEventHandler):
@@ -106,6 +105,7 @@ class FileHandler(FileSystemEventHandler):
 
         try:
             # Generate preview image
+            root_path = config.get("relative_root_path")
             previewfolder = 'src/webserver/static/images/pdfpreview/'
             if not os.path.exists(os.path.join(root_path, previewfolder)):
                 logger.debug(f"Creating folder {previewfolder}")

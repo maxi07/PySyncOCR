@@ -18,7 +18,6 @@ import requests
 import os
 
 shutdown_flag = threading.Event()
-root_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def shutdown_handler(sig, frame):
@@ -34,7 +33,11 @@ This module handles the initialization and running of the various services.
 """
 
 if __name__ == "__main__":
+    root_path = os.path.dirname(os.path.abspath(__file__))
     logger.debug("Root path is: " + root_path)
+    config.set("relative_root_path", root_path)
+
+    # Check if the OS is supported
     if not sys.platform.lower().startswith('linux'):
         logger.error("OS is not supported.")
         sys.exit(-1)
