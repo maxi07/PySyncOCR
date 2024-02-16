@@ -106,12 +106,14 @@ class FileHandler(FileSystemEventHandler):
         try:
             # Generate preview image
             root_path = config.get("relative_root_path")
-            previewfolder = 'src/webserver/static/images/pdfpreview/'
-            logger.debug(f"Checking if {os.path.join(root_path, previewfolder)} exists")
-            if not os.path.exists(os.path.join(root_path, previewfolder)):
-                logger.debug(f"Creating folder {previewfolder}")
-            previewimage_path = previewfolder + str(last_inserted_id) + '.jpg'
-            self.pdf_to_jpeg(item.local_file_path, os.path.join(root_path, previewimage_path), 128, 50)
+            previewfolder_relative = 'src/webserver/static/images/pdfpreview/'
+            preview_folder = os.path.join(root_path, previewfolder_relative)
+            logger.debug(f"Checking if {preview_folder} exists")
+            if not os.path.exists(preview_folder):
+                logger.debug(f"Creating folder {preview_folder}")
+                os.mkdir(preview_folder)
+            previewimage_path = preview_folder + str(last_inserted_id) + '.jpg'
+            self.pdf_to_jpeg(item.local_file_path, previewimage_path, 128, 50)
             update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path}, self.websocket_messages_queue)
         except Exception as e:
             logger.exception(f"Error adding preview image to database: {e}")
