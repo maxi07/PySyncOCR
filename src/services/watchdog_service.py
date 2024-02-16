@@ -107,6 +107,7 @@ class FileHandler(FileSystemEventHandler):
             # Generate preview image
             root_path = config.get("relative_root_path")
             previewfolder = 'src/webserver/static/images/pdfpreview/'
+            logger.debug(f"Checking if {os.path.join(root_path, previewfolder)} exists")
             if not os.path.exists(os.path.join(root_path, previewfolder)):
                 logger.debug(f"Creating folder {previewfolder}")
             previewimage_path = previewfolder + str(last_inserted_id) + '.jpg'
