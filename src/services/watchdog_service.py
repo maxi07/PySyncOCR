@@ -106,7 +106,10 @@ class FileHandler(FileSystemEventHandler):
         try:
             # Generate preview image
             absolute_path = os.path.dirname(__file__)
-            previewimage_path = f'src/webserver/static/images/pdfpreview/{last_inserted_id}.jpg'
+            previewfolder = 'src/webserver/static/images/pdfpreview/'
+            if not os.path.exists(os.path.join(absolute_path, previewfolder)):
+                logger.debug(f"Creating folder {previewfolder}")
+            previewimage_path = previewfolder + last_inserted_id + '.jpg'
             self.pdf_to_jpeg(item.local_file_path, os.path.join(absolute_path, previewimage_path), 128, 50)
             update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path}, self.websocket_messages_queue)
         except Exception as e:
