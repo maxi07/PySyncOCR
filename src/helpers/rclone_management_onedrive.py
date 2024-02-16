@@ -23,11 +23,14 @@ def list_remotes() -> list[str]:
         # Split the data by newline characters to get individual lines
         lines = result.stdout.decode().split('\n')
 
-        # Remove additional spaces from the values
-        result2 = [value.split(":")[1].replace(' ', '') for value in lines]
+        # Remove empty strings
+        filtered_list = [item for item in lines if item.strip() != '']
+
+        # Remove spaces after ":"
+        processed_list = [entry.split(":")[0] + ":" + entry.split(":")[1].strip() for entry in filtered_list]
 
         # Use list comprehension to filter lines and extract values before ':'
-        result = [line.split(':')[0].strip() for line in result2 if ':onedrive' in line]
+        result = [line.split(':')[0].strip() for line in processed_list if ':onedrive' in line]
         logger.debug(f"Found remotes: {str(result)}")
         return result
     except subprocess.CalledProcessError as e:
