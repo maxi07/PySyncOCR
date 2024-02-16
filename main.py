@@ -14,6 +14,7 @@ import time
 import argparse
 import signal
 import sys
+import requests
 
 
 shutdown_flag = threading.Event()
@@ -99,6 +100,10 @@ if __name__ == "__main__":
     sync_queue.put(None)
     sync_thread.join()
     logger.debug("Sync thread joined")
+    try:
+        requests.get("http://localhost:5000/shutdown")
+    except Exception as e:
+        logger.exception(f"Failed shutting down Flask: {e}")
     flask_thread.join()
     logger.debug("Flask thread joined")
     smb.stop_server()
