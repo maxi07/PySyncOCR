@@ -114,7 +114,7 @@ class FileHandler(FileSystemEventHandler):
                 os.mkdir(preview_folder)
             previewimage_path = preview_folder + str(last_inserted_id) + '.jpg'
             self.pdf_to_jpeg(item.local_file_path, previewimage_path, 128, 50)
-            update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path}, self.websocket_messages_queue)
+            update_scanneddata_database(item.db_id, {'previewimage_path': "static/images/pdfpreview/" + str(last_inserted_id) + ".jpg"}, self.websocket_messages_queue)
         except Exception as e:
             logger.exception(f"Error adding preview image to database: {e}")
 
