@@ -223,6 +223,9 @@ def websocket_dashboard_loop():
                 else:
                     latest_timestamp_pending_string = "Never"
                     logger.debug("No latest timestamp for pending documents found")
+            except IndexError:
+                latest_timestamp_pending_string = "Never"
+                logger.debug("No latest timestamp for pending documents found")
             except Exception as e:
                 logger.exception(f"Error while getting latest pending timestamp: {e}")
                 latest_timestamp_pending_string = "Unknown"
@@ -241,6 +244,9 @@ def websocket_dashboard_loop():
                 else:
                     latest_timestamp_completed_string = "Never"
                     logger.debug("No latest timestamp for synced documents found")
+            except IndexError:
+                latest_timestamp_completed_string = "Never"
+                logger.debug("No latest timestamp for synced documents found")
             except Exception as e:
                 logger.exception(f"Error while getting latest synced timestamp: {e}")
                 latest_timestamp_completed_string = "Unknown"
