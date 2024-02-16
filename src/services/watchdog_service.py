@@ -160,6 +160,7 @@ class FileHandler(FileSystemEventHandler):
             return False
 
     def pdf_to_jpeg(self, pdf_path: str, output_path: str, target_height=128, compression_quality=50):
+        logger.debug(f"Creating JPEG preview image from {pdf_path} to {output_path}")
         # Open the PDF file
         pdf_document = fitz.open(pdf_path)
 
