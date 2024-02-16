@@ -49,6 +49,7 @@ PyPDF2==3.0.1
 pyspnego==0.10.2
 pytest==7.4.4
 rich==13.7.0
+requests
 simple-websocket==1.0.0
 six==1.16.0
 soupsieve==2.5
