@@ -14,6 +14,7 @@ from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 from src.helpers.rclone_configManager import RcloneConfig
 import fitz
 from src.webserver.db import send_database_request, update_scanneddata_database
+from main import root_path
 
 
 class FileHandler(FileSystemEventHandler):
@@ -105,12 +106,11 @@ class FileHandler(FileSystemEventHandler):
 
         try:
             # Generate preview image
-            absolute_path = os.path.dirname(__file__)
             previewfolder = 'src/webserver/static/images/pdfpreview/'
-            if not os.path.exists(os.path.join(absolute_path, previewfolder)):
+            if not os.path.exists(os.path.join(root_path, previewfolder)):
                 logger.debug(f"Creating folder {previewfolder}")
             previewimage_path = previewfolder + str(last_inserted_id) + '.jpg'
-            self.pdf_to_jpeg(item.local_file_path, os.path.join(absolute_path, previewimage_path), 128, 50)
+            self.pdf_to_jpeg(item.local_file_path, os.path.join(root_path, previewimage_path), 128, 50)
             update_scanneddata_database(item.db_id, {'previewimage_path': previewimage_path}, self.websocket_messages_queue)
         except Exception as e:
             logger.exception(f"Error adding preview image to database: {e}")
