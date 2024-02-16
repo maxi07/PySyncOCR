@@ -65,7 +65,7 @@ function updatePDFCard(pdfData) {
 
     // Now update the pdf info
     var pdfModified = document.getElementById(pdfData.id + '_pdf_modified');
-    pdfModified.innerHTML = pdfData.modified + "<br>";
+    pdfModified.innerHTML = pdfData.local_modified + "<br>";
 
     var pdfSMB = document.getElementById(pdfData.id + '_pdf_smb');
     pdfSMB.innerHTML = pdfData.local_filepath + "<br>";

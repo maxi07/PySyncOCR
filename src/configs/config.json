@@ -1,4 +1,5 @@
 {
+    "relative_root_path": "",
     "sync_service": {
         "root_folder": "/home/ocr/pysyncocr_shared",
         "user_path": "/home/ocr",

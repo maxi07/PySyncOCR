@@ -39,10 +39,12 @@ def create_app(test_config=None):
     from . import dashboard
     from . import sync
     from . import smb
+    from . import shutdown
     app.register_blueprint(root.bp)
     app.register_blueprint(dashboard.bp)
     app.register_blueprint(sync.bp)
     app.register_blueprint(smb.bp)
+    app.register_blueprint(shutdown.bp)
     app.template_context_processors[None].append(inject_template_data)
     logger.debug(f"Registered blueprints with routes {app.url_map}")
     logger.info("Started web server")

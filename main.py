@@ -14,7 +14,8 @@ import time
 import argparse
 import signal
 import sys
-
+import requests
+import os
 
 shutdown_flag = threading.Event()
 
@@ -32,6 +33,11 @@ This module handles the initialization and running of the various services.
 """
 
 if __name__ == "__main__":
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    logger.debug("Root path is: " + root_path)
+    config.set("relative_root_path", root_path)
+
+    # Check if the OS is supported
     if not sys.platform.lower().startswith('linux'):
         logger.error("OS is not supported.")
         sys.exit(-1)
@@ -99,6 +105,10 @@ if __name__ == "__main__":
     sync_queue.put(None)
     sync_thread.join()
     logger.debug("Sync thread joined")
+    try:
+        requests.get("http://localhost:5000/shutdown")
+    except Exception as e:
+        logger.exception(f"Failed shutting down Flask: {e}")
     flask_thread.join()
     logger.debug("Flask thread joined")
     smb.stop_server()
