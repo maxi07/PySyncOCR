@@ -24,7 +24,7 @@ def list_remotes() -> list[str]:
         lines = result.stdout.decode().split('\n')
 
         # Remove additional spaces from the values
-        result2 = [value.replace(' ', '') for value in lines]
+        result2 = [value.split(":")[1].replace(' ', '') for value in lines]
 
         # Use list comprehension to filter lines and extract values before ':'
         result = [line.split(':')[0].strip() for line in result2 if ':onedrive' in line]
