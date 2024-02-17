@@ -1,3 +1,4 @@
+import ast
 import json
 from flask import Blueprint, render_template, request, current_app
 bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -73,7 +74,17 @@ def index():
                 logger.debug(f"Found latest timestamp for pending documents: {latest_timestamp_pending[0]}")
                 latest_timestamp_pending_string = "Updated " + format_time_difference(latest_timestamp_pending[0])
             else:
-                latest_timestamp_pending_string = "Never"
+                latest_timestamp_pending = db.execute(
+                    'SELECT DATETIME(modified, "localtime") FROM scanneddata '
+                    'WHERE file_status != "Pending" '
+                    'ORDER BY created DESC '
+                    'LIMIT 1'
+                ).fetchone()
+
+                if latest_timestamp_pending is None:
+                    latest_timestamp_pending_string = "Never"
+                else:
+                    latest_timestamp_pending_string = "Updated " + format_time_difference(latest_timestamp_pending[0])
                 logger.debug("No latest timestamp for pending documents found")
         except Exception as e:
             logger.exception(f"Error while getting latest pending timestamp: {e}")
@@ -211,21 +222,30 @@ def websocket_dashboard_loop():
             # Now get the latest timestamps for the dashboard
             # Get the latest timestamp from the file_status=pending
             try:
-                latest_timestamp_pending = send_database_request(
+                dbresult = send_database_request(
                     'SELECT DATETIME(created, "localtime") FROM scanneddata '
                     'WHERE file_status = "Pending" '
                     'ORDER BY created DESC '
                     'LIMIT 1'
-                    )[0]
-                if latest_timestamp_pending is not None:
-                    logger.debug(f"Found latest timestamp for pending documents: {latest_timestamp_pending[0]}")
-                    latest_timestamp_pending_string = "Updated " + format_time_difference(latest_timestamp_pending[0])
+                    )
+                logger.debug("Returned " + str(dbresult))
+                latest_timestamp_pending = ast.literal_eval(str(dbresult))
+                if latest_timestamp_pending:
+                    logger.debug(f"Found latest timestamp for pending documents: {latest_timestamp_pending[0][0]}")
+                    latest_timestamp_pending_string = "Updated " + format_time_difference(latest_timestamp_pending[0][0])
                 else:
-                    latest_timestamp_pending_string = "Never"
+                    dbresult = send_database_request(
+                        'SELECT DATETIME(modified, "localtime") FROM scanneddata '
+                        'WHERE file_status != "Pending" '
+                        'ORDER BY created DESC '
+                        'LIMIT 1'
+                    )
+                    latest_timestamp_pending = ast.literal_eval(str(dbresult))
+                    if not latest_timestamp_pending:
+                        latest_timestamp_pending_string = "Never"
+                    else:
+                        latest_timestamp_pending_string = "Updated " + format_time_difference(latest_timestamp_pending[0][0])
                     logger.debug("No latest timestamp for pending documents found")
-            except IndexError:
-                latest_timestamp_pending_string = "Never"
-                logger.debug("No latest timestamp for pending documents found")
             except Exception as e:
                 logger.exception(f"Error while getting latest pending timestamp: {e}")
                 latest_timestamp_pending_string = "Unknown"

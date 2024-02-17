@@ -34,7 +34,7 @@ class SyncService:
                 if confitem is None:
                     logger.error(f"Cannot sync {item.ocr_file} as no matching onedrive config was found.")
                     item.status = ProcessStatus.SYNC_FAILED
-                    self.move_to_failed(item.ocr_file)
+                    self.move_to_failed(item)
                     if os.path.exists(item.local_file_path.replace("_OCR", "")):
                         logger.debug(f"Removing original file at {item.local_file_path.replace('_OCR', '')}")
                         os.remove(item.local_file_path.replace("_OCR", ""))
