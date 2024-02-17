@@ -146,5 +146,10 @@ else
     log_message "Skipping service installation."
 fi
 
-
+echo ""
+echo ""
+echo "=========================================="
 echo "Installation complete. Log file: $LOG_FILE"
+echo ""
+echo "Access the webui via http://$(hostname):5000"
+echo "=========================================="

@@ -191,20 +191,26 @@
                             <div id="name_help" class="form-text">This name must be unique for the connection.</div>
                             <br>
                             <label for="onedrive_selector" class="col-form-label">Select OneDrive Account</label><br>
-                            <div class="btn-group" id="onedrive_selector" role="group" aria-label="Basic radio toggle button group">
-                                <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_personal" autocomplete="off" checked>
-                                <label class="btn btn-outline-primary" for="onedrive_selector_personal"><i class="bi bi-person"></i> Personal</label>
-                              
-                                <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_sharepoint" autocomplete="off" disabled>
-                                <label class="btn btn-outline-primary" for="onedrive_selector_sharepoint"><i class="bi bi-briefcase"></i> SharePoint</label>
-                              </div>
-                              <div id="onedrive_help" class="form-text text-danger">SharePoint is currently not supported (but soon!)</div>
+                            <div class="btn-group" id="onedrive_selector" role="group"
+                                aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_personal"
+                                    autocomplete="off" checked>
+                                <label class="btn btn-outline-primary" for="onedrive_selector_personal"><i
+                                        class="bi bi-person"></i> Personal</label>
+
+                                <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_sharepoint"
+                                    autocomplete="off" disabled>
+                                <label class="btn btn-outline-primary" for="onedrive_selector_sharepoint"><i
+                                        class="bi bi-briefcase"></i> SharePoint</label>
+                            </div>
+                            <div id="onedrive_help" class="form-text text-danger">SharePoint is currently not supported
+                                (but soon!)</div>
                         </div>
                         <div class="text-danger" id="allowedCharsErrorMsgOneDriveConn" style="display: none;">
                             Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
                         </div>
                     </div>
-                    
+
 
                     <!-- Waiting animation -->
                     <div class="text-center" id="waitingAnimationonedriveadd" style="display: none;">
@@ -227,16 +233,54 @@
                         <div class="text-center">
                             <h5>Setup SSH Tunnel</h5>
                         </div>
-                        <p>For secure authentication, we need a SSH tunnel from your machine to the server.<br>
-                            Please open a terminal and use the following command to route the authentication server
-                            securely to you.<br>
-                            Once connected, please resume here by clicking "Next".
+                        <p>For secure authentication, we need a SSH tunnel from your machine to the server running PySyncOCR.<br>
                         </p>
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="bi bi-1-circle-fill" style="font-size: 2rem; color: gray;"></i>
+                                </div>
+                                <div class="col">
+                                    <p class="m-0 lh-sm">Open a new Terminal</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="bi bi-2-circle-fill" style="font-size: 2rem; color: gray;"></i>
+                                </div>
+                                <div class="col">
+                                    <p class="m-0 lh-sm">Connect to the server using the following command and replacing <i><span>&lt;username&gt;</span></i> with your SSH user</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="bi bi-3-circle-fill" style="font-size: 2rem; color: gray;"></i>
+                                </div>
+                                <div class="col">
+                                    <p class="m-0 lh-sm">Click Next and authenticate to OneDrive</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="bi bi-4-circle-fill" style="font-size: 2rem; color: gray;"></i>
+                                </div>
+                                <div class="col">
+                                    <p class="m-0 lh-sm">Close the terminal</p>
+                                </div>
+                            </div>
+                        </div>
                         <div class="container mt-5">
                             <div class="terminal-box bg-dark px-3 py-2 rounded">
                                 <div class="terminal-command">
-                                    <span class="text-white">ssh -L localhost:53682:localhost:53682 ocr@{{ hostname
-                                        }}</span>
+                                    <span class="text-white">ssh -L localhost:53682:localhost:53682
+                                        <span>&lt;username&gt;</span>@{{ hostname }}
+                                    </span>
                                 </div>
                             </div>
                             <div class="row justify-content-center mt-3">
@@ -252,8 +296,8 @@
                     <div id="sshInstallInfo" style="display: none;">
                         <div id="lottieWarning" class="d-flex justify-content-center align-items-center">
                             <dotlottie-player id="terminal_lottie_player" src="/static/lottie/error.json"
-                                background="transparent" speed="1" direction="1" playMode="normal" style="width: 150px; height: 150px;"
-                                autoplay></dotlottie-player>
+                                background="transparent" speed="1" direction="1" playMode="normal"
+                                style="width: 150px; height: 150px;" autoplay></dotlottie-player>
                         </div>
                         <div class="text-center">
                             <h5>Setup SSH</h5>
@@ -276,8 +320,8 @@
                     <div id="errormsg_display" style="display: none;">
                         <div id="lottieWarning" class="d-flex justify-content-center align-items-center">
                             <dotlottie-player id="terminal_lottie_player" src="/static/lottie/error.json"
-                                background="transparent" speed="1" direction="1" playMode="normal" style="width: 150px; height: 150px;"
-                                autoplay></dotlottie-player>
+                                background="transparent" speed="1" direction="1" playMode="normal"
+                                style="width: 150px; height: 150px;" autoplay></dotlottie-player>
                         </div>
                         <div class="text-center">
                             <h5>Error</h5>
