@@ -30,7 +30,7 @@ lxml
 markdown-it-py==3.0.0
 MarkupSafe==2.1.3
 mdurl==0.1.2
-ocrmypdf
+ocrmypdf~=16.1.1
 packaging==23.2
 pdfminer.six==20231228
 pexpect==4.9.0

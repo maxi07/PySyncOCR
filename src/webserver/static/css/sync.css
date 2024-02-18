@@ -11,3 +11,9 @@
 .copy-button:hover {
     background-color: #0056b3;
 }
+
+.terminal-command {
+    white-space: nowrap; /* Prevent line breaks */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    scrollbar-color: white transparent; /* Remove scrollbar background */
+}
