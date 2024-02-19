@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, render_template, request, send_file
 bp = Blueprint('sync', __name__, url_prefix='/sync')
 from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import dump_config, delete_config_item, list_remotes, list_folders
-from src.helpers.rclone_setup import configure_rclone_onedrive_personal, check_ssh_enabled
+from src.helpers.rclone_setup import configure_rclone_onedrive_personal, check_ssh_enabled, configure_rclone_onedrive_sharepoint
 from src.helpers.rclone_configManager import RcloneConfig
 from . import socketio
 from src.webserver.db import get_db
@@ -11,6 +11,7 @@ from src.helpers.config import config
 import json
 import os
 import socket
+import src.helpers.rclone_setup
 
 
 @bp.route("/")
@@ -175,7 +176,28 @@ def handle_message(message):
         json_data = json.loads(message)
         socketio.emit('message_update', 'Connecting to OneDrive...', namespace='/websocket-onedrive')
         if "name" in json_data:
-            socketio.start_background_task(target=configure_rclone_onedrive_personal, name=json_data["name"])
+            if json_data['onedrive_type'] == "personal":
+                socketio.start_background_task(target=configure_rclone_onedrive_personal, name=json_data["name"])
+            elif json_data['onedrive_type'] == "sharepoint":
+                socketio.start_background_task(target=configure_rclone_onedrive_sharepoint, name=json_data["name"], sharepoint_name=json_data["sp_name"])
+
+
+@socketio.on('rclone_sp_update', namespace='/websocket-onedrive')
+def handle_rclone_update(message):
+    if message is None:
+        return
+    else:
+        logger.info(f"Received data: {message}")
+        msg_json = json.loads(message)
+        if msg_json['step'] == "sp_select":
+            logger.debug(f"Step: {msg_json['step']} with value {msg_json['value']}")
+            src.helpers.rclone_setup.sp_name = msg_json['value']
+        elif msg_json['step'] == "library_select":
+            logger.debug(f"Step: {msg_json['step']} with value: {msg_json['value']}")
+            src.helpers.rclone_setup.sp_library = msg_json['value']
+        else:
+            logger.info(f"Unknown step: {msg_json['step']}")
+            return
 
 
 @bp.post("/pathmapping")

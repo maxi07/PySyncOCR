@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const errormsgOneDriveConn = document.getElementById("allowedCharsErrorMsgOneDriveConn");
     const errormsglocalpath = document.getElementById("allowedCharsErrorMsgLocalPath");
     var localpathinput = document.getElementById('local_path');
+    const sharepoint_name_input = document.getElementById('sharepoint_name');
 
     // Add an input event listener to the text input
     onedriveNameInput.addEventListener('input', function () {
@@ -25,6 +26,22 @@ document.addEventListener('DOMContentLoaded', function () {
             onedriveNameInput.classList.add('is-invalid');
             errormsgOneDriveConn.style.display = 'block';
             submitButtonOneDriveConnections.disabled = true;
+        }
+    });
+
+    sharepoint_name_input.addEventListener('input', function () {
+        // Enable or disable the button based on whether the input has content
+        submitButtonpathmapping.disabled = !sharepoint_name_input.value.trim();
+
+        // Validate the input
+        if (validateTextInput(sharepoint_name_input.value)) {
+            sharepoint_name_input.classList.remove('is-invalid');
+            errormsgOneDriveConn.style.display = 'none';
+            submitButtonpathmapping.disabled = false;
+        } else {
+            sharepoint_name_input.classList.add('is-invalid');
+            errormsgOneDriveConn.style.display = 'block';
+            submitButtonpathmapping.disabled = true;
         }
     });
 
@@ -143,6 +160,10 @@ function addOneDrive() {
                                 rCloneAuthPopup.close();
                             } catch {}
                             window.location.reload();
+                        } else if (data.startsWith("Authenticated")) {
+                            try {
+                                rCloneAuthPopup.close();
+                            } catch {}
                         } else {
                             // Otherwise, it's just text
                             if (data.startsWith("Error")) {
@@ -157,9 +178,44 @@ function addOneDrive() {
                             }
                         }
                     });
+                    socket.on('rclone_sp_update', function (data) {
+                        console.log("Received rclone status: " + JSON.stringify(data));
+
+                        animation_statustext.innerText = data.message;
+                        const listgroup = document.getElementById("sharepoint_list_group");
+                        if (data.step === "sp_select") {
+                            console.log("Received " + Object.keys(data.options).length + " items.");
+
+                            listgroup.innerHTML = '';
+                            // Iterate through the JSON and create list-group-items dynamically
+                            for (const [key, value] of Object.entries(data.options)) {
+                                const listItem = document.createElement('a');
+                                listItem.href = '#';
+                                listItem.classList.add('list-group-item', 'list-group-item-action', 'd-flex', 'justify-content-between', 'align-items-center');
+
+                                const icon = document.createElement('i');
+                                icon.classList.add('bi', 'bi-house');
+
+                                const span = document.createElement('span');
+                                span.appendChild(icon);
+                                span.appendChild(document.createTextNode(` ${value}`));
+                                listItem.appendChild(span);
+
+                                // Add event listeners
+                                listItem.addEventListener('dblclick', function() {
+                                    socket.emit('rclone_sp_update', JSON.stringify({ "step": data.step, "value": key }));
+                                });
+
+                                listgroup.appendChild(listItem);
+                            }
+                            listgroup.style.display = "block";
+                        }
+                    });
+
                     socket.on('connect', function () {
                         console.log('Connected to onedrive websocket');
-                        socket.emit('message_update', JSON.stringify({ "name": document.getElementById("onedrive_name").value }));
+                        const onedrive_selector = document.getElementById("onedrive_selector");
+                        socket.emit('message_update', JSON.stringify({ "name": document.getElementById("onedrive_name").value, "sp_name": document.getElementById("sharepoint_name").value, "onedrive_type": getActiveElementOneDriveSelector()}));
                     });
                 };
             };
@@ -168,8 +224,27 @@ function addOneDrive() {
     xhr.send();
 }
 
+function getActiveElementOneDriveSelector() {
+    const radioButtons = document.querySelectorAll('#onedrive_selector input[type="radio"]');
+    
+    let activeElement = null;
+    radioButtons.forEach(button => {
+        if (button.checked) {
+            activeElement = button.id.includes('personal') ? 'personal' : 'sharepoint';
+        }
+    });
+    
+    return activeElement;
+}
+
+
 function openAuthWindow(url) {
     rCloneAuthPopup = window.open(url, "rClone Authentication", "width=400,height=600");
+}
+
+function toggleSPName() {
+    const sp_container = document.getElementById("sharepoint_name_container");
+    sp_container.style.display = sp_container.style.display === "none"? "block" : "none";
 }
 
 function validateTextInput(input) {

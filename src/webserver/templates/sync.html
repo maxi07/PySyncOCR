@@ -190,21 +190,26 @@
                                 placeholder="Name">
                             <div id="name_help" class="form-text">This name must be unique for the connection.</div>
                             <br>
+                            <div id="sharepoint_name_container" style="display: none;">
+                            <label for="sharepoint_name" class="col-form-label">SharePoint Name</label>
+                            <input type="text" class="form-control" id="sharepoint_name" name="sharepoint_name"
+                                placeholder="Office">
+                            <div id="sharepoint_help" class="form-text">The name of the SharePoint to search for (eg. Office)</div>
+                            </div>
+                            <br>
                             <label for="onedrive_selector" class="col-form-label">Select OneDrive Account</label><br>
                             <div class="btn-group" id="onedrive_selector" role="group"
                                 aria-label="Basic radio toggle button group">
                                 <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_personal"
-                                    autocomplete="off" checked>
+                                    autocomplete="off" onchange="toggleSPName()" checked>
                                 <label class="btn btn-outline-primary" for="onedrive_selector_personal"><i
                                         class="bi bi-person"></i> Personal</label>
 
                                 <input type="radio" class="btn-check" name="btnradio" id="onedrive_selector_sharepoint"
-                                    autocomplete="off" disabled>
+                                    autocomplete="off" onchange="toggleSPName()">
                                 <label class="btn btn-outline-primary" for="onedrive_selector_sharepoint"><i
                                         class="bi bi-briefcase"></i> SharePoint</label>
                             </div>
-                            <div id="onedrive_help" class="form-text text-danger">SharePoint is currently not supported
-                                (but soon!)</div>
                         </div>
                         <div class="text-danger" id="allowedCharsErrorMsgOneDriveConn" style="display: none;">
                             Please only use allowed characters: 0-9, A-Z ,a-z ,_ , - and space
@@ -219,6 +224,12 @@
                         </div>
                         <p class="mt-2" id="waitingAnimationonedriveadd_statustext">Checking for ssh...</p>
                     </div>
+
+                    <!-- List group SharePoint selection -->
+                    <div class="list-group" id="sharepoint_list_group" style="display: none;">
+                        <!-- Items will be added dynamically -->
+                    </div>
+
 
                     <!-- SSH Tunnel setup -->
                     <div id="sshTunnelSetupInfo" style="display: none;">
