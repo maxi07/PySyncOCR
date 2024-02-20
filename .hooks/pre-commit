@@ -21,7 +21,6 @@ if __name__ == "__main__":
             for file in staged_files:
                 if "secrets.json" in file:
                     with open("src/configs/secrets.json", "r") as config_file:
-                        print("🔎 secrets.json is staged, checking for secrets...")
                         try:
                             config_data = json.load(config_file)
                         except json.JSONDecodeError as e:
