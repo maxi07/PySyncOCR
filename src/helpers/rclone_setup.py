@@ -326,8 +326,6 @@ def extract_sharepoint_options(input: bytes) -> list[str]:
 
 def check_ssh_enabled():
     logger.info("Checking for ssh service...")
-    logger.warning("!!!!!!!!!!!!!!!!!!! REMOVE ME !!!!!!!!!!!!!!!!!!!!!!!!!")
-    return 0
 
     if current_app.debug:
         logger.warning("This is a workaround for debugging purpose. Skipping ssh check.")
