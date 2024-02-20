@@ -128,6 +128,8 @@ def configure_rclone_onedrive_personal(name):
 
 def configure_rclone_onedrive_sharepoint(name, sharepoint_name):
     global sp_name, sp_library
+    sp_name = None
+    sp_library = None
     # Run the rclone config command using pexpect
     process = pexpect.spawn('rclone config')
     logger.info("Configuring OneDrive with rclone for SharePoint, please wait...")
@@ -236,10 +238,11 @@ def configure_rclone_onedrive_sharepoint(name, sharepoint_name):
             search_results_sp_library = extract_sharepoint_options(process.before)
             sp_message = {"message": "Select a library", "step": "library_select", "options": search_results_sp_library}
             socketio.emit('rclone_sp_update', sp_message, namespace="/websocket-onedrive")
+            socketio.sleep(0.1)
 
             timeout_splib = 120
             timeout_splib_count = 0
-            while sp_name is None:
+            while sp_library is None:
                 socketio.sleep(1)
                 timeout_splib_count += 1
                 if timeout_splib_count >= timeout_splib:
@@ -249,11 +252,11 @@ def configure_rclone_onedrive_sharepoint(name, sharepoint_name):
 
             if int(sp_library) >= 0 and int(sp_library) < (len(search_results_sp_library)):
                 process.sendline(sp_library)
-                logger.debug(f"Selected SharePoint {sp_library}")
+                logger.debug(f"Selected SharePoint library {sp_library}")
             else:
-                socketio.emit("rclone_sp_update", "Invalid SharePoint selection.", namespace="/websocket-onedrive")
+                socketio.emit("rclone_sp_update", "Invalid SharePoint library selection.", namespace="/websocket-onedrive")
                 socketio.sleep(0.1)
-                raise Exception("Invalid SharePoint selection.")
+                raise Exception("Invalid SharePoint library selection.")
 
             # Confirm drive selection
             process.expect('Is that okay?', timeout=120)
@@ -270,7 +273,7 @@ def configure_rclone_onedrive_sharepoint(name, sharepoint_name):
 
         else:
             logger.error("Failed to extract authorization URL.")
-            socketio.emit("message_update", "Failed to extract authorization URL.", namespace="/websocket-onedrive")
+            socketio.emit("message_update", "Error: Failed to extract authorization URL.", namespace="/websocket-onedrive")
             socketio.sleep(0.1)
 
     except pexpect.EOF:
@@ -282,8 +285,14 @@ def configure_rclone_onedrive_sharepoint(name, sharepoint_name):
     except Exception as ex:
         logger.exception(ex)
         logger.error(process.buffer.decode())
-        socketio.emit("message_update", process.buffer.decode(), namespace="/websocket-onedrive")
-        socketio.sleep(0.1)
+        if "returned no results" in process.before.decode():
+            logger.error("Error: Invalid SharePoint name.")
+            socketio.emit("message_update", "Error: Invalid SharePoint name.", namespace="/websocket-onedrive")
+            socketio.sleep(0.1)
+        else:
+            logger.error("Error: " + process.buffer.decode() + "\n" + process.before.decode())
+            socketio.emit("message_update", "Error: " + process.buffer.decode() + "\n" + process.before.decode(), namespace="/websocket-onedrive")
+            socketio.sleep(0.1)
 
     finally:
         # Close the process
