@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="/static/css/dashboard.css">
+<h1>Settings</h1>
+<br><br>
+<h2>Automatic file names</h2>
+<hr>
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="filenamesswitch" onchange="toggle_filename_switch()">
+    <label class="form-check-label" for="filenamesswitch" id="filenamesswitch_label">Automatic file names are disabled</label>
+</div>
+<p>
+    Using OpenAI, we can add automatic file names to your scanned files. The content of the first page will be submitted
+    to OpenAI to generate a file name.
+</p>
+
+<div class="input-group">
+    <span class="input-group-text" id="addon-wrapping"><i class="bi bi-key"></i></span>
+    <input type="password" class="form-control" placeholder="OpenAI Key" aria-label="OpenAI key"
+        aria-describedby="addon-wrapping">
+</div>
+<br>
+<button type="button" class="btn btn-primary">Save</button>
+<script src="/static/js/settings.js"></script>
+
+{% endblock %}
