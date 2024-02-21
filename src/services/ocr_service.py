@@ -28,7 +28,7 @@ class OcrService:
             logger.info(f"Processing file with OCR: {item.local_file_path}")
 
             try:
-                result = ocrmypdf.ocr(item.local_file_path, item.ocr_file, output_type='pdf', skip_text=True, rotate_pages=True, jpg_quality=80, png_quality=80, optimize=2, language=["eng", "deu"])
+                result = ocrmypdf.ocr(item.local_file_path, item.ocr_file, output_type='pdfa', skip_text=True, rotate_pages=True, jpg_quality=80, png_quality=80, optimize=2, language=["eng", "deu"])
                 logger.info(f"OCR processing completed: {item.local_file_path}")
                 logger.debug(f"OCR exited with code {result}")
                 logger.debug(f"Adding {item.ocr_file} to sync queue")
