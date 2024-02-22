@@ -16,7 +16,11 @@ import signal
 import sys
 import requests
 import os
+from dotenv import load_dotenv
 
+
+logger.debug("Loading Env...")
+load_dotenv()
 shutdown_flag = threading.Event()
 
 

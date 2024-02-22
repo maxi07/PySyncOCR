@@ -73,5 +73,4 @@ class Config:
 
 
 config = Config('src/configs/config.json')
-secrets = Config('src/configs/secrets.json')
 logger.debug(f"Loaded {__name__} module")
