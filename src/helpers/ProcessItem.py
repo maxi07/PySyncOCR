@@ -18,6 +18,7 @@ class ProcessStatus(Enum):
     """
     OCR_PENDING = "OCR Pending"
     OCR = "OCR Processing"
+    FILENAME_PENDING = "Generating File Name"
     SYNC_PENDING = "Sync Pending"
     SYNC = "Syncing"
     COMPLETED = "Completed"

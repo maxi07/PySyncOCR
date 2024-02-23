@@ -76,7 +76,7 @@ class ConfigManager:
                 try:
                     # Create folder
                     folder_to_create = os.path.join(config.get_filepath("smb_service.share_path"), local)
-                    os.makedirs(folder_to_create, exist_ok=True, mode=775)
+                    os.makedirs(folder_to_create, exist_ok=True, mode=777)
                     logger.info(f"Created folder {folder_to_create}")
 
                     # Set owner of folder to user "ocr"
@@ -87,7 +87,7 @@ class ConfigManager:
                     logger.info(f"Set owner of {folder_to_create} to user ocr.")
 
                     # Set permissions of folder to user "ocr"
-                    command = ["sudo", "chmod", "-R", "775", folder_to_create]
+                    command = ["sudo", "chmod", "-R", "777", folder_to_create]
                     logger.debug(f"Calling {' '.join(command)}")
                     res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
                     logger.debug(f"Received {res}")

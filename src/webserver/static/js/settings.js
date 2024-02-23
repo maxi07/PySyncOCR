@@ -13,7 +13,11 @@ function submitOpenAI(event) {
     event.preventDefault(); // Prevent default form submission
     const submitButton = document.getElementById('save-button');
     const keyInput = document.getElementById('openai_key');
-    submitButton.innerText = "Testing key...";
+    if (submitButton.innerText == "Enable") {
+        submitButton.innerText = "Testing key...";
+    } else {
+        submitButton.innerText = "Deactivating...";
+    }
     submitButton.disabled = true;
 
     var formData = new FormData(document.getElementById('openai-form'));
@@ -26,15 +30,20 @@ function submitOpenAI(event) {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 console.log(response);
-                if (response.success) {
-                    animateButton(document.getElementById('save-button'), true);
+                if (response.success == 200) {
+                    animateButton(submitButton, true, "Success", "Disable");
+                } else if (response.success == 204) {
+                    animateButton(submitButton, true, "Deactivated", "Enable")
+                    keyInput.value = "";
+                } else if (response.success == 401) {
+                    animateButton(submitButton, false, "Invalid key", "Enable");
                 } else {
-                    animateButton(document.getElementById('save-button'), false);
+                    animateButton(submitButton, false, "Unknown Error", "Enable");
                 }
             } else {
                 console.error('Error:', xhr.status);
                 console.error('Error:', xhr.responseText);
-                animateButton(document.getElementById('save-button'), false);
+                animateButton(submitButton, false, "Internal Error");
             }
         }
     };
@@ -42,20 +51,20 @@ function submitOpenAI(event) {
     xhr.send(formData);
 }
 
-function animateButton(button, success) {
+function animateButton(button, success, message, buttonText='Enable') {
     button.classList.add('disabled');
   
     if (success) {
         button.classList.add('success-color');
-        button.innerHTML = '<i class="bi bi-check"></i> Success';
+        button.innerHTML = '<i class="bi bi-check"></i> ' + message;
     } else {
         button.classList.add('failure-color');
-        button.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Failed';
+        button.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + message;
     }
     
     setTimeout(function() {
         button.classList.remove('success-color', 'failure-color', 'disabled');
-        button.innerHTML = 'Enable';
+        button.innerHTML = buttonText;
     }, 3000);
 }
 

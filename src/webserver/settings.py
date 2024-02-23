@@ -3,7 +3,7 @@ bp = Blueprint('settings', __name__, url_prefix='/settings')
 from src.helpers.logger import logger
 from src.helpers.OpenAI import test_and_add_key
 from src.helpers.config import config
-from src.helpers.env_manager import update_env_variable
+from src.helpers.env_manager import remove_env_variable
 import os
 
 
@@ -31,16 +31,20 @@ def index():
 @bp.post("/openai")
 def set_openai_key():
     try:
-        logger.info("Testing OpenAI key...")
         key = request.form.get("openai_key")
         if key and config.get('web_service.automatic_file_names'):
             logger.debug("Removing OpenAI key...")
             config.set("web_service.automatic_file_names", False)
-            update_env_variable("OPEN_AI_KEY", "")
-            return {"success": True}, 200
+            remove_env_variable("OPEN_AI_KEY")
+            return {"success": 204}, 200
         else:
+            logger.info("Testing OpenAI key...")
             res = test_and_add_key(key)
-            return {"success": res}, 200 if res else 400
+            if res == 200:
+                config.set("web_service.automatic_file_names", True)
+            else:
+                config.set("web_service.automatic_file_names", False)
+            return {"success": res}, 200
     except Exception as e:
         logger.exception(f"An error occurred while setting OpenAI key: {e}")
         return {"success": False}, 500
