@@ -7,14 +7,35 @@
 <hr>
 <p>
     Using OpenAI, we can add automatic file names to your scanned files. The content of the first page will be submitted
-    to OpenAI to generate a file name.<br>You can find your API key <a href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key">here.</a>
+    to OpenAI to generate a file name.
+    By entering your OpenAI API key, you agree to OpenAI's <a href="https://openai.com/terms/" target="_blank">Terms of
+        Service</a> and <a href="https://https://openai.com/policies/privacy-policy" target="_blank">Privacy
+        Policy</a>.<br>
+    <a data-bs-toggle="collapse" href="#openAIDataCollapse" role="button" aria-expanded="false"
+        aria-controls="openAIDataCollapse">Does OpenAI store my data?</a>
 </p>
-
+<div class="alert alert-dark d-flex align-items-center" role="alert" id="openAIDataAlert">
+    <i class="bi bi-info-circle-fill me-2" style="font-size: 1.25rem;"></i>
+    <div>
+        You can find more info <a href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key"
+            target="_blank" style="color: var(--bs-alert-link-color)">here</a> or get your API key <a
+            href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--bs-alert-link-color)"> from
+            here</a>.
+    </div>
+</div>
+<div class="collapse py-2" id="openAIDataCollapse">
+    <div class="card card-body collapse-info">
+        <h4>Does OpenAI store the data that is passed into the API?</h4>
+        As of March 1st, 2023, we retain customer API data for 30 days but no longer use customer data sent via the API
+        to improve our models. You can learn more in our data usage policy. (As of 23.02.2024)
+    </div>
+</div>
 <form id="openai-form" action="/settings/openai" method="POST" onsubmit="submitOpenAI(event)">
     <div class="input-group">
         <span class="input-group-text" id="addon-wrapping"><i class="bi bi-key"></i></span>
         <input type="password" class="form-control" placeholder="OpenAI Key" aria-label="OpenAI key"
-            aria-describedby="addon-wrapping" id="openai_key" name="openai_key" value="{{ dummy_key }}" oninput="checkIfEmpty(this.id, 'save-button')">
+            aria-describedby="addon-wrapping" id="openai_key" name="openai_key" value="{{ dummy_key }}"
+            oninput="checkIfEmpty(this.id, 'save-button')">
     </div>
     <br>
     <button type="submit" class="btn btn-primary animated-button" id="save-button" disabled>Enable</button>

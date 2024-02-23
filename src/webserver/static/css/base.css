@@ -1,7 +1,8 @@
 h1:not(.modal-title),
 h2,
 h3,
-p {
+p,
+a {
     color: white;
 }
 
