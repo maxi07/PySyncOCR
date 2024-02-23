@@ -83,7 +83,7 @@ def generate_filename(pdf_path: str) -> str:
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Identify a suitable filename for the following pdf content. Keep the language of the file name in the original language and do not add any other language. Avoid special characters. Do not add a file extension. "},
+                {"role": "system", "content": "Identify a suitable filename for the following pdf content. Keep the language of the file name in the original language and do not add any other language. Avoid special characters. Do not add a file extension. Seperate words with a underscore."},
                 {"role": "user", "content": pdf_text}
             ]
         )
