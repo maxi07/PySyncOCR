@@ -278,7 +278,10 @@ def deleteFailedPDF():
                 {'id': json_data['id']}
             ).fetchone()[0]
             logger.info(f"Removing {os.path.join(config.get_filepath('sync_service.failed_dir'), item_name)}")
-            os.remove(os.path.join(config.get_filepath("sync_service.failed_dir"), item_name))
+            if os.path.exists(os.path.join(config.get_filepath("sync_service.failed_dir"), item_name)):
+                os.remove(os.path.join(config.get_filepath("sync_service.failed_dir"), item_name))
+            else:
+                logger.warning(f"File {item_name} does not exist in failed directory!")
             db = get_db()
             db.execute(
                 f'UPDATE {config.get("sql.db_pdf_table")} SET file_status = :status, modified = CURRENT_TIMESTAMP WHERE id = :id',

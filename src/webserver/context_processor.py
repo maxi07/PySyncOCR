@@ -15,9 +15,10 @@ def inject_template_data():
             path_mappings = json.load(f)
             logger.debug(f"Loaded {len(path_mappings)} path mappings")
 
+        remotes = list_remotes()
         # Check if the connection in the path mapping actually exisits
         for path_mapping in path_mappings:
-            if str(path_mapping["remote"]).split(":")[0] not in list_remotes():
+            if str(path_mapping["remote"]).split(":")[0] not in remotes:
                 logger.warning(f"Remote {str(path_mapping['remote']).split(':')[0]} not found in rclone remotes.")
                 logger.debug("Set mapping_error to True to display warning in Navbar")
                 mapping_error = True
