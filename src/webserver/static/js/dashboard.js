@@ -71,7 +71,7 @@ function updatePDFCard(pdfData) {
     pdfSMB.innerHTML = pdfData.local_filepath + "<br>";
 
     var pdfCloud = document.getElementById(pdfData.id + '_pdf_cloud');
-    pdfCloud.innerHTML = pdfData.local_filepath + "<br>";
+    pdfCloud.innerHTML = pdfData.remote_filepath + "<br>";
 
     var pdfStatus = document.getElementById(pdfData.id + '_pdf_status');
     pdfStatus.innerHTML = pdfData.file_status + "<br>";
