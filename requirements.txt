@@ -46,7 +46,7 @@ Pygments==2.17.2
 PyMuPDF==1.23.16
 PyMuPDFb==1.23.9
 pyOpenSSL==23.3.0
-PyPDF2==3.0.1
+pypdf
 pyspnego==0.10.2
 pytest==7.4.4
 python-dotenv

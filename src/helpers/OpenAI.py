@@ -3,7 +3,7 @@ from src.helpers.env_manager import update_env_variable
 from src.helpers.logger import logger
 from src.helpers.config import config
 import os
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 
 def test_and_add_key(key) -> int:
