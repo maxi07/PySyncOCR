@@ -16,7 +16,12 @@ import signal
 import sys
 import requests
 import os
+import src.helpers.git
+from dotenv import load_dotenv
 
+
+logger.debug("Loading Env...")
+load_dotenv()
 shutdown_flag = threading.Event()
 
 
@@ -54,6 +59,10 @@ if __name__ == "__main__":
     if args.dev:
         logger.warning("Running in development mode!")
     check_install()
+
+    # Get git version
+    src.helpers.git.git_version = src.helpers.git.get_git_version()
+    logger.info(f"Version is {src.helpers.git.git_version}")
 
     root_folder = config.get_filepath("sync_service.root_folder")
     logger.info(f"Root folder is {root_folder}")

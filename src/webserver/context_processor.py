@@ -3,6 +3,7 @@ from src.helpers.rclone_management_onedrive import list_remotes
 from src.services.smb_server_alternative import SambaController
 from src.webserver.db import send_database_request
 import json
+import src.helpers.git
 
 
 def inject_template_data():
@@ -14,9 +15,10 @@ def inject_template_data():
             path_mappings = json.load(f)
             logger.debug(f"Loaded {len(path_mappings)} path mappings")
 
+        remotes = list_remotes()
         # Check if the connection in the path mapping actually exisits
         for path_mapping in path_mappings:
-            if str(path_mapping["remote"]).split(":")[0] not in list_remotes():
+            if str(path_mapping["remote"]).split(":")[0] not in remotes:
                 logger.warning(f"Remote {str(path_mapping['remote']).split(':')[0]} not found in rclone remotes.")
                 logger.debug("Set mapping_error to True to display warning in Navbar")
                 mapping_error = True
@@ -42,6 +44,7 @@ def inject_template_data():
     template_data = {
         'mapping_error': mapping_error,
         'failed_documents': failed_documents,
-        'smb_error': smb_status
+        'smb_error': smb_status,
+        'version': src.helpers.git.git_version
     }
     return template_data

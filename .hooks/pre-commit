@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+import json
+import sys
+import subprocess
+
+sys.stdout.reconfigure(encoding='utf-8')
+
+
+def check_if_keys_empty(json_data):
+    for key, value in json_data.items():
+        if value != "":
+            print(f"⚠️  Credentials found in secrets.json for key {key}. Commit aborted.")
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    try:
+        config_data = None  # Initialize config_data to None
+        staged_files = subprocess.check_output(['git', 'diff', '--cached', '--name-only']).decode('utf-8').splitlines()
+        if staged_files:
+            for file in staged_files:
+                if "secrets.json" in file:
+                    with open("src/configs/secrets.json", "r") as config_file:
+                        try:
+                            config_data = json.load(config_file)
+                        except json.JSONDecodeError as e:
+                            print("❌ Error decoding JSON in secrets.json: {}".format(e))
+                            sys.exit(1)
+
+                    if not config_data:
+                        print("❌ No data found in secrets.json.")
+                        sys.exit(1)
+                    check_if_keys_empty(config_data)
+                break
+        else:
+            print("🔎 No files are staged, nothing to check.")
+            sys.exit(0)
+        print("✅ No secrets found in staged commit.")
+        sys.exit(0)
+    except Exception as ex:
+        print(ex)

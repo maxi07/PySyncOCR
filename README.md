@@ -41,3 +41,5 @@ Change this line:
 
 ## Development
 For developing we can use the built-in Flask server. To get debug output and use flask, run the `main.py` from VSCode with the `--dev` option or use the preconfigured launch.json.
+
+Please use the hooks provided in the '.hooks' directory by running 'git config core.hooksPath .hooks/'

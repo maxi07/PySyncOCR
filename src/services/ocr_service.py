@@ -6,6 +6,8 @@ from shutil import copy
 from src.helpers.ProcessItem import ProcessItem, ProcessStatus, OCRStatus
 from datetime import datetime
 from src.webserver.db import update_scanneddata_database
+from src.helpers.OpenAI import generate_filename
+import os
 
 
 class OcrService:
@@ -41,6 +43,17 @@ class OcrService:
                         logger.exception(f"Failed copying to backup location: {ex}")
                 else:
                     logger.debug("Skipping file save due to user config.")
+
+                if config.get("web_service.automatic_file_names"):
+                    item.status = ProcessStatus.FILENAME_PENDING
+                    update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
+                    new_file_name = generate_filename(item.ocr_file) + ".pdf"
+                    new_file_name_with_ocr_ending = new_file_name.replace(".pdf", "_OCR.pdf")
+                    logger.debug(f"Renaming file to {new_file_name}")
+                    new_ocr_file = os.path.join(item.local_directory, new_file_name_with_ocr_ending)
+                    os.rename(item.ocr_file, new_ocr_file)
+                    item.ocr_file = os.path.join(item.local_directory, new_file_name_with_ocr_ending)
+                    item.filename = new_file_name
             except ocrmypdf.UnsupportedImageFormatError:
                 logger.error(f"Unsupported image format: {item.local_file_path}")
                 item.ocr_status = OCRStatus.UNSUPPORTED
@@ -59,7 +72,7 @@ class OcrService:
             finally:
                 item.time_ocr_finished = datetime.now()
                 item.status = ProcessStatus.SYNC_PENDING
-                update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)
+                update_scanneddata_database(item.db_id, {"file_status": item.status.value, "file_name": item.filename}, self.websocket_messages_queue)
                 self.sync_queue.put(item)
 
             self.ocr_queue.task_done()

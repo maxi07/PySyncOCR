@@ -44,7 +44,7 @@ def test_general(setup_ocr_service):
     ocr_service.ocr_queue.put(None)  # Quit the loop
     ocr_service.start_processing()
     assert item.ocr_status == OCRStatus.COMPLETED
-    assert item.ocr_file == "tests/assets/cardinal_OCR.pdf"
+    assert item.ocr_file.endswith("_OCR.pdf")
     assert os.path.isfile(item.ocr_file)
     assert item.time_ocr_started is not None
     assert item.time_ocr_finished is not None

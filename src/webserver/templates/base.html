@@ -52,6 +52,9 @@
                             </span>
                             {% endif %}
                         </li>
+                        <li class="nav-item position-relative">
+                            <a class="nav-link" href="{{ url_for('settings.index') }}">Settings</a>
+                        </li>
 
                     </ul>
                     <span class="navbar-text">
@@ -74,7 +77,7 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col">
-                        Version 1.0
+                        Version {{ version }}
                     </div>
                     <div class="col-auto">
                         <a href="https://github.com/maxi07" style="color: white; font-size: 1.5rem;"><i

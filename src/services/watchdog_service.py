@@ -1,7 +1,7 @@
 import shutil
 import sqlite3
 import time
-import PyPDF2
+import pypdf
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from queue import Queue
@@ -9,7 +9,7 @@ from src.helpers.logger import logger
 from src.helpers.config import config
 import os
 from PIL import Image
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from src.helpers.ProcessItem import ItemType, ProcessItem, ProcessStatus
 from src.helpers.rclone_configManager import RcloneConfig
 import fitz
@@ -135,7 +135,7 @@ class FileHandler(FileSystemEventHandler):
             # Read PDF file properties
         if item.item_type == ItemType.PDF:
             try:
-                pdf_reader = PyPDF2.PdfReader(item.local_file_path)
+                pdf_reader = pypdf.PdfReader(item.local_file_path)
                 item.pdf_pages = len(pdf_reader.pages)
                 logger.debug(f"PDF file has {item.pdf_pages} pages to process")
                 update_scanneddata_database(item.db_id, {'pdf_pages': item.pdf_pages}, self.websocket_messages_queue)
