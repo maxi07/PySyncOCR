@@ -2,8 +2,8 @@ from src.helpers.logger import logger
 from src.helpers.rclone_management_onedrive import list_remotes
 from src.services.smb_server_alternative import SambaController
 from src.webserver.db import send_database_request
-from src.helpers.run_subprocess import run_subprocess
 import json
+import src.helpers.git
 
 
 def inject_template_data():
@@ -40,20 +40,10 @@ def inject_template_data():
         logger.exception(f"Failed checking SMB status: {e}")
         smb_status = False
 
-    try:
-        code, msg = run_subprocess(['git', 'describe', '--tags', '--abbrev=0'])
-        if code == 0 and msg.startswith("v"):
-            version = msg.split("v")[1]
-        else:
-            version = "Unknown"
-    except Exception as e:
-        logger.exception(f"Failed retrieving git version: {e}")
-        version = "Unknown"
-
     template_data = {
         'mapping_error': mapping_error,
         'failed_documents': failed_documents,
         'smb_error': smb_status,
-        'version': version
+        'version': src.helpers.git.git_version
     }
     return template_data

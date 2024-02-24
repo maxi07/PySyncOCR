@@ -13,7 +13,7 @@ def update_env_variable(key, value, env_file_path='.env') -> bool:
         else:
             logger.debug(f"Environment file '{env_file_path}' not found.")
             logger.debug(f"Creating environment file '{env_file_path}'.")
-            lines = []                
+            lines = []
 
         # Update the value of the specified key
         key_found = False
