@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Received add command");
             // Find pdfcard suing id
             addPdfCard(jsonData.data);
+        } else if (jsonData.command === 'toast') {
+            console.log("Received toast command");
+            showToast(jsonData.message, 'Just Now', jsonData.style);
         } else if (jsonData.command === 'update_dashboard') {
             console.log("Received update_dashboard command");
             // If it is, update the dashboard
@@ -191,6 +194,7 @@ function addPdfCard(pdfData) {
     cloudSpan.id = pdfData.id + '_pdf_cloud';
     cloudSpan.textContent = pdfData.remote_filepath;
     cloudSpan.innerHTML += brElement;
+    cloudText.appendChild(cloudSpan);
 
     var statusText = document.createElement('span');
     statusText.innerHTML = `<i class="bi bi-hourglass"></i><strong> Status:</strong> `;
@@ -204,7 +208,6 @@ function addPdfCard(pdfData) {
     infoParagraph.appendChild(smbText);
     infoParagraph.appendChild(smbSpan);
     infoParagraph.appendChild(cloudText);
-    infoParagraph.appendChild(cloudSpan);
     infoParagraph.appendChild(statusText);
     infoParagraph.appendChild(statusSpan);
 

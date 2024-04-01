@@ -179,6 +179,10 @@ def websocket_dashboard_loop():
                 logger.warning(f"Received unexpected message from websocket queue: {signal}")
                 continue
 
+            if signal["command"] == "toast":
+                socketio.emit('message_update', json.dumps(signal), namespace="/websocket")
+                return
+
             db_id = signal['id']
             pdf_list = send_database_request_with_headers(
                 'SELECT *, DATETIME(created, "localtime") AS local_created, DATETIME(modified, "localtime") AS local_modified FROM scanneddata '

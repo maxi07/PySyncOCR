@@ -4,6 +4,7 @@ from src.helpers.logger import logger
 from src.helpers.config import config
 import os
 from pypdf import PdfReader
+from src.webserver.dashboard import websocket_messages_queue
 
 
 def test_and_add_key(key) -> int:
@@ -99,12 +100,15 @@ def generate_filename(pdf_path: str) -> str:
             return filename
     except AuthenticationError:
         logger.warning("OpenAI key is invalid")
+        websocket_messages_queue.put({"command": "toast", "style": "warning", "message": "Cannot generate file name: OpenAI Key is invalid."})
         return filename
     except RateLimitError:
-        logger.warning("OPENAI rate limit reached! Either not enough credits or too many requests.")
+        logger.warning("OpenAI rate limit reached! Either not enough credits or too many requests.")
+        websocket_messages_queue.put({"command": "toast", "style": "warning", "message": "Cannot generate file name: OpenAI Key is invalid."})
         return filename
     except Exception as e:
         logger.exception(f"An error occurred while testing OpenAI key: {e}")
+        websocket_messages_queue.put({"command": "toast", "style": "warning", "message": f"Cannot generate file name: {e}"})
         return filename
 
 

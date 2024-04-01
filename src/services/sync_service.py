@@ -35,6 +35,8 @@ class SyncService:
                     logger.error(f"Cannot sync {item.ocr_file} as no matching onedrive config was found.")
                     item.status = ProcessStatus.SYNC_FAILED
                     self.move_to_failed(item)
+                    self.websocket_messages_queue.put({"command": "toast", "style": "warning", "message": f"Cannot sync {item.filename} due to no matching OneDrive config."})
+
                     if os.path.exists(item.local_file_path.replace("_OCR", "")):
                         logger.debug(f"Removing original file at {item.local_file_path.replace('_OCR', '')}")
                         os.remove(item.local_file_path.replace("_OCR", ""))
@@ -45,9 +47,13 @@ class SyncService:
                     if res is False:
                         item.status = ProcessStatus.SYNC_FAILED
                         logger.error(f"Failed uploading {item.ocr_file} to onedrive")
+                        self.websocket_messages_queue.put({"command": "toast", "style": "warning", "message": f"Failed uploading {item.filename}"})
+
                         self.move_to_failed(item)
                     else:
                         item.status = ProcessStatus.COMPLETED
+                        self.websocket_messages_queue.put({"command": "toast", "style": "success", "message": f"The file {item.filename} was successfully uploaded."})
+
                         if os.path.exists(item.local_file_path.replace("_OCR", "")):
                             logger.debug(f"Removing original file at {item.local_file_path.replace('_OCR', '')}")
                             os.remove(item.local_file_path.replace("_OCR", ""))

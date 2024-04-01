@@ -43,7 +43,6 @@ class OcrService:
                         logger.exception(f"Failed copying to backup location: {ex}")
                 else:
                     logger.debug("Skipping file save due to user config.")
-
                 if config.get("web_service.automatic_file_names"):
                     item.status = ProcessStatus.FILENAME_PENDING
                     update_scanneddata_database(item.db_id, {"file_status": item.status.value}, self.websocket_messages_queue)

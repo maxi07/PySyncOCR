@@ -71,6 +71,7 @@
                 {% endblock %}
                 <br>
             </div>
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
         </div>
 
         <footer class="footer text-light rounded-top p-2">
@@ -107,6 +108,62 @@
                 }
             });
         });        
+    </script>
+    <script>
+        function generateToast(message, time, type) {
+            let icon, bgColor, textColor;
+      
+            switch (type) {
+              case 'info':
+                icon = 'bi-info-circle';
+                bgColor = 'bg-info';
+                textColor = 'text-light';
+                break;
+              case 'success':
+                icon = 'bi-check-circle';
+                bgColor = 'bg-success';
+                textColor = 'text-light';
+                break;
+              case 'warning':
+                icon = 'bi-exclamation-triangle';
+                bgColor = 'bg-warning';
+                textColor = 'text-dark';
+                break;
+              default:
+                icon = 'bi-info-circle';
+                bgColor = 'bg-info';
+                textColor = 'text-light';
+            }
+      
+            const toastHtml = `<div class="toast ${bgColor} ${textColor}" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
+                      <div class="toast-header">
+                        <i class="bi ${icon} me-2"></i>
+                        <strong class="me-auto">PySyncOCR</strong>
+                        <small class="text-muted">${time}</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                      </div>
+                      <div class="toast-body">
+                        ${message}
+                      </div>
+                    </div>`;
+      
+            // Create jQuery object from HTML
+            const newToast = $(toastHtml);
+      
+            // Attach event listener to remove toast after it's hidden
+            newToast.on('hidden.bs.toast', function () {
+              newToast.remove();
+            });
+      
+            return newToast;
+        }
+    
+        function showToast(message, time, type) {
+            // Generate and show new toast
+            const newToast = generateToast(message, time, type);
+            newToast.appendTo('#toastContainer');
+            newToast.toast('show');
+        }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         crossorigin="anonymous"></script>
