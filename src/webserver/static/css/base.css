@@ -10,7 +10,7 @@ a {
     color: initial;
 }
 
-.modal p {
+.modal p, a {
     color: initial;
 }
 
