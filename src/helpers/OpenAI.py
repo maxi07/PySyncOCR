@@ -1,4 +1,4 @@
-from openai import OpenAI, AuthenticationError
+from openai import OpenAI, AuthenticationError, RateLimitError
 from src.helpers.env_manager import update_env_variable
 from src.helpers.logger import logger
 from src.helpers.config import config
@@ -38,6 +38,8 @@ def test_and_add_key(key) -> int:
     except AuthenticationError:
         logger.warning("OpenAI key is invalid")
         return 401
+    except RateLimitError:
+        logger.warning("OPENAI rate limit reached! Either not enough credits or too many requests.")
     except Exception as e:
         logger.exception(f"An error occurred while testing OpenAI key: {e}")
         return 400
@@ -59,10 +61,10 @@ def generate_filename(pdf_path: str) -> str:
     logger.debug(f"Generating filename for {pdf_path}")
     # Get filename
     try:
-        filename = os.path.basename(pdf_path)
+        filename = os.path.splitext(os.path.basename(pdf_path))[0]
     except Exception as ex:
         logger.exception(f"Failed getting filename: {ex}")
-        return
+        return "unknown"
 
     if not config.get("web_service.automatic_file_names"):
         logger.warning("Automatic files names are disabled")
@@ -83,7 +85,7 @@ def generate_filename(pdf_path: str) -> str:
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Identify a suitable filename for the following pdf content. Keep the language of the file name in the original language and do not add any other language. Avoid special characters. Do not add a file extension. Seperate words with a underscore."},
+                {"role": "system", "content": "Identify a suitable filename for the following pdf content. Keep the language of the file name in the original language and do not add any other language. Avoid special characters. Do not add a file extension. Seperate words with a underscore. Have a maximum filename length of 50 characters."},
                 {"role": "user", "content": pdf_text}
             ]
         )
@@ -96,6 +98,9 @@ def generate_filename(pdf_path: str) -> str:
             return filename
     except AuthenticationError:
         logger.warning("OpenAI key is invalid")
+        return filename
+    except RateLimitError:
+        logger.warning("OPENAI rate limit reached! Either not enough credits or too many requests.")
         return filename
     except Exception as e:
         logger.exception(f"An error occurred while testing OpenAI key: {e}")

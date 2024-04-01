@@ -3,7 +3,7 @@ from src.helpers.rclone_management_onedrive import list_remotes
 from src.services.smb_server_alternative import SambaController
 from src.webserver.db import send_database_request
 import json
-import src.helpers.git
+from src.helpers.config import config
 
 
 def inject_template_data():
@@ -45,6 +45,6 @@ def inject_template_data():
         'mapping_error': mapping_error,
         'failed_documents': failed_documents,
         'smb_error': smb_status,
-        'version': src.helpers.git.git_version
+        'version': config.get('version')
     }
     return template_data
