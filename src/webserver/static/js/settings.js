@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     const openai_button = document.getElementById("save-button");
-    if (document.getElementById('openai_key').value.length > 0) {
-        openai_button.textContent = "Disable"
+    if (document.getElementById('openai_key').value.length > 0 && automatic_file_names) {
+        openai_button.textContent = "Disable";
         openai_button.disabled = false;
     } else {
-        openai_button.textContent = "Enable"
+        openai_button.textContent = "Enable";
     }
 });
 
@@ -37,6 +37,8 @@ function submitOpenAI(event) {
                     keyInput.value = "";
                 } else if (response.success == 401) {
                     animateButton(submitButton, false, "Invalid key", "Enable");
+                } else if (response.success == 429) {
+                    animateButton(submitButton, false, "Not enough OpenAI credit", "Enable");
                 } else {
                     animateButton(submitButton, false, "Unknown Error", "Enable");
                 }

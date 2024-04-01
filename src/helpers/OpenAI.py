@@ -40,6 +40,7 @@ def test_and_add_key(key) -> int:
         return 401
     except RateLimitError:
         logger.warning("OPENAI rate limit reached! Either not enough credits or too many requests.")
+        return 429
     except Exception as e:
         logger.exception(f"An error occurred while testing OpenAI key: {e}")
         return 400

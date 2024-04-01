@@ -13,19 +13,15 @@ def index():
     if "OPEN_AI_KEY" in os.environ:
         logger.debug("OpenAI key found.")
         dummy_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        config.set('web_service.automatic_file_names', True)
     else:
         logger.debug("OpenAI key not found.")
         dummy_key = ""
+        config.set('web_service.automatic_file_names', False)
 
-    if config.get('web_service.automatic_file_names'):
-        logger.debug("Automatic file names enabled.")
-        automatic_file_names = True
-    else:
-        logger.debug("Automatic file names disabled.")
-        automatic_file_names = False
     return render_template("settings.html",
                            dummy_key=dummy_key,
-                           automatic_file_names=automatic_file_names)
+                           automatic_file_names=config.get('web_service.automatic_file_names'))
 
 
 @bp.post("/openai")
