@@ -163,3 +163,4 @@ cython_debug/
 #.idea/
 .timetracker
 src/configs/onedrive_sync_config.json
+install_log.txt
